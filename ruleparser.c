@@ -6,38 +6,38 @@
 int subrule_count = 0;
 int sequence_count = 0;
 
-bool is_capitalized(stringview sv){
+bool is_capitalized(string_slice sv){
     bool caps = true;
     for (int i = 0; i < sv.length; i++){
-      char c = *(sv.data + i);
-      caps &= 'A' <= c && c <= 'Z';
+        char c = *(sv.data + i);
+        caps &= 'A' <= c && c <= 'Z';
     }
     return caps;
 }
 
 void parse_rule(Token rule, TokenStream *ts){
     Token t = {};
-    print("\t\t{{");
+    print("\t{{");
     subrule_count++;
     sequence_count = 0;
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
-            print("\t\t},%i},",sequence_count);
-            print("\t\t{{");
+            print("\t},%i},",sequence_count);
+            print("\t{{");
             subrule_count++;
             sequence_count = 0;
         } else if (t.kind == TOK_NEWLINE) break;
         else {
-            stringview sv = token_to_slice(t);
+            string_slice sv = token_to_slice(t);
             sequence_count++;
             if (is_capitalized(sv))
-                printf("\t\t\tTOKEN(%v),",sv);
+                printf("\t\tTOKEN(%v),",sv);
             else 
-                printf("\t\t\tRULE(%v),",sv);
+                printf("\t\tRULE(%v),",sv);
         }
     }
-    print("\t\t},%i},",sequence_count);
-    print("\t},%i},",subrule_count);
+    print("\t},%i},",sequence_count);
+    print("},%i},",subrule_count);
     subrule_count = 0;
 }
 
