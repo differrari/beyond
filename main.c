@@ -167,6 +167,7 @@ int main(int argc, char *argv[]){
     while (ts_next(&ts, &t)) {
         if (!t.kind) break;
         result = parse_token(content, t, &parser);
+        if (!result) break;
         // msleep(1000);
     }
     
