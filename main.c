@@ -3,7 +3,6 @@
 #include "data/tokenizer/tokenizer.h"
 #include "data/helpers/token_stream.h"
 #include "std/stringview.h"
-#include <stdio.h>
 
 typedef enum { rule_block, rule_statement, rule_declaration, rule_assignment, rule_expression, rule_funccall, rule_argument, num_grammar_rules } grammar_rules;
 
@@ -28,35 +27,53 @@ typedef struct {
 Scanner scan;
 
 grammar_rule language_rules[num_grammar_rules] = {
-    [rule_block] = {
-      {
-          {{RULE(statement), RULE(statement)}, 2},
-          {{RULE(statement)}, 1}
-      }, 2
-    },
-    [rule_statement] = {
-        {
-            {{RULE(declaration)}, 1},
-            // {{RULE(assignment)}, 1},
-            // {{RULE(funccall)}, 1},
-        },
-        1
-    },
-    [rule_declaration] = {
-        {
-            (grammar_rule_opt){ { TOKEN(IDENTIFIER), TOKEN(IDENTIFIER), TOKEN(ASSIGN), RULE(expression), TOKEN(SEMICOLON) }, 5 }
-        }, 
-        1
-    },
-    [rule_expression] = {
-        {
-            {{TOKEN(CONST), TOKEN(OPERATOR), RULE(expression)}, 3},
-            {{TOKEN(IDENTIFIER), TOKEN(OPERATOR), RULE(expression)}, 3},
-            {{TOKEN(CONST)}, 1},
-            {{TOKEN(IDENTIFIER)}, 1}
-        },
-        4
-    }
+    [rule_block] = {{
+		{{
+			RULE(statement),
+			RULE(statement),
+		},2},
+		{{
+			RULE(statement),
+		},1},
+	},2},
+    [rule_statement] = {{
+		{{
+			RULE(declaration),
+		},1},
+		{{
+			RULE(assignment),
+		},1},
+		{{
+			RULE(funccall),
+		},1},
+	},3},
+    [rule_declaration] = {{
+		{{
+			TOKEN(IDENTIFIER),
+			TOKEN(IDENTIFIER),
+			TOKEN(ASSIGN),
+			RULE(expression),
+			TOKEN(SEMICOLON),
+		},5},
+	},1},
+    [rule_expression] = {{
+		{{
+			TOKEN(CONST),
+			TOKEN(OPERATOR),
+			RULE(expression),
+		},3},
+		{{
+			TOKEN(IDENTIFIER),
+			TOKEN(OPERATOR),
+			RULE(expression),
+		},3},
+		{{
+			TOKEN(CONST),
+		},1},
+		{{
+			TOKEN(IDENTIFIER),
+		},1},
+	},4},
 };
 
 typedef struct {
