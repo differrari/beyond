@@ -1,5 +1,5 @@
-y = 0;
-x = 0;
+int y = 0;
+int x = 0;
 y_loop:
     x_loop:
         draw(x,y, 0xFF00FF00);

@@ -1,145 +1,12 @@
 #include "syscalls/syscalls.h" 
 #include "data/scanner/scanner.h"
-#include "data/tokenizer/tokenizer.h"
+#include "rules.h"
 #include "data/helpers/token_stream.h"
 #include "std/string_slice.h"
-
-typedef enum { rule_block, rule_statement, rule_declaration, rule_assignment, rule_expression, rule_funccall, rule_argument, rule_conditional, rule_jump, rule_label, num_grammar_rules } grammar_rules;
-
-typedef struct {
-    bool rule;
-    int value;
-    char *lit;
-} grammar_elem;
-
-typedef struct {
-    grammar_elem rules[16];
-    uint8_t num_elements;
-} grammar_rule_opt;
-
-typedef struct {
-    grammar_rule_opt options[8];
-    uint8_t num_elements;
-} grammar_rule;
-
-#define TOKEN(name) { false, TOK_##name, 0 }
-#define RULE(name) { true, rule_##name, 0 }
-#define LITERAL(val) { false, TOK_IDENTIFIER, val }
-#define LITTOK(tok,val) { false, TOK_##tok, val }
 
 Scanner scan;
 
 char *indent = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-
-grammar_rule language_rules[num_grammar_rules] = {
-    [rule_block] = {{
-	{{
-		RULE(statement),
-		RULE(statement),
-	},2},
-	{{
-		RULE(statement),
-	},1},
-    },2},
-    [rule_statement] = {{
-	{{
-		RULE(declaration),
-	},1},
-	{{
-		RULE(assignment),
-	},1},
-	{{
-		RULE(funccall),
-	},1},
-	{{
-		RULE(conditional),
-	},1},
-	{{
-		RULE(jump),
-	},1},
-	{{
-		RULE(label),
-	},1},
-    },6},
-    [rule_assignment] = {{
-	{{
-		TOKEN(IDENTIFIER),
-		LITTOK(OPERATOR,"="),
-		RULE(expression),
-		TOKEN(SEMICOLON),
-	},4},
-    },1},
-    [rule_funccall] = {{
-	{{
-		TOKEN(IDENTIFIER),
-		TOKEN(LPAREN),
-		RULE(argument),
-		TOKEN(RPAREN),
-		TOKEN(SEMICOLON),
-	},5},
-    },1},
-    [rule_argument] = {{
-	{{
-		RULE(expression),
-		TOKEN(COMMA),
-		RULE(argument),
-	},3},
-	{{
-		RULE(expression),
-	},1},
-    },2},
-    [rule_conditional] = {{
-	{{
-		LITERAL("if"),
-		TOKEN(LPAREN),
-		RULE(expression),
-		TOKEN(RPAREN),
-		TOKEN(LBRACE),
-		RULE(block),
-		TOKEN(RBRACE),
-	},7},
-    },1},
-    [rule_declaration] = {{
-	{{
-		TOKEN(IDENTIFIER),
-		TOKEN(IDENTIFIER),
-		LITTOK(OPERATOR,"="),
-		RULE(expression),
-		TOKEN(SEMICOLON),
-	},5},
-    },1},
-    [rule_jump] = {{
-	{{
-		LITERAL("goto"),
-		TOKEN(IDENTIFIER),
-		TOKEN(SEMICOLON),
-	},3},
-    },1},
-    [rule_label] = {{
-	{{
-		TOKEN(IDENTIFIER),
-		TOKEN(COLON),
-	},2},
-    },1},
-    [rule_expression] = {{
-	{{
-		TOKEN(CONST),
-		TOKEN(OPERATOR),
-		RULE(expression),
-	},3},
-	{{
-		TOKEN(IDENTIFIER),
-		TOKEN(OPERATOR),
-		RULE(expression),
-	},3},
-	{{
-		TOKEN(CONST),
-	},1},
-	{{
-		TOKEN(IDENTIFIER),
-	},1},
-    },4},
-};
 
 typedef struct {
     grammar_rules current_rule;
@@ -224,7 +91,7 @@ bool parse_token(char *content, Token t, parser_sm *parser){
     parser_advance_to_token(parser, t);
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
-    if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit){
+    if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit))){
         parser_debug("%sParsed token %v [%i] = %i",curr_indent, make_string_slice(content, t.pos, t.length), t.kind, element.value);
         return parser_advance_sequence(parser);
     } else {

@@ -17,13 +17,13 @@ bool is_capitalized(string_slice sv){
 
 void parse_rule(Token rule, TokenStream *ts){
     Token t = {};
-    print("\t{{");
+    print("\t\t{{");
     subrule_count++;
     sequence_count = 0;
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
-            print("\t},%i},",sequence_count);
-            print("\t{{");
+            print("\t\t},%i},",sequence_count);
+            print("\t\t{{");
             subrule_count++;
             sequence_count = 0;
         } else if (t.kind == TOK_NEWLINE) break;
@@ -31,22 +31,22 @@ void parse_rule(Token rule, TokenStream *ts){
             string_slice sv = token_to_slice(t);
             sequence_count++;
             if (t.kind == TOK_STRING){
-                printf("\t\tLITERAL(%v),",sv);
+                printf("\t\t\tLITERAL(%v),",sv);
             } else if (is_capitalized(sv)){
                 Token p1, s, p2;
                 uint32_t p = ts->tz->s->pos;
                 if (ts_next(ts, &p1) && p1.kind == TOK_LPAREN && ts_next(ts, &s) && s.kind == TOK_STRING  && ts_next(ts, &p2) && p2.kind == TOK_RPAREN){
-                    printf("\t\tLITTOK(%v,%v),",sv,token_to_slice(s));
+                    printf("\t\t\tLITTOK(%v,%v),",sv,token_to_slice(s));
                 } else {
                     ts->tz->s->pos = p;
-                    printf("\t\tTOKEN(%v),",sv);
+                    printf("\t\t\tTOKEN(%v),",sv);
                 }
             } else 
-                printf("\t\tRULE(%v),",sv);
+                printf("\t\t\tRULE(%v),",sv);
         }
     }
-    print("\t},%i},",sequence_count);
-    print("},%i},",subrule_count);
+    print("\t\t},%i},",sequence_count);
+    print("\t},%i},",subrule_count);
     subrule_count = 0;
 }
 
@@ -60,6 +60,8 @@ int main(int argc, char *argv[]){
     TokenStream ts;
     ts_init(&ts, &tk);
     
+    print("#include \"rules.h\" \n\ngrammar_rule language_rules[num_grammar_rules] = {");
+    
     Token t;
     while (ts_next(&ts, &t) && t.kind) {
         if (t.kind == TOK_IDENTIFIER) {
@@ -68,12 +70,13 @@ int main(int argc, char *argv[]){
                 print("Malformed rule %v. Expected -> Got %v",token_to_slice(t),token_to_slice(op1));
                 return -1;
             }
-            print("[rule_%v] = {{",token_to_slice(t));
+            print("\t[rule_%v] = {{",token_to_slice(t));
             parse_rule(t, &ts);
         } else {
             print("Unrecognized grammar token %v",token_to_slice(t));
             return -1;
         }
     }
+    print("};");
     return 0;
 }
