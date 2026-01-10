@@ -4,7 +4,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
 		{{
 			RULE(statement),
-			RULE(statement),
+			RULE(block),
 		},2},
 		{{
 			RULE(statement),
