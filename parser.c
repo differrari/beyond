@@ -20,8 +20,8 @@ int parser_depth;
 
 #define current_parser_rule(parser) language_rules[parser->current_rule].options[parser->option].rules[parser->sequence]
 
-bool emit_token(Token t, grammar_rules rule, int option){
-    if (t.kind != TOK_IDENTIFIER && t.kind != TOK_STRING && t.kind != TOK_CONST && t.kind != TOK_OPERATOR) return true;
+bool emit_token(Token t, grammar_rules rule, int option, int sequence, grammar_elem element){
+    if (element.lit || (t.kind != TOK_IDENTIFIER && t.kind != TOK_STRING && t.kind != TOK_CONST && t.kind != TOK_OPERATOR)) return true;
     if (tree_count >= MAX_TREE_COUNT-1){
         print("Too much code");
         return false;
@@ -31,11 +31,12 @@ bool emit_token(Token t, grammar_rules rule, int option){
         .rule = rule,
         .option = option,
         .depth = parser_depth,
+        .sequence = sequence,
     };
     return true;
 }
 
-bool emit_rule(grammar_rules rule, int option){
+bool emit_rule(grammar_rules rule, int option, int sequence){
     if (tree_count >= MAX_TREE_COUNT-1){
         print("Too much code");
         return false;
@@ -45,6 +46,7 @@ bool emit_rule(grammar_rules rule, int option){
         .rule = rule,
         .option = option,
         .depth = parser_depth,
+        .sequence = sequence,
     };
     return true;
 }
@@ -59,13 +61,13 @@ bool parser_advance_to_token(parser_sm *parser, Token t){
             return false;
         }
         // parser_debug("Push state");
-        if (!emit_rule(parser->current_rule,parser->option)) return false;
         parser_stack[parser_depth++] = *parser;
         parser->scanner_pos = t.pos;
         parser->tree_pos = tree_count;
         parser->current_rule = current_parser_rule(parser).value;
         parser->sequence = 0;
         parser->option = 0;
+        if (!emit_rule(parser->current_rule,parser->option, parser->sequence)) return false;
     }
     // parser_debug("%sCurrent rule %i. Option %i. Sequence %i",curr_indent, parser->current_rule, parser->option, parser->sequence);
     return true;
@@ -100,6 +102,7 @@ bool parser_advance_option_sm(parser_sm *parser){
         if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
         parser->scan->pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
+        if (!emit_rule(parser->current_rule,parser->option, parser->sequence)) return false;
         return true;
     }
 }
@@ -120,7 +123,7 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
     grammar_elem element = current_parser_rule(parser);
     if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit))){
         parser_debug("%sParsed token %v [%i] = %i",curr_indent, make_string_slice(content, t.pos, t.length), t.kind, element.value);
-        if (!emit_token(t, parser->current_rule, parser->option)) return false;
+        if (!emit_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
     } else {
         parser_debug("%sFailed to match token %i, found %i. Skipping",curr_indent, element.value, t.kind);
@@ -131,6 +134,7 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
 parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
     Token t;
     bool result;
+    if (!emit_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos };
     while (ts_next(ts, &t)) {
         if (!t.kind)
             break;

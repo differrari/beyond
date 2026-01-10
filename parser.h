@@ -2,6 +2,7 @@
 
 #include "rules.h"
 #include "data/helpers/token_stream.h"
+#include "ast.h"
 
 typedef struct {
     grammar_rules current_rule;
@@ -11,13 +12,6 @@ typedef struct {
     Scanner *scan;
     uint32_t tree_pos;
 } parser_sm;
-
-typedef struct {
-    Token t;
-    grammar_rules rule;
-    int option;
-    int depth;
-} ast_node;
 
 typedef struct {
     bool result;
