@@ -4,6 +4,7 @@
 #include "data/helpers/token_stream.h"
 #include "common.h"
 #include "codegen.h"
+#include "sem_analysis.h"
 
 Scanner scan;
 
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]){
     printf("String scanned %i",parse_res.result);
     if (!parse_res.result)
         printf("Found syntax error at position %i",parse_res.furthest_parse_pos);
-    else {
+    else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
         gen_code(parse_res.ast_stack, parse_res.ast_count);
     }
     

@@ -6,6 +6,5 @@ y_loop:
         x = x + 1;
         if (x < 100) { goto x_loop; }
     y = y + 1;
-    if (y < 100) { goto y_loop;
-    }
+    if (y < 100) { goto y_loop; }
     printf("Done");

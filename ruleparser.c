@@ -53,6 +53,9 @@ void parse_rule(Token rule, TokenStream *ts){
 int main(int argc, char *argv[]){
     char *content = read_full_file("rules.config");
     
+    print("Parser not prepared to handle semantic tags");
+    return 0;
+    
     Scanner s = scanner_make(content, strlen(content));
     Tokenizer tk = tokenizer_make(&s);
     tk.parse_newline = true;

@@ -40,7 +40,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1},
 	[rule_funccall] = {{
 		{{
-			TOKEN(IDENTIFIER),
+			SYMCHECK(IDENTIFIER,func),
 			TOKEN(LPAREN),
 			RULE(argument),
 			TOKEN(RPAREN),
@@ -70,8 +70,8 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1},
 	[rule_declaration] = {{
 		{{
-			TOKEN(IDENTIFIER),
-			TOKEN(IDENTIFIER),
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
 			LITTOK(OPERATOR,"="),
 			RULE(expression),
 			TOKEN(SEMICOLON),
@@ -80,13 +80,13 @@ grammar_rule language_rules[num_grammar_rules] = {
 	[rule_jump] = {{
 		{{
 			LITERAL("goto"),
-			TOKEN(IDENTIFIER),
+			SYMCHECK(IDENTIFIER,jmp),
 			TOKEN(SEMICOLON),
 		},3},
 	},1},
 	[rule_label] = {{
 		{{
-			TOKEN(IDENTIFIER),
+			SYMDEC(IDENTIFIER,name),
 			TOKEN(COLON),
 		},2},
 	},1},
@@ -97,7 +97,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 			RULE(expression),
 		},3},
 		{{
-			TOKEN(IDENTIFIER),
+			SYMCHECK(IDENTIFIER,var),
 			TOKEN(OPERATOR),
 			RULE(expression),
 		},3},
@@ -105,7 +105,13 @@ grammar_rule language_rules[num_grammar_rules] = {
 			TOKEN(CONST),
 		},1},
 		{{
-			TOKEN(IDENTIFIER),
+			SYMCHECK(IDENTIFIER,var),
 		},1},
 	},4},
+};
+
+semantic_rules semantic_analysis_rules[num_grammar_rules] = {
+  [rule_block] = sem_scope,
+  [rule_label] = sem_jmp,
+  [rule_declaration] = sem_var,
 };

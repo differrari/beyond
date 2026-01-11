@@ -121,7 +121,7 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
     parser_advance_to_token(parser, t);
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
-    if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit))){
+    if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit, false))){
         parser_debug("%sParsed token %v [%i] = %i",curr_indent, make_string_slice(content, t.pos, t.length), t.kind, element.value);
         if (!emit_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
