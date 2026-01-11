@@ -55,7 +55,7 @@ size_t furthest_pos = 0;
 
 bool parser_advance_to_token(parser_sm *parser, Token t){
     while (current_parser_rule(parser).rule){
-        parser_debug("%s[r:%i,o:%i,s:%i] subrule %i",curr_indent, parser->current_rule, parser->option, parser->sequence, current_parser_rule(parser).value);
+        parser_debug("%s[%i] %s[o:%i] subrule %s",curr_indent, parser->sequence, rule_name(parser->current_rule), parser->option, rule_name(current_parser_rule(parser).value));
         if (parser_depth == MAX_DEPTH - 1){
             parser_debug("Maximum depth reached, too many nested statements, shame on you");
             return false;
@@ -92,13 +92,14 @@ bool pop_parser_stack(parser_sm *parser, bool backtrack){
 
 bool parser_advance_option_sm(parser_sm *parser){
     if (parser->option + 1 == language_rules[parser->current_rule].num_elements){
-        parser_debug("%sRule %i failed",curr_indent,parser->current_rule);
+        parser_debug("%sRule %s failed",curr_indent,rule_name(parser->current_rule));
         if (!pop_parser_stack(parser, true)) return false;
         return parser_advance_option_sm(parser);
     } else {
+        parser_debug("%sRule %s option %i failed",curr_indent,rule_name(parser->current_rule), parser->option);
         parser->option++;
         parser->sequence = 0;
-        parser_debug("%sRule %i option %i failed",curr_indent,parser->current_rule, parser->option);
+        parser_debug("%%s [o:%i]",curr_indent,rule_name(parser->current_rule), parser->option);
         if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
         parser->scan->pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
@@ -122,11 +123,11 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
     if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit, false))){
-        parser_debug("%sParsed token %v [%i] = %i",curr_indent, make_string_slice(content, t.pos, t.length), t.kind, element.value);
+        parser_debug("%s[%i] Parsed token %v [%i] = %i",curr_indent, parser->sequence, make_string_slice(content, t.pos, t.length), t.kind, element.value);
         if (!emit_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
     } else {
-        parser_debug("%sFailed to match token %i, found %i. Skipping",curr_indent, element.value, t.kind);
+        parser_debug("%s[%i] Failed to match token %i, found %i. Skipping",curr_indent, parser->sequence, element.value, t.kind);
         return parser_advance_option_sm(parser);
     }
 }
