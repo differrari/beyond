@@ -27,6 +27,7 @@ typedef struct {
 typedef struct {
     grammar_rule_opt options[8];
     uint8_t num_elements;
+    semantic_rules action;
 } grammar_rule;
 
 #define TOKEN(name) { false, TOK_##name, 0, sem_action_none, 0 }
@@ -38,7 +39,6 @@ typedef struct {
 #define SYMCHECK(name,type) { false, TOK_IDENTIFIER, 0, sem_action_check, sem_##type }
 
 extern grammar_rule language_rules[num_grammar_rules];
-extern semantic_rules semantic_analysis_rules[num_grammar_rules];
 
 char *rule_name(grammar_rules rule);
 char *tok_symbol(TokenKind kind);

@@ -27,7 +27,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
     
     symbol_t sym = {};
     
-    sym.sym_type = semantic_analysis_rules[current_rule];
+    sym.sym_type = language_rules[current_rule].action;
     
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
@@ -55,7 +55,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
              }
         }
     }
-    if (semantic_analysis_rules[current_rule] == sem_jmp || semantic_analysis_rules[current_rule] == sem_var || semantic_analysis_rules[current_rule] == sem_func){
+    if (sym.sym_type == sem_jmp || sym.sym_type == sem_var || sym.sym_type == sem_func){
         symbol_table[symbol_count++] = sym;
         print("SYMBOL = %s TYPE = %v NAME = %v",sem_rule_name(sym.sym_type),sym.type.kind ? token_to_slice(sym.type) : make_string_slice("none", 0, 4),token_to_slice(sym.name));
     }
