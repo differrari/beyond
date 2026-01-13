@@ -52,17 +52,18 @@ bool emit_rule(grammar_rules rule, int option, int sequence){
 }
 
 size_t furthest_pos = 0;
+uint32_t tok_pos = 0;
 
 bool parser_advance_to_token(parser_sm *parser, Token t){
     while (current_parser_rule(parser).rule){
-        parser_debug("%s[%i] %s[o:%i] subrule %s",curr_indent, parser->sequence, rule_name(parser->current_rule), parser->option, rule_name(current_parser_rule(parser).value));
+        parser_debug("%s[%i] %s[o:%i] subrule %s @%i",curr_indent, parser->sequence, rule_name(parser->current_rule), parser->option, rule_name(current_parser_rule(parser).value),parser->scan->pos);
         if (parser_depth == MAX_DEPTH - 1){
             parser_debug("Maximum depth reached, too many nested statements, shame on you");
             return false;
         }
-        // parser_debug("Push state");
+        // parser_debug("Push state with pos %i",tok_pos);
         parser_stack[parser_depth++] = *parser;
-        parser->scanner_pos = t.pos;
+        parser->scanner_pos = tok_pos;
         parser->tree_pos = tree_count;
         parser->current_rule = current_parser_rule(parser).value;
         parser->sequence = 0;
@@ -84,6 +85,7 @@ bool pop_parser_stack(parser_sm *parser, bool backtrack){
         parser_debug("%sSubrule failed, backtrack to %i",curr_indent, parser->scanner_pos);
         if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
         parser->scan->pos = parser->scanner_pos;
+        tok_pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
     }
     parser_depth--;
@@ -99,9 +101,11 @@ bool parser_advance_option_sm(parser_sm *parser){
         parser_debug("%sRule %s option %i failed",curr_indent,rule_name(parser->current_rule), parser->option);
         parser->option++;
         parser->sequence = 0;
-        parser_debug("%%s [o:%i]",curr_indent,rule_name(parser->current_rule), parser->option);
+        parser_debug("%soption failed, backtrack to %i",curr_indent, parser->scanner_pos);
+        parser_debug("%s%s [o:%i]",curr_indent,rule_name(parser->current_rule), parser->option);
         if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
         parser->scan->pos = parser->scanner_pos;
+        tok_pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
         if (!emit_rule(parser->current_rule,parser->option, parser->sequence)) return false;
         return true;
@@ -123,11 +127,12 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
     if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit, false))){
-        parser_debug("%s[%i] Parsed token %v [%i] = %i",curr_indent, parser->sequence, make_string_slice(content, t.pos, t.length), t.kind, element.value);
+        parser_debug("%s[%i] Parsed token %v [%s@%i]",curr_indent, parser->sequence, make_string_slice(content, t.pos, t.length), token_name(t.kind), parser->scan->pos);
+        tok_pos = parser->scan->pos;
         if (!emit_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
     } else {
-        parser_debug("%s[%i] Failed to match token %i, found %i. Skipping",curr_indent, parser->sequence, element.value, t.kind);
+        parser_debug("%s[%i] Failed to match token %s, found %s@%i. Skipping",curr_indent, parser->sequence, token_name(element.value), token_name(t.kind),parser->scan->pos);
         return parser_advance_option_sm(parser);
     }
 }
@@ -137,6 +142,7 @@ parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
     bool result;
     if (!emit_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos };
     while (ts_next(ts, &t)) {
+        // print("Read token@%i",parser->scan->pos);
         if (!t.kind)
             break;
         result = parse_token(content, t, parser);
