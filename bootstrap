@@ -1,3 +1,3 @@
-gcc -std=c99 -g -O0 -nostdlib -ffreestanding -I. -I../os/shared ./main.c ../os/shared/libshared.a ../redxlib/redxlib.a $HOME/raylib/src/libraylib.a -lc -lm -framework Cocoa -framework IOKit -framework CoreVideo -framework CoreFoundation -o cred
+gcc -std=c99 -g -O0 -nostdlib -ffreestanding -I. -I../os/shared ./main.c ../os/shared/clibshared.a ../redxlib/redxlib.a $HOME/raylib/src/libraylib.a -lc -lm -framework Cocoa -framework IOKit -framework CoreVideo -framework CoreFoundation -o cred
 chmod +x cred
 ./cred
