@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     Tokenizer tk = tokenizer_make(&scan);
     tk.skip_type_check = true;
     tk.comment_type = TOKENIZER_COMMENT_TYPE_SLASH;
-    tk.parse_newline = true;
+    tk.parse_newline = argc && strcmp(argv[1],"-nl") == 0;
     TokenStream ts;
     ts_init(&ts,&tk);
     
