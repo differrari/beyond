@@ -47,7 +47,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
                  if (elem.sem_value == sem_elem_type) sym.type = node.t;
                  if (elem.sem_value == sem_elem_name) sym.name = node.t;
                  // print("SYMBOL: %s = %v",get_sem_elem_name(elem.sem_value),token_to_slice(node.t));
-             } else if (elem.action == sem_action_check && elem.sem_value != sem_func){
+             } else if (elem.action == sem_action_check && elem.sem_value == sem_var && elem.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/){
                  if (!find_symbol(elem.sem_value, node.t)){
                      print("%s %v does not exist",sem_rule_name(elem.sem_value),token_to_slice(node.t));
                      return false;
@@ -55,7 +55,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
              }
         }
     }
-    if (sym.sym_type == sem_jmp || sym.sym_type == sem_var || sym.sym_type == sem_func){
+    if (sym.sym_type == sem_label || sym.sym_type == sem_dec || sym.sym_type == sem_func){
         symbol_table[symbol_count++] = sym;
         print("SYMBOL = %s TYPE = %v NAME = %v",sem_rule_name(sym.sym_type),sym.type.kind ? token_to_slice(sym.type) : make_string_slice("none", 0, 4),token_to_slice(sym.name));
     }

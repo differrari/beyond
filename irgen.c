@@ -1,4 +1,4 @@
-#include "codegen.h"
+#include "irgen.h"
 #include "common.h"
 
 #define MAX_CHARS 10000
@@ -8,6 +8,15 @@ uintptr_t cursor;
 int curr_indent = 0;
 
 stack_navigator gsn;
+
+// scope =>
+// assign => var val
+// call => func args
+// cond => cond scope
+// dec => type name val
+// jmp => jmp
+// label => name
+// val => val op exp | var op exp | val | var
 
 void print_stack(ast_node *stack, uint32_t count){
     for (uint32_t i = 0; i < count; i++){
@@ -41,6 +50,23 @@ void output_literal(char* lit, bool space){
 
 void eval_rule(grammar_rules current_rule, int curr_option){
     // print("Current rule %s@%i",rule_name(current_rule),curr_option);
+    
+    semantic_rules statement_type = language_rules[current_rule].action;
+    bool gen = true;
+    
+    switch (current_rule){
+        // case rule_block: print("+SCOPE");
+        case rule_declaration: print("DECLARATION"); break;
+        case rule_assignment: print("ASSIGNMENT"); break;
+        case rule_expression: print("EXPRESSION"); break;
+        case rule_funccall: print("FUNCCALL"); break;
+        case rule_argument: print("ARGUMENT"); break;
+        case rule_conditional: print("CONDITIONAL"); break;
+        case rule_jump: print("JUMP"); break;
+        case rule_label: print("LABEL"); break;
+        default: gen = false; break;
+    }
+
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
         if (elem.rule){
@@ -51,23 +77,24 @@ void eval_rule(grammar_rules current_rule, int curr_option){
                 if (!res) print("Rule not found %i",elem.value);
                 return;
             }
-            eval_rule(new_rule, new_opt);
+            if (elem.sem_value){
+                print("Begin %s",sem_rule_name(elem.sem_value));
+                eval_rule(new_rule, new_opt);
+                print("End %s",sem_rule_name(elem.sem_value));
+            } else eval_rule(new_rule, new_opt);
         } else {
-            // print("Token@%i",s);
             if (elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR){
-                if (elem.lit){
-                    output_literal(elem.lit, true);
-                } else {
+                if (!elem.lit){
                     ast_node node;
                     pop_stack(&gsn, &node);
                     if (node.t.kind != elem.value){
-                        // print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
+                        print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
                         return;
                     }
-                    output_token(node.t);
+                    if (gen){
+                        if (elem.sem_value) print("%v",token_to_slice(node.t));
+                    }
                 }
-            } else {
-                output_literal(tok_symbol(elem.value), false);
             }
         }
     }

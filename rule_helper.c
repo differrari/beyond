@@ -48,6 +48,10 @@ char *sem_rule_name(semantic_rules rule){
         case sem_func: return "func";
         case sem_jmp: return "jmp";
         case sem_scope: return "scope";
+        case sem_val: return "val";
+        case sem_cond: return "condition";
+        case sem_call: return "call";
+        case sem_args: return "arg";
         default: return "";
     }
 }

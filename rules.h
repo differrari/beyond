@@ -5,9 +5,9 @@
 
 typedef enum { rule_block, rule_statement, rule_declaration, rule_assignment, rule_expression, rule_funccall, rule_argument, rule_conditional, rule_jump, rule_label, num_grammar_rules } grammar_rules;
 
-typedef enum { sem_none, sem_var, sem_func, sem_jmp, sem_scope, sem_rules_count } semantic_rules;
+typedef enum { sem_none, sem_dec, sem_var, sem_assign, sem_exp, sem_func, sem_label, sem_jmp, sem_scope, sem_val, sem_op, sem_cond, sem_call, sem_args, sem_rules_count } semantic_rules;
 
-typedef enum { sem_elem_type, sem_elem_name, sem_elem_count } semantic_elements;
+typedef enum { sem_elem_none, sem_elem_type, sem_elem_name, sem_elem_count } semantic_elements;
 
 typedef enum { sem_action_none, sem_action_declare, sem_action_check } semantic_action;
 
@@ -35,8 +35,9 @@ typedef struct {
 #define LITERAL(val) { false, TOK_IDENTIFIER, val, sem_action_none, 0 }
 #define LITTOK(tok,val) { false, TOK_##tok, val, sem_action_none, 0 }
 
-#define SYMDEC(name,type) { false, TOK_IDENTIFIER, 0, sem_action_declare, sem_elem_##type }
-#define SYMCHECK(name,type) { false, TOK_IDENTIFIER, 0, sem_action_check, sem_##type }
+#define SYMDEC(name,type) { false, TOK_##name, 0, sem_action_declare, sem_elem_##type }
+#define SYMCHECK(name,type) { false, TOK_##name, 0, sem_action_check, sem_##type }
+#define SYMRULE(name,type) { true, rule_##name, 0, sem_action_check, sem_##type }
 
 extern grammar_rule language_rules[num_grammar_rules];
 

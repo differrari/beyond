@@ -3,7 +3,7 @@
 #include "parser.h"
 #include "data/helpers/token_stream.h"
 #include "common.h"
-#include "codegen.h"
+#include "irgen.h"
 #include "sem_analysis.h"
 
 Scanner scan;

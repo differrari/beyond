@@ -32,21 +32,21 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},6, 0},
 	[rule_assignment] = {{
 		{{
-			TOKEN(IDENTIFIER),
+			SYMCHECK(IDENTIFIER,var),
 			LITTOK(OPERATOR,"="),
-			RULE(expression),
+			SYMRULE(expression,exp),
 			TOKEN(SEMICOLON),
 		},4},
-	},1, 0},
+	},1, sem_assign},
 	[rule_funccall] = {{
 		{{
 			SYMCHECK(IDENTIFIER,func),
 			TOKEN(LPAREN),
-			RULE(argument),
+			SYMRULE(argument,args),
 			TOKEN(RPAREN),
 			TOKEN(SEMICOLON),
 		},5},
-	},1, 0},
+	},1, sem_call},
 	[rule_argument] = {{
 		{{
 			RULE(expression),
@@ -61,51 +61,51 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			LITERAL("if"),
 			TOKEN(LPAREN),
-			RULE(expression),
+			SYMRULE(expression,cond),
 			TOKEN(RPAREN),
 			TOKEN(LBRACE),
-			RULE(block),
+			SYMRULE(block,scope),
 			TOKEN(RBRACE),
 		},7},
-	},1, 0},
+	},1, sem_cond},
 	[rule_declaration] = {{
 		{{
 			SYMDEC(IDENTIFIER,type),
 			SYMDEC(IDENTIFIER,name),
 			LITTOK(OPERATOR,"="),
-			RULE(expression),
+			SYMRULE(expression,exp),
 			TOKEN(SEMICOLON),
 		},5},
-	},1, sem_var},
+	},1, sem_dec},
 	[rule_jump] = {{
 		{{
 			LITERAL("goto"),
 			SYMCHECK(IDENTIFIER,jmp),
 			TOKEN(SEMICOLON),
 		},3},
-	},1, 0},
+	},1, sem_jmp},
 	[rule_label] = {{
 		{{
 			SYMDEC(IDENTIFIER,name),
 			TOKEN(COLON),
 		},2},
-	},1, sem_jmp},
+	},1, sem_label},
 	[rule_expression] = {{
 		{{
-			TOKEN(CONST),
-			TOKEN(OPERATOR),
+			SYMCHECK(CONST,val),
+			SYMCHECK(OPERATOR,op),
 			RULE(expression),
 		},3},
 		{{
 			SYMCHECK(IDENTIFIER,var),
-			TOKEN(OPERATOR),
+			SYMCHECK(OPERATOR,op),
 			RULE(expression),
 		},3},
 		{{
-			TOKEN(CONST),
+			SYMCHECK(CONST,val),
 		},1},
 		{{
 			SYMCHECK(IDENTIFIER,var),
 		},1},
-	},4, 0},
+	},4, sem_exp},
 };

@@ -29,9 +29,7 @@ bool is_capitalized(string_slice sv){
     return caps;
 }
 
-static inline bool is_dec(string_slice sv){
-    return slice_lit_match(sv, "type", false) || slice_lit_match(sv, "name", false);
-}
+bool is_dec;
 
 void parse_rule(Token rule, TokenStream *ts){
     Token t = {};
@@ -80,15 +78,19 @@ void parse_rule(Token rule, TokenStream *ts){
                 } else {
                     ts->tz->s->pos = p;
                     if (has_tag){
-                        if (is_dec(token_to_slice(tag)))
+                        if (is_dec)
                             emit("\t\t\tSYMDEC(%v,%v),",sv,token_to_slice(tag));
                         else 
                             emit("\t\t\tSYMCHECK(%v,%v),",sv,token_to_slice(tag));
                     } else 
                         emit("\t\t\tTOKEN(%v),",sv);
                 }
-            } else 
-                emit("\t\t\tRULE(%v),",sv);
+            } else {
+                if (has_tag){
+                    emit("\t\t\tSYMRULE(%v,%v),",sv,token_to_slice(tag));
+                } else 
+                    emit("\t\t\tRULE(%v),",sv);
+            }
         }
     }
     emit("\t\t},%i},",sequence_count);
@@ -119,12 +121,13 @@ int main(int argc, char *argv[]){
                 if (!ts_next(&ts, &tag) || tag.kind != TOK_IDENTIFIER){
                     print("Malformed tag on %v. Expected identifier, got %v",token_to_slice(t),token_to_slice(tag));
                     return -1;
-                } //else print("Should store tag %v@%v",token_to_slice(t),token_to_slice(tag));
+                }
+                is_dec = slice_lit_match(token_to_slice(tag), "dec", false) || slice_lit_match(token_to_slice(tag), "label", false);
                 if (!ts_next(&ts, &op1)){
                     print("Unfinished rule %v",token_to_slice(t));
                     return -1;
                 }
-            }
+            } else is_dec = false;
             if (*op1.start != '-' || *(op1.start+1) != '>'){
                 print("Malformed rule %v. Expected -> Got %v",token_to_slice(t),token_to_slice(op1));
                 return -1;
