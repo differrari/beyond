@@ -54,16 +54,16 @@ void eval_rule(grammar_rules current_rule, int curr_option){
     semantic_rules statement_type = language_rules[current_rule].action;
     bool gen = true;
     
-    switch (current_rule){
+    switch (statement_type){
         // case rule_block: print("+SCOPE");
-        case rule_declaration: print("DECLARATION"); break;
-        case rule_assignment: print("ASSIGNMENT"); break;
-        case rule_expression: print("EXPRESSION"); break;
-        case rule_funccall: print("FUNCCALL"); break;
-        case rule_argument: print("ARGUMENT"); break;
-        case rule_conditional: print("CONDITIONAL"); break;
-        case rule_jump: print("JUMP"); break;
-        case rule_label: print("LABEL"); break;
+        case sem_dec: print("DECLARATION"); break;
+        case sem_assign: print("ASSIGNMENT"); break;
+        case sem_exp: print("EXPRESSION"); break;
+        case sem_call: print("FUNCCALL"); break;
+        case sem_args: print("ARGUMENT"); break;
+        case sem_cond: print("CONDITIONAL"); break;
+        case sem_jmp: print("JUMP"); break;
+        case sem_label: print("LABEL"); break;
         default: gen = false; break;
     }
 
@@ -92,7 +92,7 @@ void eval_rule(grammar_rules current_rule, int curr_option){
                         return;
                     }
                     if (gen){
-                        if (elem.sem_value) print("%v",token_to_slice(node.t));
+                        if (elem.sem_value) print("%s: %v",elem.action == sem_action_declare ? get_sem_elem_name(elem.sem_value) : sem_rule_name(elem.sem_value), token_to_slice(node.t));
                     }
                 }
             }

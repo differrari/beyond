@@ -52,6 +52,11 @@ char *sem_rule_name(semantic_rules rule){
         case sem_cond: return "condition";
         case sem_call: return "call";
         case sem_args: return "arg";
+        case sem_dec: return "dec"; 
+        case sem_assign: return "assign"; 
+        case sem_exp: return "exp"; 
+        case sem_label: return "label"; 
+        case sem_op: return "op"; 
         default: return "";
     }
 }
