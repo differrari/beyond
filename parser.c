@@ -83,7 +83,7 @@ bool pop_parser_stack(parser_sm *parser, bool backtrack){
     *parser = parser_stack[parser_depth-1];
     if (backtrack){
         parser_debug("%sSubrule failed, backtrack to %i",curr_indent, parser->scanner_pos);
-        if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
+        if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
@@ -103,7 +103,7 @@ bool parser_advance_option_sm(parser_sm *parser){
         parser->sequence = 0;
         parser_debug("%soption failed, backtrack to %i",curr_indent, parser->scanner_pos);
         parser_debug("%s%s [o:%i]",curr_indent,rule_name(parser->current_rule), parser->option);
-        if (parser->scan->pos > furthest_pos) furthest_pos = parser->scan->pos;
+        if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
