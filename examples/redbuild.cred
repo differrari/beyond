@@ -61,7 +61,7 @@ exec_cross {
         .add("~/raylib/src","~/raylib/src/libraylib.a", "", false)
         .add("~/redxlib", "~/redxlib/redxlib.a", "~/os/", true)
     precomp_flag.add("CROSS");
-    os.switch {
+    switch os {
         linux_os: linker_flag.add("-Wl,--start-group");
         windows_os: linker_flag.add("-fuse-ld=lld");
         mac_os: {
@@ -102,3 +102,6 @@ main {
         }
     }
 }
+
+//if (strcmp(argv[1],"cross")) exec_cross();
+//if (strcmp(argv[1],"dump")) { system("objdump -rf resources %s.red/resources,output_name"); }

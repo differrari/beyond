@@ -1,0 +1,59 @@
+interface codegen {
+    register_elem(int type, Token elem);
+    register_subrule(int type, codegen *child);
+    
+    char *emit_code();
+};
+
+class dec_code: codegen {
+    
+    Token type;
+    Token name;
+    codegen *initial_value;
+    
+    register_elem(int type, Token elem){
+        dec_code *declaration = (dec_code*)ptr;
+        switch (type) {
+            case sem_elem_type: declaration->type = elem; 
+            case sem_elem_name: declaration->name = elem;
+        }
+    }
+    
+    register_subrule(int type, codegen *child){
+        initial_value = child;
+    }
+    
+    char *emit_code {
+        return "$(token_to_slice(type)) $(token_to_slice(name)) $(initial_value.emit_code())";
+    }
+    
+}
+
+// typedef struct {
+//     int type;
+//     void (*register_elem)(void* ptr, int type, Token elem);
+//     void *ptr;
+// } codegen_t;
+
+// typedef struct {
+//     Token type;
+//     Token name;
+//     void *initial_value;
+// } dec_code;
+
+// void declaration_register_elem(void* ptr, int type, Token elem){
+//     print("Registering element of type %i for declaration",type);
+//     dec_code *declaration = (dec_code*)ptr;
+//     switch (type) {
+//         case sem_elem_type: declaration->type = elem; 
+//         case sem_elem_name: declaration->name = elem;
+//     }
+// }
+
+// codegen_t generate_declaration(int type){
+//     return (codegen_t){
+//         .ptr = malloc(sizeof(dec_code)),
+//         .register_elem = declaration_register_elem,
+//         .type = type
+//     };
+// }
