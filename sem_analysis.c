@@ -13,7 +13,7 @@ uint16_t symbol_count;
 
 bool find_symbol(semantic_rules type, Token t){
     for (uint16_t i = 0; i < symbol_count; i++){
-        if (symbol_table[i].sym_type == type && slices_equal(token_to_slice(t), token_to_slice(symbol_table[i].name), false)) return true;
+        if (slices_equal(token_to_slice(t), token_to_slice(symbol_table[i].name), false)) return true;
     }
     return false;
 }
@@ -47,7 +47,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
                  if (elem.sem_value == sem_elem_type) sym.type = node.t;
                  if (elem.sem_value == sem_elem_name) sym.name = node.t;
                  // print("SYMBOL: %s = %v",get_sem_elem_name(elem.sem_value),token_to_slice(node.t));
-             } else if (elem.action == sem_action_check && elem.sem_value == sem_var && elem.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/){
+             } else if (elem.action == sem_action_check && (elem.sem_value == sem_var || elem.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/)){
                  if (!find_symbol(elem.sem_value, node.t)){
                      print("%s %v does not exist",sem_rule_name(elem.sem_value),token_to_slice(node.t));
                      return false;

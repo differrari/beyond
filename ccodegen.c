@@ -1,0 +1,38 @@
+#include "codegen.h"
+#include "ccoderules/general.h"
+#include "rules.h"
+
+#ifdef CCODEGEN
+codegen_t begin_rule(int type){
+    switch (type){
+        // case rule_block: print("+SCOPE");
+        case sem_dec: return dec_code_init(); break;
+        case sem_assign: return ass_code_init(); break;
+        case sem_exp: return exp_code_init(); break;
+        case sem_call: return call_code_init(); break;
+        // case sem_args: arg_code_init(); break;
+        case sem_cond: return cond_code_init(); break;
+        case sem_jmp: return jmp_code_init(); break;
+        case sem_label: return label_code_init(); break;
+        default: return (codegen_t){};
+    }
+}
+
+void register_elem(codegen_t gen, int type, Token elem){
+   if (gen.register_elem) gen.register_elem(gen.ptr, type, elem);
+}
+
+void end_rule(int type){
+    
+}
+
+void register_subrule(codegen_t gen, int type, void *child){
+    if (gen.register_subrule) gen.register_subrule(gen.ptr, type, child);
+}
+
+char* emit_code(codegen_t gen){
+    if (gen.emit_code) return gen.emit_code(gen.ptr);
+    return "";
+}
+
+#endif

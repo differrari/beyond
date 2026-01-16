@@ -52,7 +52,6 @@ int main(int argc, char *argv[]){
     
     parse_result parse_res = parse(content, &ts, &parser);
     
-    printf("String scanned %i",parse_res.result);
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.furthest_parse_pos, content);
         printf("Found syntax error on l%i:%i in file %i",ln.line_number,ln.column,ln.file);

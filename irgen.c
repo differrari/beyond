@@ -1,5 +1,6 @@
 #include "irgen.h"
 #include "common.h"
+#include "codegen.h"
 
 #define MAX_CHARS 10000
 char buf[MAX_CHARS];
@@ -8,15 +9,6 @@ uintptr_t cursor;
 int curr_indent = 0;
 
 stack_navigator gsn;
-
-// scope =>
-// assign => var val
-// call => func args
-// cond => cond scope
-// dec => type name val
-// jmp => jmp
-// label => name
-// val => val op exp | var op exp | val | var
 
 void print_stack(ast_node *stack, uint32_t count){
     for (uint32_t i = 0; i < count; i++){
@@ -48,24 +40,11 @@ void output_literal(char* lit, bool space){
     }
 }
 
-void eval_rule(grammar_rules current_rule, int curr_option){
+codegen_t eval_rule(grammar_rules current_rule, int curr_option, bool should_print){
     // print("Current rule %s@%i",rule_name(current_rule),curr_option);
     
     semantic_rules statement_type = language_rules[current_rule].action;
-    bool gen = true;
-    
-    switch (statement_type){
-        // case rule_block: print("+SCOPE");
-        case sem_dec: print("DECLARATION"); break;
-        case sem_assign: print("ASSIGNMENT"); break;
-        case sem_exp: print("EXPRESSION"); break;
-        case sem_call: print("FUNCCALL"); break;
-        case sem_args: print("ARGUMENT"); break;
-        case sem_cond: print("CONDITIONAL"); break;
-        case sem_jmp: print("JUMP"); break;
-        case sem_label: print("LABEL"); break;
-        default: gen = false; break;
-    }
+    codegen_t gen = begin_rule(statement_type);
 
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
@@ -75,13 +54,12 @@ void eval_rule(grammar_rules current_rule, int curr_option){
             tern res = switch_rule(&gsn, &new_rule, &new_opt);
             if (res != true){
                 if (!res) print("Rule not found %i",elem.value);
-                return;
+                return (codegen_t){};
             }
             if (elem.sem_value){
-                print("Begin %s",sem_rule_name(elem.sem_value));
-                eval_rule(new_rule, new_opt);
-                print("End %s",sem_rule_name(elem.sem_value));
-            } else eval_rule(new_rule, new_opt);
+                codegen_t new_codegen = eval_rule(new_rule, new_opt, !gen.ptr);
+                if (gen.ptr) register_subrule(gen, elem.sem_value, &new_codegen);
+            } else eval_rule(new_rule, new_opt, true);
         } else {
             if (elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR){
                 if (!elem.lit){
@@ -89,16 +67,18 @@ void eval_rule(grammar_rules current_rule, int curr_option){
                     pop_stack(&gsn, &node);
                     if (node.t.kind != elem.value){
                         print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
-                        return;
+                        return (codegen_t){};
                     }
-                    if (gen){
-                        if (elem.sem_value) print("%s: %v",elem.action == sem_action_declare ? get_sem_elem_name(elem.sem_value) : sem_rule_name(elem.sem_value), token_to_slice(node.t));
-                    }
+                    if (gen.ptr && elem.sem_value) register_elem(gen, elem.action == sem_action_declare ? elem.sem_value : elem.sem_value, node.t);
                 }
             }
         }
     }
-    // print("Finished rule %s@%i",rule_name(current_rule),curr_option);
+
+    end_rule(statement_type);
+    if (gen.ptr && should_print) print(emit_code(gen));
+    
+    return gen;
 }
 
 void gen_code(ast_node *stack, uint32_t count){
@@ -110,7 +90,7 @@ void gen_code(ast_node *stack, uint32_t count){
     grammar_rules new_rule;
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
-    eval_rule(new_rule,new_opt);
+    codegen_t cg = eval_rule(new_rule,new_opt, true);
     print(buf);
     // print_stack(stack, count);
 }
