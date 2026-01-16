@@ -10,6 +10,25 @@ Scanner scan;
 
 char *indent = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
+typedef struct {
+    uint32_t file;
+    uint32_t line_number;
+    uint32_t column;
+} ln_report; 
+
+ln_report parse_ln(uint32_t pos, char *content){
+    ln_report rep = {
+        .line_number = 1,
+    };
+    for (uint32_t i = 0; i < pos && content[i]; i++){
+        if (content[i] == '\n'){
+            rep.column = 0;
+            rep.line_number++;
+        } else rep.column++;
+    }
+    return rep;
+}
+
 int main(int argc, char *argv[]){
     
     char *content = read_full_file("street.cred");
@@ -34,9 +53,10 @@ int main(int argc, char *argv[]){
     parse_result parse_res = parse(content, &ts, &parser);
     
     printf("String scanned %i",parse_res.result);
-    if (!parse_res.result)
-        printf("Found syntax error at position %i",parse_res.furthest_parse_pos);
-    else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
+    if (!parse_res.result){
+        ln_report ln = parse_ln(parse_res.furthest_parse_pos, content);
+        printf("Found syntax error on l%i:%i in file %i",ln.line_number,ln.column,ln.file);
+    } else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
         gen_code(parse_res.ast_stack, parse_res.ast_count);
     }
     
