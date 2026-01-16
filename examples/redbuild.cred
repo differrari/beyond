@@ -1,0 +1,104 @@
+/*
+A declarative syntax to customize my build system. 
+*/
+
+//Lazy var loading, using a custom function
+//FIXME: how does this translate into code that isn't just if (!output_name) output_name_init_lambda()?
+var output_name: string = {
+    switch output_type {
+        red.do {
+            mkdir("%{cwd}/%{output_name}.red");
+            system("cp -rf package.info %{output_name}.red/package.info");
+            system("cp -rf resources %{output_name}.red/resources");
+            return "%{output_name}.red/%{output_name}.elf"
+        }
+    
+        bin.do {
+            return "%{output_name}.elf"
+        }
+    
+        lib.do {
+            return "%{output_name}.a"
+        }
+        
+        default.do {
+            fail "Wrong output type %{output_type}"
+        }
+    }
+}
+
+comp {
+    fail_if(!strlen(compiler), "ERROR: Specify a compiler");
+    
+    clinkedlist
+        .for_each(sys_deps, process_dep)
+        .for_each(preproc_flags_list, process_preproc_flags)
+        .for_each(comp_flags_list, process_comp_flags)
+        .for_each(link_flags_list, process_link_flags);
+    memset(buff, 0, BUF_SIZE);
+    
+    if output_type == package_lib {
+        clinkedlist_for_each(comp_files, lib_compile_individual);
+        memset(buff, 0, BUF_SIZE);
+        clinkedlist_for_each(comp_files, process_out_files);
+        string_format_buf(buff, BUF_SIZE, "ar rcs %s %s",output.data,ofiles.data);
+        printf("%{buff}");
+        system(buff);
+    } else {
+        clinkedlist_for_each(comp_files, process_comp_files);
+        string_format_buf(buff, BUF_SIZE, "%s %s %s %s %s %s %s -o %s", compiler, preproc_flags.data ? preproc_flags.data : "", comp_flags.data ? comp_flags.data : "", link_flags.data ? link_flags.data : "", includes.data ? includes.data : "",sources.data ? sources.data : "",link_libs.data ? link_libs.data : "", output.data);
+        printf("%s",buff);
+        system(buff);
+    }
+}
+
+exec_cross {
+    lib
+        .add("c")
+        .add("m")//FIXME: This is supposed to convey typeof(lib)_add("m"), but could also be confused with the pseudo-oop add(lib,"m")
+    local_dep
+        .add("~/os/shared","~/os/shared/clibshared.a", "~/os/", true)
+        .add("~/raylib/src","~/raylib/src/libraylib.a", "", false)
+        .add("~/redxlib", "~/redxlib/redxlib.a", "~/os/", true)
+    precomp_flag.add("CROSS");
+    os.switch {
+        linux_os: linker_flag.add("-Wl,--start-group");
+        windows_os: linker_flag.add("-fuse-ld=lld");
+        mac_os: {
+            system_framework.add("Cocoa")
+            .add("IOKit")
+            .add("CoreVideo")
+            .add("CoreFoundation");
+        }
+        default: break;
+    }
+    
+    compiler = "gcc";
+    comp();
+}
+
+exec_run {
+///...
+}
+
+exec_clean {
+///...
+}
+
+main {
+    switch argv[1] {
+        cross(exec_cross)
+        
+        run(exec_run)
+        
+        "clean"(exec_clean)
+        
+        dump.do {
+            system("objdump -rf resources %s.red/resources,output_name");
+        }
+        
+        default.do {
+            fail "Wrong compilation option %{argv[1]}";
+        }
+    }
+}
