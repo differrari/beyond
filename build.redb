@@ -14,6 +14,7 @@ rulegen {
     source("codegenrules/codeformat.c");
     source("ruleparser.c");
     compile();
+    run();
 }
 
 compiler {
