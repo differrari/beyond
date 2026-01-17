@@ -36,6 +36,7 @@ codegen_t arg_code_init();
 
 typedef struct {
     Token val;
+    codegen_t var;
     Token operand;
     codegen_t exp;
 } exp_code;
@@ -105,3 +106,11 @@ typedef struct {
 } dowhile_code;
 
 codegen_t dowhile_code_init();
+
+typedef struct {
+    Token name;
+    codegen_t expression;
+    Token operation;
+} var_code;
+
+codegen_t var_code_init();

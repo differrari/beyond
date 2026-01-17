@@ -106,14 +106,15 @@ CODEGEN_DEC(label_code)
 
 void exp_code_register_elem(void* ptr, int type, Token elem){
     exp_code *code = (exp_code*)ptr;
-    if (type == sem_var || type == sem_val)
+    if (type == sem_val)
         code->val = elem;
     else code->operand = elem;
 }
 
 void exp_code_register_subrule(void* ptr, int type,  codegen_t child){
     exp_code *code = (exp_code*)ptr;
-    code->exp = child;
+    if (type == sem_var) code->var = child;
+    if (type == sem_exp) code->exp = child;
 }
 
 CODEGEN_DEC(exp_code)
@@ -209,3 +210,20 @@ void dowhile_code_register_subrule(void* ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(dowhile_code)
+
+void var_code_register_elem(void* ptr, int type, Token elem){
+    var_code *code = (var_code*)ptr;
+    print("ELEM %s",sem_rule_name(type));
+    switch (type) {
+        case sem_var: code->name = elem; break;
+        case sem_op: code->operation = elem; break;
+    }
+}
+
+void var_code_register_subrule(void* ptr, int type, codegen_t child){
+    var_code *code = (var_code*)ptr;
+    print("RULE %s",sem_rule_name(type));
+    code->expression = child;
+}
+
+CODEGEN_DEC(var_code)

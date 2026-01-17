@@ -92,6 +92,7 @@ void gen_code(ast_node *stack, uint32_t count){
     ast_node node = {};
     int new_rule;
     int new_opt;
+    print_stack(stack, count);
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
     codegen_t cg = eval_rule(new_rule,new_opt);
     emit_code(cg);

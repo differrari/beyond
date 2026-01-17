@@ -264,19 +264,19 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			SYMRULE(math,exp),
 		},1},
-	},4, sem_exp},
+	},4, 0},
 	[rule_chain] = {{
 		{{
 			SYMRULE(variable,var),
-			TOKEN(DOT),
+			SYMCHECK(DOT,op),
 			SYMRULE(funccall,exp),
 		},3},
 		{{
 			SYMRULE(variable,var),
-			TOKEN(DOT),
+			SYMCHECK(DOT,op),
 			SYMCHECK(IDENTIFIER,exp),
 		},3},
-	},2, sem_exp},
+	},2, sem_var},
 	[rule_math] = {{
 		{{
 			SYMCHECK(CONST,val),
@@ -298,7 +298,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 	[rule_variable] = {{
 		{{
 			SYMCHECK(IDENTIFIER,var),
-			TOKEN(LBRACKET),
+			SYMCHECK(LBRACKET,op),
 			SYMRULE(math,exp),
 			TOKEN(RBRACKET),
 		},4},

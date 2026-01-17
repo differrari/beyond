@@ -1,6 +1,7 @@
 #pragma once
 
 #include "data/tokenizer/tokenizer.h"
+#include "rules.h"
 
 typedef struct codegen_t {
     int type;
@@ -10,7 +11,7 @@ typedef struct codegen_t {
     void *ptr;
 } codegen_t;
 
-codegen_t begin_rule(int type);
+codegen_t begin_rule(semantic_rules type);
 void register_elem(codegen_t gen, int type, Token elem);
 void end_rule(int type);
 void register_subrule(codegen_t gen, int type, codegen_t child);

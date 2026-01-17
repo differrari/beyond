@@ -2,7 +2,7 @@
 #include "codegenrules/general.h"
 #include "rules.h"
 
-codegen_t begin_rule(int type){
+codegen_t begin_rule(semantic_rules type){
     switch (type){
         case sem_scope: return blk_code_init();
         case sem_dec: return dec_code_init();
@@ -18,7 +18,13 @@ codegen_t begin_rule(int type){
         case sem_for: return for_code_init();
         case sem_while: return while_code_init();
         case sem_dowhile: return dowhile_code_init();
-        default: return (codegen_t){};
+        case sem_var: return var_code_init();
+        case sem_val: 
+        case sem_op: 
+        case sem_none:
+        case sem_stat:
+        case sem_rules_count:
+            return (codegen_t){};
     }
 }
 

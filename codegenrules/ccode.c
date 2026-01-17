@@ -71,9 +71,11 @@ void exp_code_emit_code(void *ptr){
     exp_code *code = (exp_code*)ptr;
     //TODO: fetch from symbol table
     // emit_const("(");
-    emit_token(code->val);
+    if (code->var.ptr) emit_code(code->var);
+    else emit_token(code->val);
+    // emit_const(",");
     if (code->exp.ptr){
-        emit_space();
+        if (code->val.kind || code->var.ptr) emit_space();
         emit_token(code->operand);
         emit_space();
         emit_code(code->exp);
@@ -155,6 +157,18 @@ void dowhile_code_emit_code(void* ptr){
     emit_const("while (");
     emit_code(code->condition);
     emit_const(");");
+}
+
+void var_code_emit_code(void* ptr, int type, Token elem){
+    var_code *code = (var_code*)ptr;
+    emit_token(code->name);
+    if (code->operation.kind){
+        if (*code->operation.start == '['){
+            emit_const("[");
+            emit_code(code->expression);
+            emit_const("]");
+        } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
+    } else if (code->expression.ptr) emit_code(code->expression);
 }
 
 #endif
