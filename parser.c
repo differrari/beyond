@@ -123,7 +123,7 @@ bool parser_advance_sequence(parser_sm *parser){
 }
 
 bool parse_token(const char *content, Token t, parser_sm *parser){
-    parser_advance_to_token(parser, t);
+    if (!parser_advance_to_token(parser, t)) return false;
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
     if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit, false))){
