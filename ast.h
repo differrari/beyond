@@ -5,7 +5,7 @@
 
 typedef struct {
     Token t;
-    grammar_rules rule;
+    int rule;
     int option;
     int depth;
     int sequence;
@@ -19,4 +19,4 @@ typedef struct {
 
 bool pop_stack(stack_navigator *sn, ast_node* node);
 
-tern switch_rule(stack_navigator *sn, grammar_rules *current_rule, int *curr_option);
+tern switch_rule(stack_navigator *sn, int *current_rule, int *curr_option);

@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     ts_init(&ts,&tk);
     
     parser_sm parser = (parser_sm){
-        .current_rule = rule_block,
+        .current_rule = 0,
         .option = 0,
         .sequence = 0,
         .scan = &scan,

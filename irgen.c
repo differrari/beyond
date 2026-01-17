@@ -13,9 +13,9 @@ stack_navigator gsn;
 void print_stack(ast_node *stack, uint32_t count){
     for (uint32_t i = 0; i < count; i++){
         if (!stack[i].t.kind)
-            printf("%c[%i,%i] %s ->",*rule_name(stack[i].rule),stack[i].option,stack[i].sequence,indent_by(stack[i].depth));
+            printf("%c[%i,%i] %s ->",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth));
         else
-            printf("%c[%i,%i] %s %v",*rule_name(stack[i].rule),stack[i].option,stack[i].sequence,indent_by(stack[i].depth),token_to_slice(stack[i].t));
+            printf("%c[%i,%i] %s %v",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth),token_to_slice(stack[i].t));
     }
 }
 
@@ -23,9 +23,9 @@ void output_newline(){
     cursor += string_format_buf((buf+cursor), MAX_CHARS, "\n%s", indent_by(curr_indent));
 }
 
-void output_debug_rule(grammar_rules rule){
+void output_debug_rule(int rule){
     output_newline();
-    cursor += string_format_buf((buf+cursor), MAX_CHARS, "Current rule %s", rule_name(rule));
+    cursor += string_format_buf((buf+cursor), MAX_CHARS, "Current rule %s", rule_names[rule]);
 }
 
 void output_token(Token t){
@@ -40,7 +40,7 @@ void output_literal(char* lit, bool space){
     }
 }
 
-codegen_t eval_rule(grammar_rules current_rule, int curr_option){
+codegen_t eval_rule(int current_rule, int curr_option){
     
     semantic_rules statement_type = language_rules[current_rule].action;
     codegen_t gen = begin_rule(statement_type);
@@ -49,7 +49,7 @@ codegen_t eval_rule(grammar_rules current_rule, int curr_option){
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
         if (elem.rule){
-            grammar_rules new_rule;
+            int new_rule;
             int new_opt;
             tern res = switch_rule(&gsn, &new_rule, &new_opt);
             if (res != true){
@@ -88,7 +88,7 @@ void gen_code(ast_node *stack, uint32_t count){
     gsn.ast_stack = stack;
     gsn.stack_count = count;
     ast_node node = {};
-    grammar_rules new_rule;
+    int new_rule;
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
     codegen_t cg = eval_rule(new_rule,new_opt);

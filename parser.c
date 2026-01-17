@@ -20,7 +20,7 @@ int parser_depth;
 
 #define current_parser_rule(parser) language_rules[parser->current_rule].options[parser->option].rules[parser->sequence]
 
-bool emit_token(Token t, grammar_rules rule, int option, int sequence, grammar_elem element){
+bool emit_token(Token t, int rule, int option, int sequence, grammar_elem element){
     if (element.lit || (t.kind != TOK_IDENTIFIER && t.kind != TOK_STRING && t.kind != TOK_CONST && t.kind != TOK_OPERATOR)) return true;
     if (tree_count >= MAX_TREE_COUNT-1){
         print("Too much code");
@@ -36,7 +36,7 @@ bool emit_token(Token t, grammar_rules rule, int option, int sequence, grammar_e
     return true;
 }
 
-bool emit_rule(grammar_rules rule, int option, int sequence){
+bool emit_rule(int rule, int option, int sequence){
     if (tree_count >= MAX_TREE_COUNT-1){
         print("Too much code");
         return false;
@@ -56,7 +56,7 @@ uint32_t tok_pos = 0;
 
 bool parser_advance_to_token(parser_sm *parser, Token t){
     while (current_parser_rule(parser).rule){
-        parser_debug("%s[%i] %s[o:%i] subrule %s @%i",curr_indent, parser->sequence, rule_name(parser->current_rule), parser->option, rule_name(current_parser_rule(parser).value),parser->scan->pos);
+        parser_debug("%s[%i] %s[o:%i] subrule %s @%i",curr_indent, parser->sequence, rule_names[parser->current_rule], parser->option, rule_names[current_parser_rule(parser).value],parser->scan->pos);
         if (parser_depth == MAX_DEPTH - 1){
             parser_debug("Maximum depth reached, too many nested statements, shame on you");
             return false;
@@ -94,15 +94,15 @@ bool pop_parser_stack(parser_sm *parser, bool backtrack){
 
 bool parser_advance_option_sm(parser_sm *parser){
     if (parser->option + 1 == language_rules[parser->current_rule].num_elements){
-        parser_debug("%sRule %s failed",curr_indent,rule_name(parser->current_rule));
+        parser_debug("%sRule %s failed",curr_indent,rule_names[parser->current_rule]);
         if (!pop_parser_stack(parser, true)) return false;
         return parser_advance_option_sm(parser);
     } else {
-        parser_debug("%sRule %s option %i failed",curr_indent,rule_name(parser->current_rule), parser->option);
+        parser_debug("%sRule %s option %i failed",curr_indent,rule_names[parser->current_rule], parser->option);
         parser->option++;
         parser->sequence = 0;
         parser_debug("%soption failed, backtrack to %i",curr_indent, parser->scanner_pos);
-        parser_debug("%s%s [o:%i]",curr_indent,rule_name(parser->current_rule), parser->option);
+        parser_debug("%s%s [o:%i]",curr_indent,rule_names[parser->current_rule], parser->option);
         if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;

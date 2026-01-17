@@ -18,8 +18,8 @@ bool find_symbol(semantic_rules type, Token t){
     return false;
 }
 
-bool analyze_rule(grammar_rules current_rule, int curr_option){
-    // print("Current rule %s@%i",rule_name(current_rule),curr_option);
+bool analyze_rule(int current_rule, int curr_option){
+    // print("Current rule %s@%i",rule_names[current_rule],curr_option);
     // if (semantic_analysis_rules[current_rule]){
         // if (semantic_analysis_rules[current_rule] == sem_scope)
             // print("== SYMBOL TABLE FOR SCOPE ==");
@@ -32,7 +32,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
         if (elem.rule){
-            grammar_rules new_rule;
+            int new_rule;
             int new_opt;
             tern res = switch_rule(&ssn, &new_rule, &new_opt);
             if (res != true){
@@ -70,7 +70,7 @@ bool analyze_semantics(ast_node *stack, uint32_t count){
     ssn.stack_count = count;
     // output_debug_rule(current_rule);
     ast_node node = {};
-    grammar_rules new_rule;
+    int new_rule;
     int new_opt;
     switch_rule(&ssn, &new_rule,&new_opt);
     return analyze_rule(new_rule,new_opt);

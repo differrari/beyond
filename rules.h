@@ -3,8 +3,6 @@
 #include "types.h"
 #include "data/tokenizer/tokenizer.h"
 
-typedef enum { rule_block, rule_statement, rule_declaration, rule_assignment, rule_expression, rule_funccall, rule_funcdec, rule_argdec, rule_argument, rule_conditional, rule_jump, rule_label, num_grammar_rules } grammar_rules;
-
 typedef enum { sem_none, sem_dec, sem_stat, sem_var, sem_assign, sem_exp, sem_func, sem_label, sem_jmp, sem_scope, sem_param, sem_val, sem_op, sem_cond, sem_call, sem_args, sem_rules_count } semantic_rules;
 
 typedef enum { sem_elem_none, sem_elem_type, sem_elem_name, sem_elem_count } semantic_elements;
@@ -39,9 +37,10 @@ typedef struct {
 #define SYMCHECK(name,type) { false, TOK_##name, 0, sem_action_check, sem_##type }
 #define SYMRULE(name,type) { true, rule_##name, 0, sem_action_check, sem_##type }
 
-extern grammar_rule language_rules[num_grammar_rules];
+extern grammar_rule language_rules[];
 
-char *rule_name(grammar_rules rule);
+extern char* rule_names[];
+
 char *tok_symbol(TokenKind kind);
 char *sem_action_name(semantic_action act);
 char *sem_rule_name(semantic_rules rule);

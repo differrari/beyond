@@ -6,7 +6,7 @@ bool pop_stack(stack_navigator *sn, ast_node* node){
     return true;
 }
 
-tern switch_rule(stack_navigator *sn, grammar_rules *current_rule, int *curr_option){
+tern switch_rule(stack_navigator *sn, int *current_rule, int *curr_option){
     ast_node node;
     if (!pop_stack(sn, &node)) return -1;
     if (node.t.kind){

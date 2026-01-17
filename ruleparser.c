@@ -39,6 +39,25 @@ typedef struct {
     char *type;
 } rule_sequence;
 
+typedef struct {
+    string_slice name;
+    clinkedlist_t *list;  
+    Token tag;
+} rule_entry;
+
+clinkedlist_t *allrules;
+
+int rule_to_index(string_slice name){
+    int i = 0;
+    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+        rule_entry *e = node->data;
+        if (!e) continue;
+        if (slices_equal(e->name, name, true)) return i;
+        i++;
+    }
+    return -1;
+}
+
 int emit_sequence(clinkedlist_t *list){
     if (!list->length) return 0;
     int num_optionals = 0;
@@ -58,19 +77,19 @@ int emit_sequence(clinkedlist_t *list){
             }
             if (should_emit){
                 count++;
-                print("Emit %v",token_to_slice(s->t));
                 if (s->tag.kind)
                     emit("\t\t\t%s(%v,%v),",s->type,token_to_slice(s->t),token_to_slice(s->tag));
                 else 
                     emit("\t\t\t%s(%v),",s->type,token_to_slice(s->t));
-            } else print("Skip %v",token_to_slice(s->t));
+            }
         }
         emit("\t\t},%i},",count);
     }
     return num_optionals;
 }
 
-void parse_rule(Token rule, TokenStream *ts){
+clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
+    clinkedlist_t *rulelist = clinkedlist_create();
     Token t = {};
     subrule_count++;
     sequence_count = 0;
@@ -78,8 +97,7 @@ void parse_rule(Token rule, TokenStream *ts){
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
             if (seq->length){
-                subrule_count += emit_sequence(seq);
-                clinkedlist_destroy(seq);
+                clinkedlist_push(rulelist,seq);
                 seq = clinkedlist_create();
             }
             subrule_count++;
@@ -101,7 +119,7 @@ void parse_rule(Token rule, TokenStream *ts){
                 }
             }
             sequence_count++;
-            rule_sequence *seqrule = malloc(sizeof(rule_sequence));
+            rule_sequence *seqrule = zalloc(sizeof(rule_sequence));
             if (t.kind == TOK_STRING){
                 if (has_tag) {
                     print("Literal isn't expected to have a tag");
@@ -155,7 +173,44 @@ void parse_rule(Token rule, TokenStream *ts){
             clinkedlist_push(seq, seqrule);
         }
     }
-    subrule_count += emit_sequence(seq);
+    clinkedlist_push(rulelist,seq);
+    return rulelist;
+}
+
+void emit_rule_enum(){
+    emit("typedef enum { ");
+    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+        rule_entry *e = node->data;
+        if (!e) continue;
+        emit("\trule_%v,",e->name);
+    }
+    emit(" \tnum_grammar_rules\n} grammar_rules;");
+}
+
+void emit_rules(){
+    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+        rule_entry *e = node->data;
+        if (!e) continue;
+        emit("\t[rule_%v] = {{",e->name);
+        subrule_count = clinkedlist_length(e->list);
+        for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
+            subrule_count += emit_sequence(o->data);
+        }
+        if (e->tag.length)
+            emit("\t},%i, sem_%v},",subrule_count,token_to_slice(e->tag));
+        else 
+            emit("\t},%i, 0},",subrule_count);
+    }
+}
+
+void emit_rule_prints(){
+    emit("\nchar* rule_names[num_grammar_rules] = {");
+    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+        rule_entry *e = node->data;
+        if (!e) continue;
+        emit("\t[rule_%v] = \"%v\",",e->name,e->name);
+    }
+    emit("};");
 }
 
 int main(int argc, char *argv[]){
@@ -168,7 +223,7 @@ int main(int argc, char *argv[]){
     TokenStream ts;
     ts_init(&ts, &tk);
     
-    emit("#include \"rules.h\" \n\ngrammar_rule language_rules[num_grammar_rules] = {");
+    allrules = clinkedlist_create();
     
     Token t;
     while (ts_next(&ts, &t) && t.kind) {
@@ -194,21 +249,24 @@ int main(int argc, char *argv[]){
                 print("Malformed rule %v. Expected -> Got %v",token_to_slice(t),token_to_slice(op1));
                 return -1;
             }
-            emit("\t[rule_%v] = {{",token_to_slice(t));
-            parse_rule(t, &ts);
-            if (tag.length)
-                emit("\t},%i, sem_%v},",subrule_count,token_to_slice(tag));
-            else 
-                emit("\t},%i, 0},",subrule_count);
+            rule_entry *entry = zalloc(sizeof(rule_entry));
+            entry->name = token_to_slice(t);
+            entry->list = parse_rule(t, &ts);
+            if (tag.length) entry->tag = tag;
+            clinkedlist_push(allrules, entry);
             subrule_count = 0;
         } else {
             print("Unrecognized grammar token %v",token_to_slice(t));
             return -1;
         }
     }
+    emit("#include \"rules.h\" \n");
+    emit_rule_enum();
+    emit("\ngrammar_rule language_rules[num_grammar_rules] = {");
+    emit_rules();
     emit("};");
     
-    print("Wrote %i",strlen(code_buf));
+    emit_rule_prints();
     
     if (strlen(code_buf) < MAX_BUF-1) code_buf[strlen(code_buf)] = '\0';
     

@@ -5,7 +5,7 @@
 #include "ast.h"
 
 typedef struct {
-    grammar_rules current_rule;
+    int current_rule;
     int option;
     int sequence;
     uint32_t scanner_pos;

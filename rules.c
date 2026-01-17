@@ -1,5 +1,21 @@
 #include "rules.h" 
 
+typedef enum { 
+	rule_block,
+	rule_statement,
+	rule_assignment,
+	rule_funccall,
+	rule_funcdec,
+	rule_argdec,
+	rule_argument,
+	rule_conditional,
+	rule_declaration,
+	rule_jump,
+	rule_label,
+	rule_expression,
+ 	num_grammar_rules
+} grammar_rules;
+
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
 		{{
@@ -180,4 +196,19 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMCHECK(IDENTIFIER,var),
 		},1},
 	},4, sem_exp},
+};
+
+char* rule_names[num_grammar_rules] = {
+	[rule_block] = "block",
+	[rule_statement] = "statement",
+	[rule_assignment] = "assignment",
+	[rule_funccall] = "funccall",
+	[rule_funcdec] = "funcdec",
+	[rule_argdec] = "argdec",
+	[rule_argument] = "argument",
+	[rule_conditional] = "conditional",
+	[rule_declaration] = "declaration",
+	[rule_jump] = "jump",
+	[rule_label] = "label",
+	[rule_expression] = "expression",
 };

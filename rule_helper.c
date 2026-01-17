@@ -1,21 +1,5 @@
 #include "rules.h"
 
-char* rule_name(grammar_rules rule){
-    switch (rule) {
-        case rule_block: return "block";
-        case rule_statement: return "statement";
-        case rule_declaration: return "declaration";
-        case rule_assignment: return "assignment";
-        case rule_expression: return "expression";
-        case rule_funccall: return "funccall";
-        case rule_argument: return "argument";
-        case rule_conditional: return "conditional";
-        case rule_jump: return "jump";
-        case rule_label: return "label";
-        default: return "UNK";
-    }
-}
-
 char *tok_symbol(TokenKind kind){
     switch (kind) {
         case TOK_LPAREN: return "(";
