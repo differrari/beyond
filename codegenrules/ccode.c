@@ -157,7 +157,7 @@ void dowhile_code_emit_code(void* ptr){
     emit_const(")");
 }
 
-void var_code_emit_code(void* ptr, int type, Token elem){
+void var_code_emit_code(void* ptr){
     var_code *code = (var_code*)ptr;
     if (code->var.ptr) emit_code(code->var); else emit_token(code->name);
     if (code->operation.kind){
@@ -170,6 +170,12 @@ void var_code_emit_code(void* ptr, int type, Token elem){
             emit_code(code->expression);
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else if (code->expression.ptr) emit_code(code->expression);
+}
+
+void inc_code_emit_code(void *ptr){
+    inc_code *code = (inc_code*)ptr;
+    emit_const("#include ");
+    emit_token(code->value);
 }
 
 #endif

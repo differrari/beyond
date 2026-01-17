@@ -115,3 +115,9 @@ typedef struct {
 } var_code;
 
 codegen_t var_code_init();
+
+typedef struct {
+    Token value;
+} inc_code;
+
+codegen_t inc_code_init();

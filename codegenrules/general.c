@@ -228,3 +228,14 @@ void var_code_register_subrule(void* ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(var_code)
+
+void inc_code_register_elem(void *ptr, int type, Token elem){
+    inc_code *code = (inc_code*)ptr;
+    if (type == sem_inc && *elem.start == '"') code->value = elem;
+}
+
+void inc_code_register_subrule(void *ptr, int type, codegen_t child){
+    
+}
+
+CODEGEN_DEC(inc_code)

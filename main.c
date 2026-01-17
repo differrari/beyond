@@ -29,7 +29,11 @@ ln_report parse_ln(uint32_t pos, char *content){
 
 int main(int argc, char *argv[]){
     
-    char *content = read_full_file("street.cred");
+    const char *compname = argc > 1 ? argv[1] : "street.cred";
+    
+    print("Compiling %s",compname);
+    
+    char *content = read_full_file(compname);
     
     scan = scanner_make(content,strlen(content));
     
@@ -54,7 +58,9 @@ int main(int argc, char *argv[]){
         ln_report ln = parse_ln(parse_res.furthest_parse_pos, content);
         printf("Found syntax error on l%i:%i in file %i",ln.line_number,ln.column,ln.file);
     } else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
-        gen_code(parse_res.ast_stack, parse_res.ast_count);
+        const char* outname = argc > 2 ? argv[2] : "output.c";
+        print("Generating %s",outname);
+        gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
     }
     
     return 0;

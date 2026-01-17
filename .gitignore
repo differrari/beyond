@@ -22,3 +22,5 @@ trace
 cred
 rulegen
 output.c
+build.c
+rules.c
