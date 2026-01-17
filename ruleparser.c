@@ -2,6 +2,7 @@
 #include "data/scanner/scanner.h"
 #include "data/tokenizer/tokenizer.h"
 #include "data/helpers/token_stream.h"
+#include "data_struct/linked_list.h"
 
 int subrule_count = 0;
 int sequence_count = 0;
@@ -31,15 +32,56 @@ bool is_capitalized(string_slice sv){
 
 bool is_dec;
 
+typedef struct {
+    Token t;
+    Token tag;
+    bool optional;
+    char *type;
+} rule_sequence;
+
+int emit_sequence(clinkedlist_t *list){
+    if (!list->length) return 0;
+    int num_optionals = 0;
+    for (clinkedlist_node_t* node = list->head; node; node = node->next){
+        rule_sequence *s = node->data;
+        if (s && s->optional) num_optionals++;
+    }
+    for (int i = num_optionals; i >= 0; i--){
+        emit("\t\t{{");
+        int taken = 0;
+        int count = 0;
+        for (clinkedlist_node_t* node = list->head; node; node = node->next){
+            rule_sequence *s = node->data;
+            bool should_emit = true;
+            if (s && s->optional) {
+                if (taken++ >= i) should_emit = false;
+            }
+            if (should_emit){
+                count++;
+                print("Emit %v",token_to_slice(s->t));
+                if (s->tag.kind)
+                    emit("\t\t\t%s(%v,%v),",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                else 
+                    emit("\t\t\t%s(%v),",s->type,token_to_slice(s->t));
+            } else print("Skip %v",token_to_slice(s->t));
+        }
+        emit("\t\t},%i},",count);
+    }
+    return num_optionals;
+}
+
 void parse_rule(Token rule, TokenStream *ts){
     Token t = {};
-    emit("\t\t{{");
     subrule_count++;
     sequence_count = 0;
+    clinkedlist_t *seq = clinkedlist_create();
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
-            emit("\t\t},%i},",sequence_count);
-            emit("\t\t{{");
+            if (seq->length){
+                subrule_count += emit_sequence(seq);
+                clinkedlist_destroy(seq);
+                seq = clinkedlist_create();
+            }
             subrule_count++;
             sequence_count = 0;
         } else if (t.kind == TOK_NEWLINE) break;
@@ -58,15 +100,16 @@ void parse_rule(Token rule, TokenStream *ts){
                     ts_peek(ts, &test);
                 }
             }
-            string_slice sv = token_to_slice(t);
             sequence_count++;
+            rule_sequence *seqrule = malloc(sizeof(rule_sequence));
             if (t.kind == TOK_STRING){
                 if (has_tag) {
                     print("Literal isn't expected to have a tag");
                     break;
                 }
-                emit("\t\t\tLITERAL(%v),",sv);
-            } else if (is_capitalized(sv)){
+                seqrule->t = t;
+                seqrule->type = "LITERAL";
+            } else if (is_capitalized(token_to_slice(t))){
                 Token p1, s, p2;
                 uint32_t p = ts->tz->s->pos;
                 if (ts_peek(ts, &p1) && p1.kind == TOK_LPAREN && ts_next(ts, &p1) && ts_peek(ts, &s) && s.kind == TOK_STRING && ts_next(ts, &s) && ts_peek(ts, &p2) && p2.kind == TOK_RPAREN && ts_next(ts, &p2)){
@@ -74,26 +117,45 @@ void parse_rule(Token rule, TokenStream *ts){
                         print("Literal isn't expected to have a tag");
                         break;
                     }
-                    emit("\t\t\tLITTOK(%v,%v),",sv,token_to_slice(s));
+                    seqrule->type = "LITTOK";
+                    seqrule->t = t;
+                    seqrule->tag = s;
                 } else {
                     ts->tz->s->pos = p;
                     if (has_tag){
-                        if (is_dec)
-                            emit("\t\t\tSYMDEC(%v,%v),",sv,token_to_slice(tag));
-                        else 
-                            emit("\t\t\tSYMCHECK(%v,%v),",sv,token_to_slice(tag));
-                    } else 
-                        emit("\t\t\tTOKEN(%v),",sv);
+                        if (is_dec){
+                            seqrule->type = "SYMDEC";
+                            seqrule->t = t;
+                            seqrule->tag = tag;
+                        } else {
+                            seqrule->type = "SYMCHECK";
+                            seqrule->t = t;
+                            seqrule->tag = tag;
+                        }
+                    } else {
+                        seqrule->type = "TOKEN";
+                        seqrule->t = t;
+                    }
                 }
             } else {
                 if (has_tag){
-                    emit("\t\t\tSYMRULE(%v,%v),",sv,token_to_slice(tag));
-                } else 
-                    emit("\t\t\tRULE(%v),",sv);
+                    seqrule->type = "SYMRULE";
+                    seqrule->t = t;
+                    seqrule->tag = tag;
+                } else {
+                    seqrule->type = "RULE";
+                    seqrule->t = t;
+                }
             }
+            Token opt;
+            if (ts_peek(ts, &opt) && opt.kind == TOK_OPERATOR && *opt.start == '?'){
+                seqrule->optional = true;
+                ts_next(ts, &opt);
+            }
+            clinkedlist_push(seq, seqrule);
         }
     }
-    emit("\t\t},%i},",sequence_count);
+    subrule_count += emit_sequence(seq);
 }
 
 int main(int argc, char *argv[]){

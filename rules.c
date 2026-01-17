@@ -52,28 +52,6 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1, sem_call},
 	[rule_funcdec] = {{
 		{{
-			SYMDEC(IDENTIFIER,name),
-			TOKEN(LBRACE),
-			SYMRULE(block,scope),
-			TOKEN(RBRACE),
-		},4},
-		{{
-			SYMDEC(IDENTIFIER,type),
-			SYMDEC(IDENTIFIER,name),
-			TOKEN(LBRACE),
-			SYMRULE(block,scope),
-			TOKEN(RBRACE),
-		},5},
-		{{
-			SYMDEC(IDENTIFIER,name),
-			TOKEN(LPAREN),
-			SYMRULE(argdec,param),
-			TOKEN(RPAREN),
-			TOKEN(LBRACE),
-			SYMRULE(block,scope),
-			TOKEN(RBRACE),
-		},7},
-		{{
 			SYMDEC(IDENTIFIER,type),
 			SYMDEC(IDENTIFIER,name),
 			TOKEN(LPAREN),
@@ -83,7 +61,37 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(block,scope),
 			TOKEN(RBRACE),
 		},8},
-	},4, sem_func},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LPAREN),
+			SYMRULE(argdec,param),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},7},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LPAREN),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},6},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},5},
+		{{
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},4},
+	},5, sem_func},
 	[rule_argdec] = {{
 		{{
 			SYMDEC(IDENTIFIER,type),
@@ -118,12 +126,20 @@ grammar_rule language_rules[num_grammar_rules] = {
 		},7},
 		{{
 			LITERAL("if"),
+			TOKEN(LPAREN),
+			SYMRULE(expression,cond),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},6},
+		{{
+			LITERAL("if"),
 			SYMRULE(expression,cond),
 			TOKEN(LBRACE),
 			SYMRULE(block,scope),
 			TOKEN(RBRACE),
 		},5},
-	},2, sem_cond},
+	},3, sem_cond},
 	[rule_declaration] = {{
 		{{
 			SYMDEC(IDENTIFIER,type),
@@ -132,16 +148,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(expression,exp),
 			TOKEN(SEMICOLON),
 		},5},
-		{{
-			LITERAL("var"),
-			SYMDEC(IDENTIFIER,name),
-			TOKEN(COLON),
-			SYMDEC(IDENTIFIER,type),
-			LITTOK(OPERATOR,"="),
-			SYMRULE(expression,exp),
-			TOKEN(SEMICOLON),
-		},7},
-	},2, sem_dec},
+	},1, sem_dec},
 	[rule_jump] = {{
 		{{
 			LITERAL("goto"),
