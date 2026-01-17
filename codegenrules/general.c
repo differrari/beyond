@@ -213,7 +213,6 @@ CODEGEN_DEC(dowhile_code)
 
 void var_code_register_elem(void* ptr, int type, Token elem){
     var_code *code = (var_code*)ptr;
-    print("ELEM %s",sem_rule_name(type));
     switch (type) {
         case sem_var: code->name = elem; break;
         case sem_op: code->operation = elem; break;
@@ -222,8 +221,10 @@ void var_code_register_elem(void* ptr, int type, Token elem){
 
 void var_code_register_subrule(void* ptr, int type, codegen_t child){
     var_code *code = (var_code*)ptr;
-    print("RULE %s",sem_rule_name(type));
-    code->expression = child;
+    if (type == sem_exp)
+        code->expression = child;
+    else if (type == sem_var)
+        code->var = child;
 }
 
 CODEGEN_DEC(var_code)

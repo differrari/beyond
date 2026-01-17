@@ -40,7 +40,7 @@ bool analyze_rule(int current_rule, int curr_option){
                 return res;
             }
             if (!analyze_rule(new_rule, new_opt)) return false;
-        } else if ((elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR) && !elem.lit){
+        } else if ((elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR || elem.sem_value) && !elem.lit){
              ast_node node;
              pop_stack(&ssn, &node);
              if (elem.action == sem_action_declare) {

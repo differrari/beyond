@@ -21,7 +21,7 @@ int parser_depth;
 #define current_parser_rule(parser) language_rules[parser->current_rule].options[parser->option].rules[parser->sequence]
 
 bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem element){
-    if (element.lit || (t.kind != TOK_IDENTIFIER && t.kind != TOK_STRING && t.kind != TOK_CONST && t.kind != TOK_OPERATOR)) return true;
+    if (element.lit || !element.sem_value) return true;
     if (tree_count >= MAX_TREE_COUNT-1){
         print("Too much code");
         return false;

@@ -3,20 +3,12 @@
 #include "data/tokenizer/tokenizer.h"
 #include "data/helpers/token_stream.h"
 #include "data_struct/linked_list.h"
+#include "codegenrules/codeformat.h"
 
 #define MAX_BUF 0x10000
 
 static char code_buf[MAX_BUF];
 uintptr_t cursor;
-
-void emit(char* fmt, ...){
-    __attribute__((aligned(16))) va_list args;
-    va_start(args, fmt); 
-    size_t n = string_format_va_buf(fmt, code_buf+cursor, MAX_BUF-cursor, args);
-    cursor += n;
-    if (cursor < MAX_BUF-2) code_buf[cursor++] = '\n';
-    va_end(args);
-}
 
 bool is_capitalized(string_slice sv){
     bool caps = true;
@@ -65,8 +57,10 @@ int emit_sequence(clinkedlist_t *list){
         if (s && s->optional){ opt_mask |= (1 << num_optionals++); }
         count++;
     }
+    emit_newline();
     for (int i = (1 << num_optionals)-1; i >= 0; i--){
-        emit("\t\t{{");
+        emit("{{ ");
+        increase_indent();
         int opts = 0;
         int count = 0;
         for (clinkedlist_node_t* node = list->head; node; node = node->next){
@@ -80,12 +74,13 @@ int emit_sequence(clinkedlist_t *list){
             if (should_emit){
                 count++;
                 if (s->tag.kind)
-                    emit("\t\t\t%s(%v,%v),",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                    emit("%s(%v,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
                 else 
-                    emit("\t\t\t%s(%v),",s->type,token_to_slice(s->t));
+                    emit("%s(%v), ",s->type,token_to_slice(s->t));
             }
         }
-        emit("\t\t},%i},",count);
+        decrease_indent();
+        emit(" },%i},",count);
     }
     return (1 << num_optionals++)-1;
 }
@@ -175,38 +170,49 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
 }
 
 void emit_rule_enum(){
-    emit("typedef enum { ");
+    emit_const("typedef enum { ");
     for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
-        emit("\trule_%v,",e->name);
+        emit("rule_%v,",e->name);
     }
-    emit(" \tnum_grammar_rules\n} grammar_rules;");
+    emit_const(" num_grammar_rules } grammar_rules;");
 }
 
 void emit_rules(){
     for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
-        emit("\t[rule_%v] = {{",e->name);
+        emit_newline();
+        emit("[rule_%v] = {{",e->name);
+        increase_indent();
         int subrule_count = clinkedlist_length(e->list);
         for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
             subrule_count += emit_sequence(o->data);
         }
+        decrease_indent();
+        emit_newline();
         if (e->tag.length)
-            emit("\t},%i, sem_%v},",subrule_count,token_to_slice(e->tag));
+            emit("},%i, sem_%v},",subrule_count,token_to_slice(e->tag));
         else 
-            emit("\t},%i, 0},",subrule_count);
+            emit("},%i, 0},",subrule_count);
     }
 }
 
 void emit_rule_prints(){
-    emit("\nchar* rule_names[num_grammar_rules] = {");
+    emit_newline();
+    emit_newline();
+    emit("char* rule_names[num_grammar_rules] = {");
+    increase_indent();
+    emit_newline();
     for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         emit("\t[rule_%v] = \"%v\",",e->name,e->name);
+        emit_newline();
     }
+    decrease_indent();
+    emit_newline();
     emit("};");
 }
 
@@ -256,17 +262,22 @@ int main(int argc, char *argv[]){
             return -1;
         }
     }
-    emit("#include \"rules.h\" \n");
+    emit_const("#include \"rules.h\"");
+    emit_newline();
     emit_rule_enum();
-    emit("\ngrammar_rule language_rules[num_grammar_rules] = {");
+    emit_newlines(2);
+    emit_const("grammar_rule language_rules[num_grammar_rules] = {");
+    increase_indent();
     emit_rules();
-    emit("};");
+    decrease_indent();
+    emit_newline();
+    emit_const("};");
     
     emit_rule_prints();
     
     if (strlen(code_buf) < MAX_BUF-1) code_buf[strlen(code_buf)] = '\0';
     
-    write_full_file("rules.c",code_buf,cursor);
+    output_code("rules.c");
     
     return 0;
 }

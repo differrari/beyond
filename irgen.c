@@ -66,7 +66,7 @@ codegen_t eval_rule(int current_rule, int curr_option){
                 else return new_codegen;
             } else eval_rule(new_rule, new_opt);
         } else {
-            if (elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR){
+            if (elem.sem_value){
                 if (!elem.lit){
                     ast_node node;
                     pop_stack(&gsn, &node);
@@ -96,6 +96,6 @@ void gen_code(ast_node *stack, uint32_t count){
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
     codegen_t cg = eval_rule(new_rule,new_opt);
     emit_code(cg);
-    output_code();
+    output_code("output.c");
     print("%s",buf);
 }

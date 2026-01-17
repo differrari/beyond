@@ -6,6 +6,7 @@
 void blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
     emit_code(code->stat);
+    emit_const(";");//TODO: not fully correct, lots of unnecessary semicolons, but better than duplicated ones that can break code
     if (code->chain.ptr){ 
         emit_newline(); 
         emit_code(code->chain); 
@@ -19,7 +20,6 @@ void dec_code_emit_code(void* ptr){
     emit_token(code->name);//TODO: fetch from symbol table
     emit_const(" = ");
     emit_code(code->initial_value);
-    emit_const(";");
 }
 
 void ass_code_emit_code(void *ptr){
@@ -27,7 +27,6 @@ void ass_code_emit_code(void *ptr){
     emit_token(code->name);//TODO: fetch from symbol table
     emit_const(" = ");
     emit_code(code->expression);
-    emit_const(";");
 }
 
 void call_code_emit_code(void *ptr){
@@ -35,7 +34,7 @@ void call_code_emit_code(void *ptr){
     emit_token(code->name);
     emit_const("(");
     emit_code(code->args);
-    emit_const(");");
+    emit_const(")");
 }
 
 void cond_code_emit_code(void *ptr){
@@ -57,14 +56,13 @@ void jmp_code_emit_code(void *ptr){
     jmp_code *code = (jmp_code*)ptr;
     emit_const("goto ");
     emit_token(code->jump);
-    emit_const(";");
 }
 
 void label_code_emit_code(void *ptr){
     label_code *code = (label_code*)ptr;
+    emit_const("\r");
     emit_token(code->name);
     emit_const(":");
-    // increase_indent();//TODO: label should ignore indent 
 }
 
 void exp_code_emit_code(void *ptr){
@@ -156,17 +154,20 @@ void dowhile_code_emit_code(void* ptr){
     emit_const("}");
     emit_const("while (");
     emit_code(code->condition);
-    emit_const(");");
+    emit_const(")");
 }
 
 void var_code_emit_code(void* ptr, int type, Token elem){
     var_code *code = (var_code*)ptr;
-    emit_token(code->name);
+    if (code->var.ptr) emit_code(code->var); else emit_token(code->name);
     if (code->operation.kind){
         if (*code->operation.start == '['){
             emit_const("[");
             emit_code(code->expression);
             emit_const("]");
+        } else if (*code->operation.start == '.'){
+            emit_const(".");//TODO: could be pointer
+            emit_code(code->expression);
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else if (code->expression.ptr) emit_code(code->expression);
 }

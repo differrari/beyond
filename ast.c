@@ -10,7 +10,7 @@ tern switch_rule(stack_navigator *sn, int *current_rule, int *curr_option){
     ast_node node;
     if (!pop_stack(sn, &node)) return -1;
     if (node.t.kind){
-        print("Found token %i instead of rule",node.t.kind);
+        print("Found token %s instead of rule",token_name(node.t.kind));
         return false;
     }
     *current_rule = node.rule;

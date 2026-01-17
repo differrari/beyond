@@ -46,6 +46,12 @@ void emit_newline(){
     emit("\n\%s",indent_by(depth));
 }
 
+void emit_newlines(int amount){
+    for (int i = 0; i < amount; i++){
+        emit_newline();
+    }
+}
+
 void increase_indent(){
     depth++;
 }
@@ -54,6 +60,6 @@ void decrease_indent(){
     depth--;
 }
 
-void output_code(){
-    write_full_file("output.c",code_buf,code_cursor);
+void output_code(const char *path){
+    write_full_file(path,code_buf,code_cursor);
 }

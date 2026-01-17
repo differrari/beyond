@@ -1,22 +1,22 @@
-void a { int a = 0; }
+int a { int a = 0; }
 
-void b() { int b = 0; }
+void draw(int x, int y, int color, int overwrite) { int b = 0; }
 
-c(int x) { int x = 0; }
-void testfunc(){
+c(int x) { int l = 0; }
+void print(){
 
 }
 main {
-    int y = initial_y();
+    int y = a();
     int x = 1-(0-2);
     int z = x[0];
     for (int i = 0; i < 10; i = i + 1){
     }
     while (0){
-        print("AY");
+        print();
     }
     do {
-        print("MF");
+        print();
     } while(0);
     y_loop:
         x_loop:
@@ -26,5 +26,5 @@ main {
             if (x < 100) { goto x_loop; }
         y = y + 1;
         if y < 100 { goto y_loop; }
-        printf("Done");
+        print();
 }

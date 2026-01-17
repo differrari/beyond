@@ -109,6 +109,7 @@ codegen_t dowhile_code_init();
 
 typedef struct {
     Token name;
+    codegen_t var;
     codegen_t expression;
     Token operation;
 } var_code;

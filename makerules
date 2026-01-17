@@ -6,6 +6,6 @@ if [ "$(uname)" = "Darwin" ]; then
     FW="-framework Cocoa -framework IOKit -framework CoreVideo -framework CoreFoundation"
 fi
 
-gcc -std=c99 -g -O0 -DCROSS -I. -I../os/shared ./ruleparser.c ../os/shared/clibshared.a ../redxlib/redxlib.a $HOME/raylib/src/libraylib.a -lc -lm $FW -o rulegen
+gcc -std=c99 -g -O0 -DCROSS -I. -I../os/shared ./ruleparser.c ./common.c ./codegenrules/codeformat.c ../os/shared/clibshared.a ../redxlib/redxlib.a $HOME/raylib/src/libraylib.a -lc -lm $FW -o rulegen
 chmod +x rulegen
 ./rulegen
