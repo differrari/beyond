@@ -121,4 +121,40 @@ void func_code_emit_code(void *ptr){
     emit_newline();
 }
 
+void for_code_emit_code(void* ptr){
+    for_code *code = (for_code*)ptr;
+    emit_const("for (");
+    emit_code(code->initial);
+    emit_const("; ");
+    emit_code(code->condition);
+    emit_const("; ");
+    emit_code(code->increment);
+    emit_const("){");
+    increase_indent();
+    if (code->body.ptr) emit_code(code->body);
+    decrease_indent();
+    emit_const("}");
+}
+void while_code_emit_code(void* ptr){
+    while_code *code = (while_code*)ptr;
+    emit_const("while (");
+    emit_code(code->condition);
+    emit_const("){");
+    increase_indent();
+    if (code->body.ptr) emit_code(code->body);
+    decrease_indent();
+    emit_const("}");
+}
+void dowhile_code_emit_code(void* ptr){
+    dowhile_code *code = (dowhile_code*)ptr;
+    emit_const("do {");
+    increase_indent();
+    if (code->body.ptr) emit_code(code->body);
+    decrease_indent();
+    emit_const("}");
+    emit_const("while (");
+    emit_code(code->condition);
+    emit_const(");");
+}
+
 #endif

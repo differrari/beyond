@@ -38,16 +38,17 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, sem_scope},
 	[rule_statement] = {{
 		{{
+			SYMRULE(dowhile,dowhile),
+			TOKEN(SEMICOLON),
+		},2},
+		{{
 			SYMRULE(funcdec,func),
 		},1},
 		{{
-			RULE(forloop),
+			SYMRULE(forloop,for),
 		},1},
 		{{
-			RULE(whileloop),
-		},1},
-		{{
-			RULE(dowhile),
+			SYMRULE(whileloop,while),
 		},1},
 		{{
 			SYMRULE(declaration,dec),
@@ -331,7 +332,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 			TOKEN(LBRACE),
 			TOKEN(RBRACE),
 		},10},
-	},2, 0},
+	},2, sem_for},
 	[rule_whileloop] = {{
 		{{
 			LITERAL("while"),
@@ -346,7 +347,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 			TOKEN(LBRACE),
 			TOKEN(RBRACE),
 		},4},
-	},2, 0},
+	},2, sem_while},
 	[rule_dowhile] = {{
 		{{
 			LITERAL("do"),
@@ -363,7 +364,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 			LITERAL("while"),
 			SYMRULE(condition,cond),
 		},5},
-	},2, 0},
+	},2, sem_dowhile},
 };
 
 char* rule_names[num_grammar_rules] = {

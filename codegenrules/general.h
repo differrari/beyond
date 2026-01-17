@@ -84,3 +84,24 @@ typedef struct {
 } func_code;
 
 codegen_t func_code_init();
+
+typedef struct {
+    codegen_t initial;
+    codegen_t increment;
+    codegen_t condition;
+    codegen_t body;
+} for_code;
+
+codegen_t for_code_init();
+typedef struct {
+    codegen_t condition;
+    codegen_t body;
+} while_code;
+
+codegen_t while_code_init();
+typedef struct {
+    codegen_t condition;
+    codegen_t body;
+} dowhile_code;
+
+codegen_t dowhile_code_init();

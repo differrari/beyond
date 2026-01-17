@@ -31,8 +31,8 @@ CODEGEN_DEC(blk_code)
 void dec_code_register_elem(void* ptr, int type, Token elem){
     dec_code *code = (dec_code*)ptr;
     switch (type) {
-        case sem_elem_type: code->type = elem; 
-        case sem_elem_name: code->name = elem;
+        case sem_elem_type: code->type = elem; break; 
+        case sem_elem_name: code->name = elem; break;
     }
 }
 
@@ -135,8 +135,8 @@ CODEGEN_DEC(arg_code)
 void param_code_register_elem(void* ptr, int type, Token elem){
     param_code *code = (param_code*)ptr;
     switch (type) {
-        case sem_elem_type: code->type = elem; 
-        case sem_elem_name: code->name = elem;
+        case sem_elem_type: code->type = elem; break; 
+        case sem_elem_name: code->name = elem; break;
     }
 }
 
@@ -151,8 +151,8 @@ CODEGEN_DEC(param_code)
 void func_code_register_elem(void* ptr, int type, Token elem){
     func_code *code = (func_code*)ptr;
     switch (type) {
-        case sem_elem_type: code->type = elem; 
-        case sem_elem_name: code->name = elem;
+        case sem_elem_type: code->type = elem; break; 
+        case sem_elem_name: code->name = elem; break;
     }
 }
 
@@ -165,3 +165,47 @@ void func_code_register_subrule(void* ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(func_code)
+
+void for_code_register_elem(void* ptr, int type, Token elem){
+
+}
+    
+void for_code_register_subrule(void* ptr, int type, codegen_t child){
+    for_code *code = (for_code*)ptr;
+    switch (type) {
+        case sem_assign: code->increment = child; break;
+        case sem_dec: code->initial = child; break;
+        case sem_cond: code->condition = child; break;
+        case sem_scope: code->body = child; break;
+    }
+}
+
+CODEGEN_DEC(for_code)
+
+void while_code_register_elem(void* ptr, int type, Token elem){
+
+}
+
+void while_code_register_subrule(void* ptr, int type, codegen_t child){
+    while_code *code = (while_code*)ptr;
+    switch (type) {
+        case sem_cond: code->condition = child; break;
+        case sem_scope: code->body = child; break;
+    }
+}
+
+CODEGEN_DEC(while_code)
+
+void dowhile_code_register_elem(void* ptr, int type, Token elem){
+
+}
+
+void dowhile_code_register_subrule(void* ptr, int type, codegen_t child){
+    dowhile_code *code = (dowhile_code*)ptr;
+    switch (type) {
+        case sem_cond: code->condition = child; break;
+        case sem_scope: code->body = child; break;
+    }
+}
+
+CODEGEN_DEC(dowhile_code)
