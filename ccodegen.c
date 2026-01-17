@@ -35,7 +35,7 @@ void register_subrule(codegen_t gen, int type, codegen_t child){
 
 char* emit_code(codegen_t gen){
     if (gen.emit_code) return gen.emit_code(gen.ptr);
-    print("No code to emit");
+    print("No code to emit for %i",gen.type);
     return "";
 }
 

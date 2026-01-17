@@ -62,6 +62,7 @@ codegen_t eval_rule(int current_rule, int curr_option){
             if (elem.sem_value){
                 codegen_t new_codegen = eval_rule(new_rule, new_opt);
                 if (gen.ptr) register_subrule(gen, elem.sem_value, new_codegen);
+                else return new_codegen;
             } else eval_rule(new_rule, new_opt);
         } else {
             if (elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR){

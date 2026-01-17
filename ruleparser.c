@@ -4,9 +4,6 @@
 #include "data/helpers/token_stream.h"
 #include "data_struct/linked_list.h"
 
-int subrule_count = 0;
-int sequence_count = 0;
-
 #define MAX_BUF 0x10000
 
 static char code_buf[MAX_BUF];
@@ -61,19 +58,24 @@ int rule_to_index(string_slice name){
 int emit_sequence(clinkedlist_t *list){
     if (!list->length) return 0;
     int num_optionals = 0;
+    uint64_t opt_mask = 0;
+    int count = 0;
     for (clinkedlist_node_t* node = list->head; node; node = node->next){
         rule_sequence *s = node->data;
-        if (s && s->optional) num_optionals++;
+        if (s && s->optional){ opt_mask |= (1 << num_optionals++); }
+        count++;
     }
-    for (int i = num_optionals; i >= 0; i--){
+    for (int i = (1 << num_optionals)-1; i >= 0; i--){
         emit("\t\t{{");
-        int taken = 0;
+        int opts = 0;
         int count = 0;
         for (clinkedlist_node_t* node = list->head; node; node = node->next){
             rule_sequence *s = node->data;
             bool should_emit = true;
             if (s && s->optional) {
-                if (taken++ >= i) should_emit = false;
+                if (!((1 << opts++) & i)) {
+                    should_emit = false;
+                }
             }
             if (should_emit){
                 count++;
@@ -85,14 +87,12 @@ int emit_sequence(clinkedlist_t *list){
         }
         emit("\t\t},%i},",count);
     }
-    return num_optionals;
+    return (1 << num_optionals++)-1;
 }
 
 clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
     clinkedlist_t *rulelist = clinkedlist_create();
     Token t = {};
-    subrule_count++;
-    sequence_count = 0;
     clinkedlist_t *seq = clinkedlist_create();
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
@@ -100,8 +100,6 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
                 clinkedlist_push(rulelist,seq);
                 seq = clinkedlist_create();
             }
-            subrule_count++;
-            sequence_count = 0;
         } else if (t.kind == TOK_NEWLINE) break;
         else {
             bool has_tag = false;
@@ -118,7 +116,6 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
                     ts_peek(ts, &test);
                 }
             }
-            sequence_count++;
             rule_sequence *seqrule = zalloc(sizeof(rule_sequence));
             if (t.kind == TOK_STRING){
                 if (has_tag) {
@@ -192,7 +189,7 @@ void emit_rules(){
         rule_entry *e = node->data;
         if (!e) continue;
         emit("\t[rule_%v] = {{",e->name);
-        subrule_count = clinkedlist_length(e->list);
+        int subrule_count = clinkedlist_length(e->list);
         for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
             subrule_count += emit_sequence(o->data);
         }
@@ -254,7 +251,6 @@ int main(int argc, char *argv[]){
             entry->list = parse_rule(t, &ts);
             if (tag.length) entry->tag = tag;
             clinkedlist_push(allrules, entry);
-            subrule_count = 0;
         } else {
             print("Unrecognized grammar token %v",token_to_slice(t));
             return -1;
