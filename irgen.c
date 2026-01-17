@@ -40,12 +40,12 @@ void output_literal(char* lit, bool space){
     }
 }
 
-codegen_t eval_rule(grammar_rules current_rule, int curr_option, bool should_print){
-    // print("Current rule %s@%i",rule_name(current_rule),curr_option);
+codegen_t eval_rule(grammar_rules current_rule, int curr_option){
     
     semantic_rules statement_type = language_rules[current_rule].action;
     codegen_t gen = begin_rule(statement_type);
 
+    // print("Current rule %s@%i",rule_name(current_rule),curr_option);
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
         if (elem.rule){
@@ -53,13 +53,16 @@ codegen_t eval_rule(grammar_rules current_rule, int curr_option, bool should_pri
             int new_opt;
             tern res = switch_rule(&gsn, &new_rule, &new_opt);
             if (res != true){
-                if (!res) print("Rule not found %i",elem.value);
-                return (codegen_t){};
+                if (!res){
+                    print("Rule not found %i",elem.value);
+                    return (codegen_t){};
+                } 
+                return gen;
             }
             if (elem.sem_value){
-                codegen_t new_codegen = eval_rule(new_rule, new_opt, !gen.ptr);
-                if (gen.ptr) register_subrule(gen, elem.sem_value, &new_codegen);
-            } else eval_rule(new_rule, new_opt, true);
+                codegen_t new_codegen = eval_rule(new_rule, new_opt);
+                if (gen.ptr) register_subrule(gen, elem.sem_value, new_codegen);
+            } else eval_rule(new_rule, new_opt);
         } else {
             if (elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR){
                 if (!elem.lit){
@@ -76,7 +79,6 @@ codegen_t eval_rule(grammar_rules current_rule, int curr_option, bool should_pri
     }
 
     end_rule(statement_type);
-    if (gen.ptr && should_print) print(emit_code(gen));
     
     return gen;
 }
@@ -85,12 +87,11 @@ void gen_code(ast_node *stack, uint32_t count){
     gsn = (stack_navigator){};
     gsn.ast_stack = stack;
     gsn.stack_count = count;
-    // output_debug_rule(current_rule);
     ast_node node = {};
     grammar_rules new_rule;
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
-    codegen_t cg = eval_rule(new_rule,new_opt, true);
-    print(buf);
-    // print_stack(stack, count);
+    codegen_t cg = eval_rule(new_rule,new_opt);
+    print("%s",emit_code(cg));
+    print("%s",buf);
 }

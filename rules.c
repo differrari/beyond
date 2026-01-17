@@ -3,33 +3,33 @@
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
 		{{
-			RULE(statement),
-			RULE(block),
+			SYMRULE(statement,stat),
+			SYMRULE(block,scope),
 		},2},
 		{{
-			RULE(statement),
+			SYMRULE(statement,stat),
 		},1},
 	},2, sem_scope},
 	[rule_statement] = {{
 		{{
-			RULE(declaration),
+			SYMRULE(declaration,dec),
 		},1},
 		{{
-			RULE(assignment),
+			SYMRULE(assignment,assign),
 		},1},
 		{{
-			RULE(funccall),
+			SYMRULE(funccall,call),
 		},1},
 		{{
-			RULE(conditional),
+			SYMRULE(conditional,cond),
 		},1},
 		{{
-			RULE(jump),
+			SYMRULE(jump,jmp),
 		},1},
 		{{
-			RULE(label),
+			SYMRULE(label,label),
 		},1},
-	},6, 0},
+	},6, sem_stat},
 	[rule_assignment] = {{
 		{{
 			SYMCHECK(IDENTIFIER,var),
@@ -49,14 +49,14 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1, sem_call},
 	[rule_argument] = {{
 		{{
-			RULE(expression),
+			SYMRULE(expression,exp),
 			TOKEN(COMMA),
-			RULE(argument),
+			SYMRULE(argument,args),
 		},3},
 		{{
-			RULE(expression),
+			SYMRULE(expression,exp),
 		},1},
-	},2, 0},
+	},2, sem_args},
 	[rule_conditional] = {{
 		{{
 			LITERAL("if"),
@@ -94,12 +94,12 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			SYMCHECK(CONST,val),
 			SYMCHECK(OPERATOR,op),
-			RULE(expression),
+			SYMRULE(expression,exp),
 		},3},
 		{{
 			SYMCHECK(IDENTIFIER,var),
 			SYMCHECK(OPERATOR,op),
-			RULE(expression),
+			SYMRULE(expression,exp),
 		},3},
 		{{
 			SYMCHECK(CONST,val),

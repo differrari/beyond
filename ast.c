@@ -10,7 +10,7 @@ tern switch_rule(stack_navigator *sn, grammar_rules *current_rule, int *curr_opt
     ast_node node;
     if (!pop_stack(sn, &node)) return -1;
     if (node.t.kind){
-        print("Found token instead of rule");
+        print("Found token %i instead of rule",node.t.kind);
         return false;
     }
     *current_rule = node.rule;

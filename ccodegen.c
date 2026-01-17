@@ -5,15 +5,16 @@
 #ifdef CCODEGEN
 codegen_t begin_rule(int type){
     switch (type){
-        // case rule_block: print("+SCOPE");
-        case sem_dec: return dec_code_init(); break;
-        case sem_assign: return ass_code_init(); break;
-        case sem_exp: return exp_code_init(); break;
-        case sem_call: return call_code_init(); break;
-        // case sem_args: arg_code_init(); break;
-        case sem_cond: return cond_code_init(); break;
-        case sem_jmp: return jmp_code_init(); break;
-        case sem_label: return label_code_init(); break;
+        case sem_scope: return blk_code_init();
+        case sem_stat: return stat_code_init(); 
+        case sem_dec: return dec_code_init();
+        case sem_assign: return ass_code_init();
+        case sem_exp: return exp_code_init();
+        case sem_call: return call_code_init();
+        case sem_args: return arg_code_init(); break;
+        case sem_cond: return cond_code_init();
+        case sem_jmp: return jmp_code_init();
+        case sem_label: return label_code_init();
         default: return (codegen_t){};
     }
 }
@@ -26,12 +27,13 @@ void end_rule(int type){
     
 }
 
-void register_subrule(codegen_t gen, int type, void *child){
+void register_subrule(codegen_t gen, int type, codegen_t child){
     if (gen.register_subrule) gen.register_subrule(gen.ptr, type, child);
 }
 
 char* emit_code(codegen_t gen){
     if (gen.emit_code) return gen.emit_code(gen.ptr);
+    print("No code to emit");
     return "";
 }
 

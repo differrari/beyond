@@ -4,7 +4,7 @@
 #define CODEGEN_DEC(name) \
 codegen_t name##_init(){\
     return (codegen_t){\
-        .ptr = malloc(sizeof(name)),\
+        .ptr = zalloc(sizeof(name)),\
         .register_elem = name##_register_elem,\
         .register_subrule = name##_register_subrule,\
         .emit_code = name##_emit_code,\
@@ -12,9 +12,62 @@ codegen_t name##_init(){\
 }
 
 typedef struct {
+    codegen_t stat;
+    codegen_t chain;
+} blk_code;
+
+void blk_code_register_elem(void* ptr, int type, Token elem){
+    
+}
+
+void blk_code_register_subrule(void* ptr, int type, codegen_t child){
+    blk_code *code = (blk_code*)ptr;
+    if (type == sem_stat){
+        code->stat = child;
+    }
+    if (type == sem_scope){
+        code->chain = child;
+    }
+}
+
+char *blk_code_emit_code(void* ptr){
+    blk_code *code = (blk_code*)ptr;
+    if (code->chain.ptr){
+        return string_format("%s\n%s",emit_code(code->stat),emit_code(code->chain)).data;
+    } else {
+        return string_format("%s",emit_code(code->stat)).data;
+    }
+}
+
+CODEGEN_DEC(blk_code)
+
+typedef struct {
+    codegen_t statement;
+    int type;
+} stat_code;
+
+void stat_code_register_elem(void* ptr, int type, Token elem){
+    
+}
+
+void stat_code_register_subrule(void* ptr, int type, codegen_t child){
+    stat_code *code = (stat_code*)ptr;
+    code->type = type;
+    code->statement = child;
+}
+
+char *stat_code_emit_code(void* ptr){
+    stat_code *code = (stat_code*)ptr;
+    if (!code->statement.ptr){ print("Statement error"); return ""; }
+    return string_format("%s",emit_code(code->statement)).data;
+}
+
+CODEGEN_DEC(stat_code)
+
+typedef struct {
     Token type;
     Token name;
-    void *initial_value;
+    codegen_t initial_value;
 } dec_code;
 
 void dec_code_register_elem(void* ptr, int type, Token elem){
@@ -25,21 +78,21 @@ void dec_code_register_elem(void* ptr, int type, Token elem){
     }
 }
 
-void dec_code_register_subrule(void* ptr, int type, void *child){
+void dec_code_register_subrule(void* ptr, int type, codegen_t child){
     dec_code *code = (dec_code*)ptr;
     code->initial_value = child;
 }
 
 char *dec_code_emit_code(void* ptr){
     dec_code *code = (dec_code*)ptr;
-    return string_format("%v %v = %s",token_to_slice(code->type),token_to_slice(code->name),emit_code(*(codegen_t*)code->initial_value)).data;
+    return string_format("%v %v = %s;",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->initial_value)).data;
 }
 
 CODEGEN_DEC(dec_code)
 
 typedef struct {
     Token name;
-    void *expression;
+    codegen_t expression;
 } ass_code;
 
 void ass_code_register_elem(void* ptr, int type, Token elem){
@@ -47,21 +100,21 @@ void ass_code_register_elem(void* ptr, int type, Token elem){
     code->name = elem;
 }
 
-void ass_code_register_subrule(void* ptr, int type, void *child){
+void ass_code_register_subrule(void* ptr, int type, codegen_t child){
     ass_code *code = (ass_code*)ptr;
     code->expression = child;
 }
 
 char* ass_code_emit_code(void *ptr){
     ass_code *code = (ass_code*)ptr;
-    return string_format("%v = %s",token_to_slice(code->name),emit_code(*(codegen_t*)code->expression)).data;
+    return string_format("%v = %s;",token_to_slice(code->name),emit_code(code->expression)).data;
 }
 
 CODEGEN_DEC(ass_code)
 
 typedef struct {
     Token name;
-    void *args;
+    codegen_t args;
 } call_code;
 
 void call_code_register_elem(void* ptr, int type, Token elem){
@@ -69,41 +122,41 @@ void call_code_register_elem(void* ptr, int type, Token elem){
     code->name = elem;
 }
 
-void call_code_register_subrule(void* ptr, int type, void *child){
+void call_code_register_subrule(void* ptr, int type, codegen_t child){
     call_code *code = (call_code*)ptr;
     code->args = child;
 }
 
 char* call_code_emit_code(void *ptr){
     call_code *code = (call_code*)ptr;
-    return string_format("%v(ARGS_NOT_IMPLEMENTED)",token_to_slice(code->name)).data;
+    return string_format("%v(%s);",token_to_slice(code->name),emit_code(code->args)).data;
 }
 
 CODEGEN_DEC(call_code)
 
 typedef struct {
-    void *cond;
-    void *scope;
+    codegen_t cond;
+    codegen_t scope;
 } cond_code;
 
 void cond_code_register_elem(void* ptr, int type, Token elem){
     
 }
 
-void cond_code_register_subrule(void* ptr, int type, void *child){
+void cond_code_register_subrule(void* ptr, int type, codegen_t child){
     cond_code *code = (cond_code*)ptr;
     // print("REG CONDITION %i",type);
     switch (type){
-        case sem_cond: code->cond = child;
-        case sem_scope: code->scope = child;
+        case sem_cond: code->cond = child; break;
+        case sem_scope: code->scope = child; break;
     }
 }
 
 char* cond_code_emit_code(void *ptr){
     cond_code *code = (cond_code*)ptr;
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
-    char *c = emit_code(*(codegen_t*)code->cond);
-    char *s = emit_code(*(codegen_t*)code->scope);
+    char *c = emit_code(code->cond);
+    char *s = emit_code(code->scope);
     // print("Condition code emit end");
     return string_format("if (%s) { %s }",c,s).data;
 }
@@ -119,13 +172,13 @@ void jmp_code_register_elem(void* ptr, int type, Token elem){
     code->jump = elem;
 }
 
-void jmp_code_register_subrule(void* ptr, int type, void *child){
+void jmp_code_register_subrule(void* ptr, int type, codegen_t child){
     
 }
 
 char* jmp_code_emit_code(void *ptr){
     jmp_code *code = (jmp_code*)ptr;
-    return string_format("goto %v",token_to_slice(code->jump)).data;
+    return string_format("goto %v;",token_to_slice(code->jump)).data;
 }
 
 CODEGEN_DEC(jmp_code)
@@ -139,7 +192,7 @@ void label_code_register_elem(void* ptr, int type, Token elem){
     code->name = elem;
 }
 
-void label_code_register_subrule(void* ptr, int type, void *child){
+void label_code_register_subrule(void* ptr, int type, codegen_t child){
     
 }
 
@@ -153,7 +206,7 @@ CODEGEN_DEC(label_code)
 typedef struct {
     Token val;
     Token operand;
-    void *exp;
+    codegen_t exp;
 } exp_code;
 
 void exp_code_register_elem(void* ptr, int type, Token elem){
@@ -163,19 +216,47 @@ void exp_code_register_elem(void* ptr, int type, Token elem){
     else code->operand = elem;
 }
 
-void exp_code_register_subrule(void* ptr, int type, void *child){
+void exp_code_register_subrule(void* ptr, int type,  codegen_t child){
     exp_code *code = (exp_code*)ptr;
     code->exp = child;
 }
 
 char* exp_code_emit_code(void *ptr){
     exp_code *code = (exp_code*)ptr;
-    // print("EMIT EXP");
-    if (code->exp){
-        return string_format("%v %v %s",token_to_slice(code->val),token_to_slice(code->operand),emit_code(*(codegen_t*)code->exp)).data;
+    if (code->exp.ptr){
+        char *exp = emit_code(code->exp);
+        return string_format("%v %v %s",token_to_slice(code->val),token_to_slice(code->operand),exp).data;
     } else {
         return string_format("%v",token_to_slice(code->val)).data;
     }
 }
 
 CODEGEN_DEC(exp_code)
+
+typedef struct {
+    codegen_t exp;
+    codegen_t chain;
+} arg_code;
+
+void arg_code_register_elem(void* ptr, int type, Token elem){
+   
+}
+
+void arg_code_register_subrule(void* ptr, int type, codegen_t child){
+    arg_code *code = (arg_code*)ptr;
+    if (type == sem_args)
+        code->chain = child;
+    if (type == sem_exp)
+        code->exp = child;
+}
+
+char* arg_code_emit_code(void *ptr){
+    arg_code *code = (arg_code*)ptr;
+    if (code->chain.ptr){
+        return string_format("%s, %s",emit_code(code->exp),emit_code(code->chain)).data;
+    } else {
+        return string_format("%s",emit_code(code->exp)).data;
+    }
+}
+
+CODEGEN_DEC(arg_code)
