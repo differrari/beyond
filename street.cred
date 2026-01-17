@@ -1,13 +1,15 @@
 void testfunc(int a, int b){
     print("Value");
 }
-int y = 0;
-int x = 0;
-y_loop:
-    x_loop:
-        draw(x,y, 0xFF00FF00);
-        x = x + 1;
-        if (x < 100) { goto x_loop; }
-    y = y + 1;
-    if (y < 100) { goto y_loop; }
-    printf("Done");
+main {
+    int y = 0;
+    int x = 0;
+    y_loop:
+        x_loop:
+            draw(x,y, 0xFF00FF00);
+            x = x + 1;
+            if (x < 100) { goto x_loop; }
+        y = y + 1;
+        if y < 100 { goto y_loop; }
+        printf("Done");
+}

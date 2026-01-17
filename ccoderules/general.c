@@ -30,6 +30,7 @@ void blk_code_register_subrule(void* ptr, int type, codegen_t child){
     }
 }
 
+//TODO: code emit should actually emit, not return a string. Can also do a formatter with this
 char *blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
     if (code->chain.ptr){
@@ -318,10 +319,11 @@ void func_code_register_subrule(void* ptr, int type, codegen_t child){
 char* func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
     if (!code->body.ptr) return "";
+    string_slice type = code->type.kind ? token_to_slice(code->type) : slice_from_lit("void");//TODO: this should be handled by the symbol table and we should look up into it
     if (code->args.ptr){
-        return string_format("%v %v(%s){ %s }",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->args),emit_code(code->body)).data;
+        return string_format("%v %v(%s){ %s }",type,token_to_slice(code->name),emit_code(code->args),emit_code(code->body)).data;
     } else {
-        return string_format("%v %v(){ %s }",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->body)).data;
+        return string_format("%v %v(){ %s }",type,token_to_slice(code->name),emit_code(code->body)).data;
     }
 }
 
