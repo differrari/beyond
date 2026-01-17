@@ -2,64 +2,92 @@
 #include "std/string.h"
 #include "common.h"
 #include "syscalls/syscalls.h"
+#include "files/buffer.h"
 
 #define MAX_BUF 0x10000
 
-int depth;
-static char code_buf[MAX_BUF];
-uintptr_t code_cursor;
+static buffer code_buf = {};
+int depth = 0;
+
+void new_buffer(){
+    code_buf = (buffer){
+        .buffer = zalloc(0x10000),
+        .limit = 0x10000,
+        .can_grow = true,
+        .buffer_size = 0,
+        .cursor = 0,
+        .circular = false,
+    };
+}
 
 void emit_const(char *lit){
-    for (int i = 0; lit[i]; i++){
-        if (code_cursor >= MAX_BUF) return;
-        code_buf[code_cursor++] = lit[i];
+    if (!code_buf.buffer){
+        new_buffer();
     }
+    buffer_write_const(&code_buf,lit);
 }
 
 void emit(char* fmt, ...){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     __attribute__((aligned(16))) va_list args;
     va_start(args, fmt); 
-    size_t n = string_format_va_buf(fmt, code_buf+code_cursor, MAX_BUF-code_cursor, args);
-    code_cursor += n;
+    buffer_write_va(&code_buf, fmt, args);
     va_end(args);
 }
 
 void emit_token(Token t){
-    for (int i = 0; i < t.length; i++){
-        if (code_cursor >= MAX_BUF) return;
-        code_buf[code_cursor++] = *(t.start + i);
+    if (!code_buf.buffer){
+        new_buffer();
     }
+    buffer_write_lim(&code_buf, (char*)t.start, t.length);
 }
 
 void emit_slice(string_slice slice){
-    for (int i = 0; i < slice.length; i++){
-        if (code_cursor >= MAX_BUF) return;
-        code_buf[code_cursor++] = slice.data[i];
+    if (!code_buf.buffer){
+        new_buffer();
     }
+    buffer_write_lim(&code_buf, (char*)slice.data, slice.length);
 }
 
 void emit_space(){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     emit_const(" ");
 }
 
 void emit_newline(){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     emit("\n\%s",indent_by(depth));
 }
 
 void emit_newlines(int amount){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     for (int i = 0; i < amount; i++){
         emit_newline();
     }
 }
 
 void increase_indent(){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     depth++;
 }
 
 void decrease_indent(){
+    if (!code_buf.buffer){
+        new_buffer();
+    }
     depth--;
 }
 
 void output_code(const char *path){
-    write_full_file(path,code_buf,code_cursor);
+    write_full_file(path,code_buf.buffer,code_buf.buffer_size);
 }
