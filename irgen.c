@@ -65,18 +65,14 @@ codegen_t eval_rule(int current_rule, int curr_option){
                 if (gen.ptr) register_subrule(gen, elem.sem_value, new_codegen);
                 else return new_codegen;
             } else eval_rule(new_rule, new_opt);
-        } else {
-            if (elem.sem_value){
-                if (!elem.lit){
-                    ast_node node;
-                    pop_stack(&gsn, &node);
-                    if (node.t.kind != elem.value){
-                        print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
-                        return (codegen_t){};
-                    }
-                    if (gen.ptr && elem.sem_value) register_elem(gen, elem.action == sem_action_declare ? elem.sem_value : elem.sem_value, node.t);
-                }
+        } else if (elem.sem_value && !elem.lit){
+            ast_node node;
+            pop_stack(&gsn, &node);
+            if (node.t.kind != elem.value){
+                print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
+                return (codegen_t){};
             }
+            if (gen.ptr && node.sem_value) register_elem(gen, node.action == sem_action_declare ? node.sem_value : node.sem_value, node.t);
         }
     }
 

@@ -32,6 +32,8 @@ bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem el
         .option = option,
         .depth = parser_depth,
         .sequence = sequence,
+        .sem_value = element.sem_value,
+        .action = element.action
     };
     return true;
 }
@@ -47,6 +49,7 @@ bool push_ast_rule(int rule, int option, int sequence){
         .option = option,
         .depth = parser_depth,
         .sequence = sequence,
+        .sem_value = language_rules[rule].action,
     };
     return true;
 }

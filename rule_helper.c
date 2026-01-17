@@ -41,7 +41,6 @@ char *sem_rule_name(semantic_rules rule){
         case sem_exp: return "exp"; 
         case sem_label: return "label"; 
         case sem_op: return "op"; 
-        // default: return "";
         case sem_stat: return "";
         case sem_param: return "parameter";
         case sem_for: return "for";
@@ -49,6 +48,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_dowhile: return "do while";
         case sem_inc: return "include";
         case sem_struct: return "struct";
+        case sem_ret: return "return";
         case sem_none: 
         case sem_rules_count: return "";
     }

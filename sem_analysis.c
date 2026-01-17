@@ -40,16 +40,16 @@ bool analyze_rule(int current_rule, int curr_option){
                 return res;
             }
             if (!analyze_rule(new_rule, new_opt)) return false;
-        } else if ((elem.value == TOK_IDENTIFIER || elem.value == TOK_STRING || elem.value == TOK_CONST || elem.value == TOK_OPERATOR || elem.sem_value) && !elem.lit){
+        } else if (elem.sem_value && !elem.lit){
              ast_node node;
              pop_stack(&ssn, &node);
-             if (elem.action == sem_action_declare) {
-                 if (elem.sem_value == sem_elem_type) sym.type = node.t;
-                 if (elem.sem_value == sem_elem_name) sym.name = node.t;
+             if (node.action == sem_action_declare) {
+                 if (node.sem_value == sem_elem_type) sym.type = node.t;
+                 if (node.sem_value == sem_elem_name) sym.name = node.t;
                  // print("SYMBOL: %s = %v",get_sem_elem_name(elem.sem_value),token_to_slice(node.t));
-             } else if (elem.action == sem_action_check && (elem.sem_value == sem_var || elem.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/)){
-                 if (!find_symbol(elem.sem_value, node.t)){
-                     print("%s %v does not exist",sem_rule_name(elem.sem_value),token_to_slice(node.t));
+             } else if (node.action == sem_action_check && (node.sem_value == sem_var || node.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/)){
+                 if (!find_symbol(node.sem_value, node.t)){
+                     print("%s %v does not exist",sem_rule_name(node.sem_value),token_to_slice(node.t));
                      return true;
                  }
              }

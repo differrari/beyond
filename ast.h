@@ -9,6 +9,8 @@ typedef struct {
     int option;
     int depth;
     int sequence;
+    semantic_action action;
+    int sem_value;
 } ast_node;
 
 typedef struct {
