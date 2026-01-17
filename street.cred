@@ -3,8 +3,8 @@ void a { int a = 0; }
 void b() { int b = 0; }
 
 c(int x) { int x = 0; }
-void testfunc(int a, int b){
-    print();
+void testfunc(){
+
 }
 main {
     int y = 0;

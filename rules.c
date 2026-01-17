@@ -103,7 +103,31 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(block,scope),
 			TOKEN(RBRACE),
 		},4},
-	},4, sem_func},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			SYMRULE(funcarguments,param),
+			TOKEN(LBRACE),
+			TOKEN(RBRACE),
+		},5},
+		{{
+			SYMDEC(IDENTIFIER,name),
+			SYMRULE(funcarguments,param),
+			TOKEN(LBRACE),
+			TOKEN(RBRACE),
+		},4},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LBRACE),
+			TOKEN(RBRACE),
+		},4},
+		{{
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LBRACE),
+			TOKEN(RBRACE),
+		},3},
+	},8, sem_func},
 	[rule_funcarguments] = {{
 		{{
 			TOKEN(LPAREN),
