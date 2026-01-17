@@ -260,3 +260,69 @@ char* arg_code_emit_code(void *ptr){
 }
 
 CODEGEN_DEC(arg_code)
+
+typedef struct {
+    Token type;
+    Token name;
+    codegen_t chain;
+} param_code;
+
+void param_code_register_elem(void* ptr, int type, Token elem){
+    param_code *code = (param_code*)ptr;
+    switch (type) {
+        case sem_elem_type: code->type = elem; 
+        case sem_elem_name: code->name = elem;
+    }
+}
+
+void param_code_register_subrule(void* ptr, int type, codegen_t child){
+    param_code *code = (param_code*)ptr;
+    if (type == sem_param)
+        code->chain = child;
+}
+
+char* param_code_emit_code(void *ptr){
+    param_code *code = (param_code*)ptr;
+    if (code->chain.ptr){
+        return string_format("%v %v, %s",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->chain)).data;
+    } else {
+        return string_format("%v %v",token_to_slice(code->type),token_to_slice(code->name)).data;
+    }
+}
+
+CODEGEN_DEC(param_code)
+
+typedef struct {
+    Token type;
+    Token name;
+    codegen_t args;
+    codegen_t body;
+} func_code;
+
+void func_code_register_elem(void* ptr, int type, Token elem){
+    func_code *code = (func_code*)ptr;
+    switch (type) {
+        case sem_elem_type: code->type = elem; 
+        case sem_elem_name: code->name = elem;
+    }
+}
+
+void func_code_register_subrule(void* ptr, int type, codegen_t child){
+    func_code *code = (func_code*)ptr;
+    if (type == sem_param)
+        code->args = child;
+    if (type == sem_scope)
+        code->body = child;
+}
+
+char* func_code_emit_code(void *ptr){
+    func_code *code = (func_code*)ptr;
+    if (!code->body.ptr) return "";
+    if (code->args.ptr){
+        return string_format("%v %v(%s){ %s }",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->args),emit_code(code->body)).data;
+    } else {
+        return string_format("%v %v(){ %s }",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->body)).data;
+    }
+}
+
+CODEGEN_DEC(func_code)

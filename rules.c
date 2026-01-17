@@ -12,6 +12,9 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, sem_scope},
 	[rule_statement] = {{
 		{{
+			SYMRULE(funcdec,func),
+		},1},
+		{{
 			SYMRULE(declaration,dec),
 		},1},
 		{{
@@ -29,7 +32,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			SYMRULE(label,label),
 		},1},
-	},6, sem_stat},
+	},7, sem_stat},
 	[rule_assignment] = {{
 		{{
 			SYMCHECK(IDENTIFIER,var),
@@ -47,6 +50,30 @@ grammar_rule language_rules[num_grammar_rules] = {
 			TOKEN(SEMICOLON),
 		},5},
 	},1, sem_call},
+	[rule_funcdec] = {{
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(LPAREN),
+			SYMRULE(argdec,param),
+			TOKEN(RPAREN),
+			TOKEN(LBRACE),
+			SYMRULE(block,scope),
+			TOKEN(RBRACE),
+		},8},
+	},1, sem_func},
+	[rule_argdec] = {{
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+			TOKEN(COMMA),
+			SYMRULE(argdec,param),
+		},4},
+		{{
+			SYMDEC(IDENTIFIER,type),
+			SYMDEC(IDENTIFIER,name),
+		},2},
+	},2, sem_param},
 	[rule_argument] = {{
 		{{
 			SYMRULE(expression,exp),

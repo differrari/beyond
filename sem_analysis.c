@@ -55,7 +55,7 @@ bool analyze_rule(grammar_rules current_rule, int curr_option){
              }
         }
     }
-    if (sym.sym_type == sem_label || sym.sym_type == sem_dec || sym.sym_type == sem_func){
+    if (sym.sym_type == sem_func || sym.sym_type == sem_param || sym.sym_type == sem_label || sym.sym_type == sem_dec || sym.sym_type == sem_func){
         symbol_table[symbol_count++] = sym;
         print("SYMBOL = %s TYPE = %v NAME = %v",sem_rule_name(sym.sym_type),sym.type.kind ? token_to_slice(sym.type) : make_string_slice("none", 0, 4),token_to_slice(sym.name));
     }

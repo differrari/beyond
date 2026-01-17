@@ -15,6 +15,8 @@ codegen_t begin_rule(int type){
         case sem_cond: return cond_code_init();
         case sem_jmp: return jmp_code_init();
         case sem_label: return label_code_init();
+        case sem_param: return param_code_init();
+        case sem_func: return func_code_init();
         default: return (codegen_t){};
     }
 }

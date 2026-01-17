@@ -57,8 +57,12 @@ char *sem_rule_name(semantic_rules rule){
         case sem_exp: return "exp"; 
         case sem_label: return "label"; 
         case sem_op: return "op"; 
-        default: return "";
-    }
+        // default: return "";
+        case sem_stat: return "";
+        case sem_param: return "parameter";
+        case sem_none: 
+        case sem_rules_count: return "";
+        }
 }
 
 char *get_sem_elem_name(semantic_elements elem){
