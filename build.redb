@@ -1,18 +1,40 @@
-@includeC("../redbuild/redbuild.h")
+@includeC("redbuild.h")
+@includeC("syscalls/syscalls.h")
 
 //FEATURE: @invoke. Allows invoking certain functions from cmd line arguments. In code generation, write code to parse argv and match against function name, then invoke function
 rulegen {
-    new_target();
+    new_module("rulegen");
+    
+    set_name("rulegen");
+    
+    set_target(target_native);
+    set_package_type(package_bin);
+    
     source("common.c");
     source("codegenrules/codeformat.c");
     source("ruleparser.c");
-    compile("gcc");
+    compile();
 }
 
 compiler {
-    new_target();
     rulegen();
+    
+    new_module("compiler");
+    
+    set_name("cred");
+    
+    set_target(target_native);
+    set_package_type(package_bin);
+    
     ignore_source("ruleparser.c");
-    source_all();
-    compile("gcc");
+    ignore_source("build.c");
+    ignore_source("output.c");
+    source_all(".c");
+    compile();
+}
+
+int main {
+    printf("Hello world");
+    
+    compiler();
 }

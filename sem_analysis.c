@@ -50,7 +50,7 @@ bool analyze_rule(int current_rule, int curr_option){
              } else if (elem.action == sem_action_check && (elem.sem_value == sem_var || elem.sem_value == sem_jmp /*&& elem.sem_value != sem_func*/)){
                  if (!find_symbol(elem.sem_value, node.t)){
                      print("%s %v does not exist",sem_rule_name(elem.sem_value),token_to_slice(node.t));
-                     return false;
+                     return true;
                  }
              }
         }

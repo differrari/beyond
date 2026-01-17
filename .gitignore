@@ -24,3 +24,4 @@ rulegen
 output.c
 build.c
 rules.c
+build
