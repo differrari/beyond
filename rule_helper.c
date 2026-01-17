@@ -47,6 +47,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_for: return "for";
         case sem_while: return "while";
         case sem_dowhile: return "do while";
+        case sem_inc: return "include";
         case sem_none: 
         case sem_rules_count: return "";
     }

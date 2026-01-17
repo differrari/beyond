@@ -18,8 +18,10 @@ void dec_code_emit_code(void* ptr){
     emit_token(code->type);//TODO: fetch from symbol table
     emit_space();
     emit_token(code->name);//TODO: fetch from symbol table
-    emit_const(" = ");
-    emit_code(code->initial_value);
+    if (code->initial_value.ptr){
+        emit_const(" = ");
+        emit_code(code->initial_value);
+    }
 }
 
 void ass_code_emit_code(void *ptr){
