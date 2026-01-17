@@ -18,12 +18,12 @@ typedef struct {
 } grammar_elem;
 
 typedef struct {
-    grammar_elem rules[16];
+    grammar_elem rules[64];
     uint8_t num_elements;
 } grammar_rule_opt;
 
 typedef struct {
-    grammar_rule_opt options[8];
+    grammar_rule_opt options[64];
     uint8_t num_elements;
     semantic_rules action;
 } grammar_rule;

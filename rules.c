@@ -44,6 +44,12 @@ grammar_rule language_rules[num_grammar_rules] = {
 			RULE(forloop),
 		},1},
 		{{
+			RULE(whileloop),
+		},1},
+		{{
+			RULE(dowhile),
+		},1},
+		{{
 			SYMRULE(declaration,dec),
 			TOKEN(SEMICOLON),
 		},2},
@@ -65,7 +71,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			SYMRULE(label,label),
 		},1},
-	},8, 0},
+	},10, 0},
 	[rule_separator] = {{
 		{{
 			TOKEN(SEMICOLON),
