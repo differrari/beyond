@@ -6,6 +6,13 @@ c(int x) { int l; }
 void print(){
 
 }
+
+struct testType {
+    int prop1;
+    int prop2;
+    // void func{};
+}
+
 main {
     int y = a();
     int x = 1-(0-2);

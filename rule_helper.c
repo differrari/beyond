@@ -48,6 +48,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_while: return "while";
         case sem_dowhile: return "do while";
         case sem_inc: return "include";
+        case sem_struct: return "struct";
         case sem_none: 
         case sem_rules_count: return "";
     }

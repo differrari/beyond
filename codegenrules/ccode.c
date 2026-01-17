@@ -180,4 +180,9 @@ void inc_code_emit_code(void *ptr){
     emit_token(code->value);
 }
 
+void struct_code_emit_code(void *ptr){
+    struct_code *code = (struct_code*)ptr;
+    emit("typedef struct { /*...*/ } %v",token_to_slice(code->name));
+}
+
 #endif

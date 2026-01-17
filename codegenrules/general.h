@@ -121,3 +121,10 @@ typedef struct {
 } inc_code;
 
 codegen_t inc_code_init();
+
+typedef struct {
+    Token name;
+    codegen_t contents;
+} struct_code;
+
+codegen_t struct_code_init();

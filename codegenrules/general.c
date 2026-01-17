@@ -239,3 +239,15 @@ void inc_code_register_subrule(void *ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(inc_code)
+
+void struct_code_register_elem(void *ptr, int type, Token elem){
+    struct_code *code = (struct_code*)ptr;
+    if (type == sem_elem_name) code->name = elem;
+}
+
+void struct_code_register_subrule(void *ptr, int type, codegen_t child){
+    struct_code *code = (struct_code*)ptr;
+    code->contents = child;
+}
+
+CODEGEN_DEC(struct_code)

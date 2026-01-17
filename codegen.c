@@ -20,6 +20,7 @@ codegen_t begin_rule(semantic_rules type){
         case sem_dowhile: return dowhile_code_init();
         case sem_var: return var_code_init();
         case sem_inc: return inc_code_init();
+        case sem_struct: return struct_code_init();
         case sem_val: 
         case sem_op: 
         case sem_none:
