@@ -70,6 +70,7 @@ void label_code_emit_code(void *ptr){
 void exp_code_emit_code(void *ptr){
     exp_code *code = (exp_code*)ptr;
     //TODO: fetch from symbol table
+    // emit_const("(");
     emit_token(code->val);
     if (code->exp.ptr){
         emit_space();
@@ -77,6 +78,7 @@ void exp_code_emit_code(void *ptr){
         emit_space();
         emit_code(code->exp);
     }
+    // emit_const(")");
 }
 
 void arg_code_emit_code(void *ptr){
