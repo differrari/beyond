@@ -1,83 +1,122 @@
 #include "general.h"
+#include "codeformat.h"
 
 #ifdef CCODEGEN
 
-//TODO: code emit should actually emit, not return a string. Can also do a formatter with this
-char *blk_code_emit_code(void* ptr){
+void blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
-    if (code->chain.ptr){
-        return string_format("%s\n%s",emit_code(code->stat),emit_code(code->chain)).data;
-    } else {
-        return string_format("%s",emit_code(code->stat)).data;
+    emit_code(code->stat);
+    if (code->chain.ptr){ 
+        emit_newline(); 
+        emit_code(code->chain); 
     }
 }
 
-char *dec_code_emit_code(void* ptr){
+void dec_code_emit_code(void* ptr){
     dec_code *code = (dec_code*)ptr;
-    return string_format("%v %v = %s;",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->initial_value)).data;
+    emit_token(code->type);//TODO: fetch from symbol table
+    emit_space();
+    emit_token(code->name);//TODO: fetch from symbol table
+    emit_const(" = ");
+    emit_code(code->initial_value);
+    emit_const(";");
 }
 
-char* ass_code_emit_code(void *ptr){
+void ass_code_emit_code(void *ptr){
     ass_code *code = (ass_code*)ptr;
-    return string_format("%v = %s;",token_to_slice(code->name),emit_code(code->expression)).data;
+    emit_token(code->name);//TODO: fetch from symbol table
+    emit_const(" = ");
+    emit_code(code->expression);
+    emit_const(";");
 }
 
-char* call_code_emit_code(void *ptr){
+void call_code_emit_code(void *ptr){
     call_code *code = (call_code*)ptr;
-    return string_format("%v(%s);",token_to_slice(code->name),emit_code(code->args)).data;
+    emit_token(code->name);
+    emit_const("(");
+    emit_code(code->args);
+    emit_const(");");
 }
 
-char* cond_code_emit_code(void *ptr){
+void cond_code_emit_code(void *ptr){
     cond_code *code = (cond_code*)ptr;
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
-    char *c = emit_code(code->cond);
-    char *s = emit_code(code->scope);
-    // print("Condition code emit end");
-    return string_format("if (%s) { %s }",c,s).data;
+    emit_const("if (");
+    emit_code(code->cond);
+    emit_const("){");
+    increase_indent();
+    emit_newline();
+    emit_code(code->scope);
+    decrease_indent();
+    emit_newline();
+    emit_const("}");
+    emit_newline();
 }
 
-char* jmp_code_emit_code(void *ptr){
+void jmp_code_emit_code(void *ptr){
     jmp_code *code = (jmp_code*)ptr;
-    return string_format("goto %v;",token_to_slice(code->jump)).data;
+    emit_const("goto ");
+    emit_token(code->jump);
+    emit_const(";");
 }
 
-char* label_code_emit_code(void *ptr){
+void label_code_emit_code(void *ptr){
     label_code *code = (label_code*)ptr;
-    return string_format("%v:",token_to_slice(code->name)).data;
+    emit_token(code->name);
+    emit_const(":");
+    // increase_indent();//TODO: label should ignore indent 
 }
 
-char* exp_code_emit_code(void *ptr){
+void exp_code_emit_code(void *ptr){
     exp_code *code = (exp_code*)ptr;
+    //TODO: fetch from symbol table
+    emit_token(code->val);
     if (code->exp.ptr){
-        char *exp = emit_code(code->exp);
-        return string_format("%v %v %s",token_to_slice(code->val),token_to_slice(code->operand),exp).data;
-    } else {
-        return string_format("%v",token_to_slice(code->val)).data;
+        emit_space();
+        emit_token(code->operand);
+        emit_space();
+        emit_code(code->exp);
     }
 }
 
-char* arg_code_emit_code(void *ptr){
+void arg_code_emit_code(void *ptr){
     arg_code *code = (arg_code*)ptr;
+    emit_code(code->exp);
     if (code->chain.ptr){
-        return string_format("%s, %s",emit_code(code->exp),emit_code(code->chain)).data;
-    } else {
-        return string_format("%s",emit_code(code->exp)).data;
+        emit_const(", ");
+        emit_code(code->chain);
     }
 }
 
-char* param_code_emit_code(void *ptr){
+void param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
+    emit_token(code->type);//TODO: fetch from symbol table
+    emit_space();
+    emit_token(code->name);//TODO: fetch from symbol table
     if (code->chain.ptr){
-        return string_format("%v %v, %s",token_to_slice(code->type),token_to_slice(code->name),emit_code(code->chain)).data;
-    } else {
-        return string_format("%v %v",token_to_slice(code->type),token_to_slice(code->name)).data;
+        emit_const(", ");
+        emit_code(code->chain);
     }
 }
 
-char* func_code_emit_code(void *ptr){
+void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    string_slice type = code->type.kind ? token_to_slice(code->type) : slice_from_lit("void");//TODO: this should be handled by the symbol table and we should look up into it
-    return string_format("%v %v(%s){ %s }",type,token_to_slice(code->name),emit_code(code->args),emit_code(code->body)).data;
+    if (code->type.kind){
+        emit_token(code->type);//TODO: fetch from symbol table
+        emit_const(" ");
+    } else 
+        emit_const("void ");
+    emit_token(code->name);//TODO: fetch from symbol table
+    emit_const("(");
+    emit_code(code->args);
+    emit_const("){");
+    increase_indent();
+    emit_newline();
+    emit_code(code->body);
+    decrease_indent();
+    emit_newline();
+    emit_const("}");
+    emit_newline();
 }
 
 #endif

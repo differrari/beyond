@@ -22,7 +22,7 @@ ln_report parse_ln(uint32_t pos, char *content){
     };
     for (uint32_t i = 0; i < pos && content[i]; i++){
         if (content[i] == '\n'){
-            rep.column = 0;
+            rep.column = 1;
             rep.line_number++;
         } else rep.column++;
     }

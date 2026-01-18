@@ -1,6 +1,7 @@
 #include "irgen.h"
 #include "common.h"
 #include "codegen.h"
+#include "codegenrules/codeformat.h"
 
 #define MAX_CHARS 10000
 char buf[MAX_CHARS];
@@ -93,6 +94,7 @@ void gen_code(ast_node *stack, uint32_t count){
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
     codegen_t cg = eval_rule(new_rule,new_opt);
-    print("%s",emit_code(cg));
+    emit_code(cg);
+    output_code();
     print("%s",buf);
 }

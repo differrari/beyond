@@ -21,3 +21,4 @@ trace
 *.dSYM
 cred
 rulegen
+output.c

@@ -2,7 +2,7 @@
 #include "general.h"
 
 #define CODEGEN_DEC(name) \
-extern char* name##_emit_code(void*ptr);\
+extern void name##_emit_code(void*ptr);\
 codegen_t name##_init(){\
     return (codegen_t){\
         .ptr = zalloc(sizeof(name)),\
