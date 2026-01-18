@@ -2,9 +2,6 @@
 
 #include "data/tokenizer/tokenizer.h"
 
-#define CCODEGEN
-// #define DEBUG_CODEGEN
-
 typedef struct codegen_t {
     int type;
     void (*register_elem)(void* ptr, int type, Token elem);

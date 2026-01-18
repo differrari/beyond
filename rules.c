@@ -50,7 +50,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{
 			SYMRULE(label,label),
 		},1},
-	},7, sem_stat},
+	},7, 0},
 	[rule_assignment] = {{
 		{{
 			SYMCHECK(IDENTIFIER,var),
@@ -169,7 +169,13 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(block,scope),
 			TOKEN(RBRACE),
 		},5},
-	},1, sem_cond},
+		{{
+			LITERAL("if"),
+			SYMRULE(condition,cond),
+			TOKEN(LBRACE),
+			TOKEN(RBRACE),
+		},4},
+	},2, sem_cond},
 	[rule_condition] = {{
 		{{
 			TOKEN(LPAREN),

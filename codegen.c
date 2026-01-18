@@ -1,12 +1,10 @@
 #include "codegen.h"
-#include "ccoderules/general.h"
+#include "codegenrules/general.h"
 #include "rules.h"
 
-#ifdef CCODEGEN
 codegen_t begin_rule(int type){
     switch (type){
         case sem_scope: return blk_code_init();
-        case sem_stat: return stat_code_init(); 
         case sem_dec: return dec_code_init();
         case sem_assign: return ass_code_init();
         case sem_exp: return exp_code_init();
@@ -38,5 +36,3 @@ char* emit_code(codegen_t gen){
     print("No code to emit for %i",gen.type);
     return "";
 }
-
-#endif
