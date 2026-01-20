@@ -26,3 +26,4 @@ build.c
 rules.c
 build
 semantic_rules.h
+publish

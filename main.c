@@ -5,6 +5,7 @@
 #include "common.h"
 #include "irgen.h"
 #include "sem_analysis.h"
+#include "files/buffer.h"
 
 Scanner scan;
 
@@ -27,15 +28,40 @@ ln_report parse_ln(uint32_t pos, char *content){
     return rep;
 }
 
+const char* outname = "output.c";
+buffer buf;
+
+void parse_arguments(int argc, char *argv[]){
+    buf = (buffer){
+        .buffer = zalloc(0x10000),
+        .limit = 0x10000,
+        .buffer_size = 0,
+        .can_grow = true,
+        .circular = 0,
+        .cursor = 0,
+    };
+    for (int i = 1; i < argc; i++){
+        if (*argv[i] != '-'){
+            char *content = read_full_file(argv[i]);
+            buffer_write_const(&buf, content);
+        } else {
+            if (strcmp(argv[i], "-o") == 0){
+                i++;
+                outname = argv[i];
+            }
+        }
+    }
+    if (!buf.buffer_size){
+        char *content = read_full_file("street.cred");
+        buffer_write_const(&buf, content);
+    }
+}
+
 int main(int argc, char *argv[]){
     
-    const char *compname = argc > 1 ? argv[1] : "street.cred";
+    parse_arguments(argc, argv);
     
-    print("Compiling %s",compname);
-    
-    char *content = read_full_file(compname);
-    
-    scan = scanner_make(content,strlen(content));
+    scan = scanner_make(buf.buffer,strlen(buf.buffer));
     
     Tokenizer tk = tokenizer_make(&scan);
     tk.skip_type_check = true;
@@ -52,13 +78,12 @@ int main(int argc, char *argv[]){
         .scanner_pos = scan.pos,
     };
     
-    parse_result parse_res = parse(content, &ts, &parser);
+    parse_result parse_res = parse(buf.buffer, &ts, &parser);
     
     if (!parse_res.result){
-        ln_report ln = parse_ln(parse_res.furthest_parse_pos, content);
+        ln_report ln = parse_ln(parse_res.furthest_parse_pos, buf.buffer);
         printf("Found syntax error on l%i:%i in file %i",ln.line_number,ln.column,ln.file);
     } else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
-        const char* outname = argc > 2 ? argv[2] : "output.c";
         print("Generating %s",outname);
         gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
     }
