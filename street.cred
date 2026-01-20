@@ -7,6 +7,12 @@ void print(){
 
 }
 
+enum test_enum {
+    one, 
+    two, 
+    three  
+}
+
 interface hello {
     void func(int rule, Token elem);
     test;

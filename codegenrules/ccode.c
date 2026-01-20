@@ -3,12 +3,15 @@
 
 #ifdef CCODEGEN
 
+typedef enum { convenience_type_none, convenience_type_to_string, convenience_type_from_string, convenience_type_to_int, convenience_type_from_int} convenience_type;
+
 typedef struct {
     int context_rule;
     string_slice context_prefix;
     string_slice context_parent;
     bool ignore_semicolon;
     bool has_defer;
+    convenience_type convenience;
 } emit_context;
 
 emit_context ctx;
@@ -402,6 +405,79 @@ void int_code_emit_code(void *ptr){
     collapse_block(new_b);
     gen_int_stubs(code->contents, token_to_slice(code->name));
     pop_and_restore_context(orig);
+}
+
+void enum_code_emit_code(void *ptr){
+    enum_code *code = (enum_code*)ptr;
+    
+    emit_const("typedef enum {");
+    increase_indent();
+    emit_newline();
+    emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = token_to_slice(code->name) });
+    emit_code(code->contents);
+    pop_and_restore_context(orig);
+    decrease_indent();
+    emit_newline();
+    emit_const("} ");
+    emit_token(code->name);
+    emit_const(";");
+    
+    emit_newlines(2);
+    
+    emit_const("char* ");
+    emit_token(code->name);
+    emit_const("_to_string(");
+    emit_token(code->name);
+    emit_const(" val){");
+    increase_indent();
+    emit_newline();
+    emit_const("switch (val) {");
+    increase_indent();
+    emit_newline();
+    orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
+    emit_code(code->contents);
+    pop_and_restore_context(orig);
+    decrease_indent();
+    emit_newline();
+    emit_const("} ");
+    decrease_indent();
+    emit_newline();
+    emit_const("} ");
+    emit_newline();
+}
+
+void enum_case_code_emit_code(void *ptr){
+    enum_case_code *code = (enum_case_code*)ptr;
+    
+    switch (ctx.convenience){
+        case convenience_type_to_string:
+            emit_const("case ");
+            emit_slice(ctx.context_prefix);
+            emit_const("_");
+            emit_token(code->name);
+            emit_const(": return \"");
+            emit_token(code->name);
+            emit_const("\";");
+        break;
+        case convenience_type_from_string:
+            //TODO
+        break;
+        case convenience_type_to_int: break;
+        case convenience_type_from_int:
+            //TODO
+        break;
+        default: 
+            emit_slice(ctx.context_prefix);
+            emit_const("_");
+            emit_token(code->name);
+            emit_const(",");
+        break;
+    }
+    if (code->chain.ptr) {
+        emit_newline();
+        emit_code(code->chain);
+    }
+    
 }
 
 #endif

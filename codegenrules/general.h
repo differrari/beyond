@@ -149,3 +149,17 @@ typedef struct {
 } int_code;
 
 codegen_t int_code_init();
+
+typedef struct {
+    Token name;
+    codegen_t contents;
+} enum_code;
+
+codegen_t enum_code_init();
+
+typedef struct {
+    Token name;
+    codegen_t chain;
+} enum_case_code;
+
+codegen_t enum_case_code_init();

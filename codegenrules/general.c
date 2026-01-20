@@ -284,3 +284,31 @@ void int_code_register_subrule(void *ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(int_code, sem_interf)
+
+void enum_code_register_elem(void *ptr, int type, Token elem){
+    enum_code * code = (enum_code*)ptr;
+    if (type == sem_elem_name)
+        code->name = elem;
+}
+
+void enum_code_register_subrule(void *ptr, int type, codegen_t child){
+    enum_code * code = (enum_code*)ptr;
+    if (type == sem_enum_case)
+        code->contents = child;
+}
+
+CODEGEN_DEC(enum_code, sem_enum)
+
+void enum_case_code_register_elem(void *ptr, int type, Token elem){
+    enum_case_code * code = (enum_case_code*)ptr;
+    if (type == sem_elem_name)
+        code->name = elem;
+}
+
+void enum_case_code_register_subrule(void *ptr, int type, codegen_t child){
+    enum_case_code * code = (enum_case_code*)ptr;
+    if (type == sem_enum_case)
+        code->chain = child;
+}
+
+CODEGEN_DEC(enum_case_code, sem_enum_case)

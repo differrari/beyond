@@ -24,6 +24,8 @@ codegen_t begin_rule(semantic_rules type){
         case sem_ret: return ret_code_init();
         case sem_def: return def_code_init();
         case sem_interf: return int_code_init();
+        case sem_enum: return enum_code_init();
+        case sem_enum_case: return enum_case_code_init();
         case sem_parent:
         case sem_val: 
         case sem_op: 
