@@ -19,6 +19,12 @@ main {
     int y = a();
     int x = 1-(0-2);
     int z = x[0];
+    {
+        printf("This is democracy");
+    }
+    defer {
+        cleanup();
+    }
     for (int i = 0; i < 10; i = i + 1){
     }
     while (0){

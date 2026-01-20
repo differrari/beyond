@@ -1,5 +1,4 @@
 #include "codeformat.h"
-#include "std/string.h"
 #include "common.h"
 #include "syscalls/syscalls.h"
 #include "files/buffer.h"
@@ -53,6 +52,9 @@ void new_block(){
 }
 
 emit_block save_and_push_block(){
+    if (!code_buf){
+        new_block();
+    }
     emit_block orig = current_eblock;
     new_block();
     return orig;
@@ -141,5 +143,9 @@ void collapse_block(emit_block old_block){
 }
 
 void output_code(const char *path){
-    write_full_file(path,code_buf->buffer,code_buf->buffer_size);
+    buffer joined = new_buffer();
+    if (current_eblock.prologue.buffer_size){ buffer_write_lim(&joined, current_eblock.prologue.buffer, current_eblock.prologue.buffer_size); }
+    if (current_eblock.body.buffer_size){ buffer_write_lim(&joined, current_eblock.body.buffer, current_eblock.body.buffer_size); }
+    if (current_eblock.epilogue.buffer_size){ buffer_write_lim(&joined, current_eblock.epilogue.buffer, current_eblock.epilogue.buffer_size); }
+    write_full_file(path,joined.buffer,joined.buffer_size);
 }

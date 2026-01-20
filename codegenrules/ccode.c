@@ -140,9 +140,7 @@ void param_code_emit_code(void *ptr){
 
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    if (ctx.context_rule == sem_struct){
-        switch_block_section(block_section_epilogue);
-    }
+    emit_block original = save_and_push_block();
     if (code->type.kind){
         emit_token(code->type);//TODO: fetch from symbol table
         emit_const(" ");
@@ -165,10 +163,17 @@ void func_code_emit_code(void *ptr){
     increase_indent();
     emit_newline();
     emit_code(code->body);
+    switch_block_section(block_section_epilogue);
     decrease_indent();
     emit_newline();
     emit_const("}");
     emit_newline();
+    switch_block_section(block_section_body);
+    emit_block fnblock = pop_and_restore_emit_block(original);
+    if (ctx.context_rule == sem_struct){
+        switch_block_section(block_section_epilogue);
+    }
+    collapse_block(fnblock);
     if (ctx.context_rule == sem_struct){
         switch_block_section(block_section_body);
     }
@@ -259,6 +264,16 @@ void ret_code_emit_code(void *ptr){
     emit_const("return ");
     emit_code(code->expression);
     emit_const(";");
+}
+
+void def_code_emit_code(void *ptr){
+    def_code *code = (def_code*)ptr;
+    switch_block_section(block_section_epilogue);
+    emit_const("defer:");
+    emit_newline();
+    emit_code(code->expression);
+    emit_newline();
+    switch_block_section(block_section_body);
 }
 
 #endif

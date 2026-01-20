@@ -49,6 +49,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_inc: return "include";
         case sem_struct: return "struct";
         case sem_ret: return "return";
+        case sem_def: return "defer";
         case sem_none: 
         case sem_rules_count: return "";
     }

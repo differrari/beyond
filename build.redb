@@ -35,7 +35,9 @@ compiler {
         ignore_source("build.c");
         ignore_source("output.c");
         source_all(".c");
-        compile();
+        if (compile()){
+            run();  
+        }
     }
 }
 
