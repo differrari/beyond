@@ -18,12 +18,10 @@ void blk_code_register_elem(void* ptr, int type, Token elem){
 
 void blk_code_register_subrule(void* ptr, int type, codegen_t child){
     blk_code *code = (blk_code*)ptr;
-    if (type == sem_stat){
-        code->stat = child;
-    }
     if (type == sem_scope){
         code->chain = child;
-    }
+    } else
+        code->stat = child;
 }
 
 CODEGEN_DEC(blk_code)

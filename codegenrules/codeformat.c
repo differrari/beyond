@@ -7,9 +7,9 @@
 #define MAX_BUF 0x10000
 
 buffer *code_buf;
-int depth = 0;
+int *current_indent;
 
-static emit_block current_eblock = {};
+emit_block current_eblock = {};
 
 buffer new_buffer(){
     return (buffer){
@@ -26,12 +26,15 @@ void switch_block_section(emit_block_section section){
     switch (section) {
     case block_section_prologue:
         code_buf = &current_eblock.prologue;
+        current_indent = &current_eblock.pindent;
     break;
     case block_section_body:
         code_buf = &current_eblock.body;
+        current_indent = &current_eblock.bindent;
     break;
     case block_section_epilogue:
         code_buf = &current_eblock.epilogue;
+        current_indent = &current_eblock.eindent;
     break;
     }
 }
@@ -39,23 +42,26 @@ void switch_block_section(emit_block_section section){
 void new_block(){
     current_eblock = (emit_block){
         .prologue = new_buffer(),
+        .pindent = current_indent ? *current_indent : 0,
         .body = new_buffer(),
-        .epilogue = new_buffer()
+        .bindent = current_indent ? *current_indent : 0,
+        .epilogue = new_buffer(),
+        .eindent = current_indent ? *current_indent : 0,
     };
     code_buf = &current_eblock.body;
+    current_indent = &current_eblock.bindent;
 }
 
-emit_block create_block(){
+emit_block save_and_push_block(){
+    emit_block orig = current_eblock;
     new_block();
-    return current_eblock;
+    return orig;
 }
 
-emit_block save_emit_block(){
-    return current_eblock;
-}
-
-void restore_emit_block(emit_block block){
+emit_block pop_and_restore_emit_block(emit_block block){
+    emit_block orig = current_eblock;
     current_eblock = block;
+    return orig;
 }
 
 void emit_const(char *lit){
@@ -100,7 +106,7 @@ void emit_newline(){
     if (!code_buf){
         new_block();
     }
-    emit("\n\%s",indent_by(depth));
+    emit("\n\%s",indent_by(*current_indent));
 }
 
 void emit_newlines(int amount){
@@ -116,14 +122,22 @@ void increase_indent(){
     if (!code_buf){
         new_block();
     }
-    depth++;
+    *current_indent = *current_indent + 1;
 }
 
 void decrease_indent(){
     if (!code_buf){
         new_block();
     }
-    depth--;
+    *current_indent = *current_indent - 1;
+}
+
+void collapse_block(emit_block old_block){
+    emit_const(old_block.prologue.buffer);
+    emit_newline();
+    emit_const(old_block.body.buffer);
+    emit_newline();
+    emit_const(old_block.epilogue.buffer);
 }
 
 void output_code(const char *path){

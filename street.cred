@@ -8,9 +8,11 @@ void print(){
 }
 
 struct testType {
+    func { 
+        int a = 0;
+    }
     int prop1;
     int prop2;
-    // void func{};
 }
 
 main {
