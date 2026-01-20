@@ -6,15 +6,17 @@
 typedef struct {
     int context_rule;
     string_slice context_prefix;
+    bool ignore_semicolon;
 } emit_context;
 
 emit_context ctx;
 
-emit_context save_and_push_context(int context_rule, string_slice context_prefix){
+emit_context save_and_push_context(int context_rule, string_slice context_prefix, bool ignore_semicolon){
     emit_context orig = ctx;
     ctx = (emit_context){
         .context_rule = context_rule,
-        .context_prefix = context_prefix
+        .context_prefix = context_prefix,
+        .ignore_semicolon = ignore_semicolon
     };
     return orig;
 }
@@ -40,18 +42,22 @@ void dec_code_emit_code(void* ptr){
     emit_space();
     emit_token(code->name);//TODO: fetch from symbol table
     if (code->initial_value.ptr){
+        emit_context orig = save_and_push_context(sem_dec, make_string_slice(0, 0, 0), true);
         emit_const(" = ");
         emit_code(code->initial_value);
+        pop_and_restore_context(orig);
     }
-    if (ctx.context_rule != sem_for) emit_const(";");
+    if (!ctx.ignore_semicolon) emit_const(";");
 }
 
 void ass_code_emit_code(void *ptr){
     ass_code *code = (ass_code*)ptr;
     emit_token(code->name);//TODO: fetch from symbol table
     emit_const(" = ");
+    emit_context orig = save_and_push_context(sem_assign, make_string_slice(0, 0, 0), true);
     emit_code(code->expression);
-    if (ctx.context_rule != sem_for) emit_const(";");
+    pop_and_restore_context(orig);
+    if (!ctx.ignore_semicolon) emit_const(";");
 }
 
 void call_code_emit_code(void *ptr){
@@ -60,14 +66,16 @@ void call_code_emit_code(void *ptr){
     emit_const("(");
     emit_code(code->args);
     emit_const(")");
-    if (ctx.context_rule != sem_exp) emit_const(";");
+    if (!ctx.ignore_semicolon) emit_const(";");
 }
 
 void cond_code_emit_code(void *ptr){
     cond_code *code = (cond_code*)ptr;
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
     emit_const("if (");
+    emit_context orig = save_and_push_context(sem_cond, make_string_slice(0, 0, 0), true);
     emit_code(code->cond);
+    pop_and_restore_context(orig);
     emit_const("){");
     increase_indent();
     emit_newline();
@@ -96,7 +104,7 @@ void exp_code_emit_code(void *ptr){
     exp_code *code = (exp_code*)ptr;
     //TODO: fetch from symbol table
     // emit_const("(");
-    emit_context orig = save_and_push_context(sem_exp, make_string_slice(0, 0, 0));
+    emit_context orig = save_and_push_context(sem_exp, make_string_slice(0, 0, 0), true);
     if (code->var.ptr) emit_code(code->var);
     else emit_token(code->val);
     // emit_const(",");
@@ -168,7 +176,7 @@ void func_code_emit_code(void *ptr){
 
 void for_code_emit_code(void* ptr){
     for_code *code = (for_code*)ptr;
-    emit_context orig = save_and_push_context(sem_for, make_string_slice(0, 0, 0));
+    emit_context orig = save_and_push_context(sem_for, make_string_slice(0, 0, 0), true);
     emit_const("for (");
     emit_code(code->initial);
     emit_const("; ");
@@ -231,7 +239,7 @@ void inc_code_emit_code(void *ptr){
 void struct_code_emit_code(void *ptr){
     struct_code *code = (struct_code*)ptr;
     emit_block original = save_and_push_block();
-    emit_context orig = save_and_push_context(sem_struct, token_to_slice(code->name));
+    emit_context orig = save_and_push_context(sem_struct, token_to_slice(code->name), false);
     // switch_block_section(block_section_prologue);
     emit_const("typedef struct { ");
     increase_indent();

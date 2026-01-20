@@ -2,7 +2,7 @@
 @includeC("syscalls/syscalls.h")
 
 //FEATURE: @invoke. Allows invoking certain functions from cmd line arguments. In code generation, write code to parse argv and match against function name, then invoke function
-rulegen {
+bool rulegen {
     new_module("rulegen");
     
     set_name("rulegen");
@@ -13,25 +13,30 @@ rulegen {
     source("common.c");
     source("codegenrules/codeformat.c");
     source("ruleparser.c");
-    compile();
-    run();
+    if (compile()){
+        int i = run();
+        if (i == 0){
+            return 1;    
+        }
+        return 0;
+    }
 }
 
 compiler {
-    rulegen();
-    
-    new_module("compiler");
-    
-    set_name("cred");
-    
-    set_target(target_native);
-    set_package_type(package_bin);
-    
-    ignore_source("ruleparser.c");
-    ignore_source("build.c");
-    ignore_source("output.c");
-    source_all(".c");
-    compile();
+    if (rulegen()){
+        new_module("compiler");
+        
+        set_name("cred");
+        
+        set_target(target_native);
+        set_package_type(package_bin);
+        
+        ignore_source("ruleparser.c");
+        ignore_source("build.c");
+        ignore_source("output.c");
+        source_all(".c");
+        compile();
+    }
 }
 
 int main {
