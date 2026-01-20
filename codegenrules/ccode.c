@@ -137,33 +137,44 @@ void param_code_emit_code(void *ptr){
 
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    emit_block original = save_and_push_block();
-    emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = false, .has_defer = false });
+    if (ctx.context_rule == sem_struct){
+        switch_block_section(block_section_epilogue);
+    }
     if (code->type.kind){
         emit_token(code->type);//TODO: fetch from symbol table
         emit_const(" ");
     } else 
         emit_const("void ");
-    if (orig.context_rule == sem_struct){
-        emit_slice(orig.context_prefix);
+    if (ctx.context_rule == sem_struct){
+        emit_slice(ctx.context_prefix);
         emit_const("_");
     }
     emit_token(code->name);//TODO: fetch from symbol table
     emit_const("(");
-    if (orig.context_rule == sem_struct){
-        emit_slice(orig.context_prefix);
+    if (ctx.context_rule == sem_struct){
+        emit_slice(ctx.context_prefix);
         emit_const(" *instance");
         if (code->args.ptr)
             emit_const(", ");
     }
     emit_code(code->args);
     emit_const("){");
+    emit_block original = save_and_push_block();
+    emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false, .has_defer = false });
     increase_indent();
     emit_newline();
     emit_code(code->body);
     switch_block_section(block_section_epilogue);
     decrease_indent();
+    if (ctx.has_defer){
+        switch_block_section(block_section_prologue);
+        emit_const("int _return_val = 0;");
+        switch_block_section(block_section_epilogue);
+        emit_const("return _return_val;");
+        emit_newline();
+    }
     emit_const("}");
+    emit_newline();
     switch_block_section(block_section_body);
     emit_block fnblock = pop_and_restore_emit_block(original);
     if (orig.context_rule == sem_struct){
@@ -258,8 +269,18 @@ void struct_code_emit_code(void *ptr){
 
 void ret_code_emit_code(void *ptr){
     ret_code *code = (ret_code*)ptr;
-    emit_const("return ");
-    emit_code(code->expression);
+    if (ctx.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
+        emit_const("_return_val = ");
+        emit_code(code->expression);
+        emit_const(";");
+        emit_newline();
+        emit_const("goto ");
+        emit_slice(ctx.context_prefix);
+        emit_const("_defer"); 
+    } else {
+        emit_const("return ");
+        emit_code(code->expression);
+    }
     emit_const(";");
 }
 
@@ -267,7 +288,8 @@ void def_code_emit_code(void *ptr){
     def_code *code = (def_code*)ptr;
     switch_block_section(block_section_epilogue);
     if (!ctx.has_defer){ 
-        emit_const("defer:"); 
+        emit_slice(ctx.context_prefix);
+        emit_const("_defer:"); 
         emit_newline();
     }
     increase_indent();

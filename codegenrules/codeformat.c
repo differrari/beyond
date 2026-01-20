@@ -108,7 +108,7 @@ void emit_newline(){
     if (!code_buf){
         new_block();
     }
-    emit("\n\%s",indent_by(*current_indent));
+    emit("\n\%s",indent_by(max(*current_indent,0)));
 }
 
 void emit_newlines(int amount){
@@ -135,11 +135,16 @@ void decrease_indent(){
 }
 
 void collapse_block(emit_block old_block){
-    emit_const(old_block.prologue.buffer);
-    emit_newline();
-    emit_const(old_block.body.buffer);
-    emit_newline();
-    emit_const(old_block.epilogue.buffer);
+    if (old_block.prologue.buffer_size){
+        emit_const(old_block.prologue.buffer);
+        emit_newline();
+    }
+    if (old_block.body.buffer_size){
+        emit_const(old_block.body.buffer);
+        emit_newline();
+    }
+    if (old_block.epilogue.buffer_size)
+        emit_const(old_block.epilogue.buffer);
 }
 
 void output_code(const char *path){

@@ -15,7 +15,7 @@ struct testType {
     int prop2;
 }
 
-main {
+int main {
     int y = a();
     int x = 1-(0-2);
     int z = x[0];
@@ -31,6 +31,7 @@ main {
     while (0){
         print();
     }
+    return 0;
     do {
         print();
     } while(0);
