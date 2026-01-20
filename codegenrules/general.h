@@ -128,3 +128,9 @@ typedef struct {
 } struct_code;
 
 codegen_t struct_code_init();
+
+typedef struct {
+    codegen_t expression;
+} ret_code;
+
+codegen_t ret_code_init();

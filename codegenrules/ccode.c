@@ -146,6 +146,12 @@ void func_code_emit_code(void *ptr){
     }
     emit_token(code->name);//TODO: fetch from symbol table
     emit_const("(");
+    if (ctx.context_rule == sem_struct){
+        emit_slice(ctx.context_prefix);
+        emit_const(" *instance");
+        if (code->args.ptr)
+            emit_const(", ");
+    }
     emit_code(code->args);
     emit_const("){");
     increase_indent();
@@ -238,6 +244,13 @@ void struct_code_emit_code(void *ptr){
     pop_and_restore_context(orig);
     collapse_block(new_b);
     // switch_block_section(block_section_body);
+}
+
+void ret_code_emit_code(void *ptr){
+    ret_code *code = (ret_code*)ptr;
+    emit_const("return ");
+    emit_code(code->expression);
+    emit_const(";");
 }
 
 #endif

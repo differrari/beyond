@@ -249,3 +249,14 @@ void struct_code_register_subrule(void *ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(struct_code)
+
+void ret_code_register_elem(void *ptr, int type, Token elem){
+    
+}
+
+void ret_code_register_subrule(void *ptr, int type, codegen_t child){
+    ret_code *code = (ret_code*)ptr;
+    code->expression = child;
+}
+
+CODEGEN_DEC(ret_code)

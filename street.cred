@@ -1,4 +1,4 @@
-int a { int a = 0; }
+int a { int a = 0; return a; }
 
 void draw(int x, int y, int color, int overwrite) { int b = 0; }
 

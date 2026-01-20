@@ -3,7 +3,7 @@
 #include "types.h"
 #include "data/tokenizer/tokenizer.h"
 
-typedef enum { sem_none, sem_dec, sem_stat, sem_var, sem_assign, sem_exp, sem_func, sem_label, sem_jmp, sem_scope, sem_param, sem_val, sem_op, sem_cond, sem_call, sem_args, sem_for, sem_while, sem_dowhile, sem_inc, sem_struct, sem_rules_count } semantic_rules;
+typedef enum { sem_none, sem_dec, sem_stat, sem_var, sem_assign, sem_exp, sem_func, sem_label, sem_jmp, sem_scope, sem_param, sem_val, sem_op, sem_cond, sem_call, sem_args, sem_for, sem_while, sem_dowhile, sem_inc, sem_struct, sem_rules_count, sem_ret } semantic_rules;
 
 typedef enum { sem_elem_none, sem_elem_type, sem_elem_name, sem_elem_count } semantic_elements;
 
