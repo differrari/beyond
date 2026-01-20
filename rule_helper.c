@@ -51,6 +51,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_ret: return "return";
         case sem_def: return "defer";
         case sem_interf: return "interface";
+        case sem_parent: return "parent";
         case sem_none: 
         case sem_rules_count: return "";
     }

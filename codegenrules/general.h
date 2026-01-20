@@ -126,6 +126,7 @@ codegen_t inc_code_init();
 typedef struct {
     Token name;
     codegen_t contents;
+    Token parent;
 } struct_code;
 
 codegen_t struct_code_init();

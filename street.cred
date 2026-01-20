@@ -8,14 +8,20 @@ void print(){
 }
 
 interface hello {
-    void func();
+    void func(int rule, Token elem);
     test;
 }
 
-struct testType {
-    func { 
+struct testType: hello {
+    
+    func(int rule, Token elem) { 
         int a = 0;
     }
+    
+    test {
+        print("Test succeeded");
+    }
+    
     int prop1;
     int prop2;
 }

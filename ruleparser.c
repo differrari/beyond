@@ -242,7 +242,7 @@ int main(int argc, char *argv[]){
                     print("Malformed tag on %v. Expected identifier, got %v",token_to_slice(t),token_to_slice(tag));
                     return -1;
                 }
-                is_dec = slice_lit_match(token_to_slice(tag), "param", false) || slice_lit_match(token_to_slice(tag), "func", false) || slice_lit_match(token_to_slice(tag), "dec", false) || slice_lit_match(token_to_slice(tag), "label", false) || slice_lit_match(token_to_slice(tag), "struct", false) || slice_lit_match(token_to_slice(tag), "interf", false);
+                is_dec = slice_lit_match(token_to_slice(tag), "param", false) || slice_lit_match(token_to_slice(tag), "func", false) || slice_lit_match(token_to_slice(tag), "dec", false) || slice_lit_match(token_to_slice(tag), "label", false) || slice_lit_match(token_to_slice(tag), "struct", false) || slice_lit_match(token_to_slice(tag), "interf", false) || slice_lit_match(token_to_slice(tag), "parent", false);
                 if (!ts_next(&ts, &op1)){
                     print("Unfinished rule %v",token_to_slice(t));
                     return -1;

@@ -1,7 +1,7 @@
 #include "rules.h"
 #include "general.h"
 
-#define CODEGEN_DEC(name) \
+#define CODEGEN_DEC(name,t) \
 extern void name##_emit_code(void*ptr);\
 codegen_t name##_init(){\
     return (codegen_t){\
@@ -9,6 +9,7 @@ codegen_t name##_init(){\
         .register_elem = name##_register_elem,\
         .register_subrule = name##_register_subrule,\
         .emit_code = name##_emit_code,\
+        .type = t,\
     };\
 }
 
@@ -24,7 +25,7 @@ void blk_code_register_subrule(void* ptr, int type, codegen_t child){
         code->stat = child;
 }
 
-CODEGEN_DEC(blk_code)
+CODEGEN_DEC(blk_code, sem_scope)
 
 void dec_code_register_elem(void* ptr, int type, Token elem){
     dec_code *code = (dec_code*)ptr;
@@ -39,7 +40,7 @@ void dec_code_register_subrule(void* ptr, int type, codegen_t child){
     code->initial_value = child;
 }
 
-CODEGEN_DEC(dec_code)
+CODEGEN_DEC(dec_code, sem_dec)
 
 void ass_code_register_elem(void* ptr, int type, Token elem){
     ass_code *code = (ass_code*)ptr;
@@ -51,7 +52,7 @@ void ass_code_register_subrule(void* ptr, int type, codegen_t child){
     code->expression = child;
 }
 
-CODEGEN_DEC(ass_code)
+CODEGEN_DEC(ass_code, sem_assign)
 
 void call_code_register_elem(void* ptr, int type, Token elem){
     call_code *code = (call_code*)ptr;
@@ -63,7 +64,7 @@ void call_code_register_subrule(void* ptr, int type, codegen_t child){
     code->args = child;
 }
 
-CODEGEN_DEC(call_code)
+CODEGEN_DEC(call_code, sem_call)
 
 void cond_code_register_elem(void* ptr, int type, Token elem){
     
@@ -78,7 +79,7 @@ void cond_code_register_subrule(void* ptr, int type, codegen_t child){
     }
 }
 
-CODEGEN_DEC(cond_code)
+CODEGEN_DEC(cond_code, sem_cond)
 
 void jmp_code_register_elem(void* ptr, int type, Token elem){
     jmp_code *code = (jmp_code*)ptr;
@@ -89,7 +90,7 @@ void jmp_code_register_subrule(void* ptr, int type, codegen_t child){
     
 }
 
-CODEGEN_DEC(jmp_code)
+CODEGEN_DEC(jmp_code, sem_jmp)
 
 void label_code_register_elem(void* ptr, int type, Token elem){
     label_code *code = (label_code*)ptr;
@@ -100,7 +101,7 @@ void label_code_register_subrule(void* ptr, int type, codegen_t child){
     
 }
 
-CODEGEN_DEC(label_code)
+CODEGEN_DEC(label_code, sem_label)
 
 void exp_code_register_elem(void* ptr, int type, Token elem){
     exp_code *code = (exp_code*)ptr;
@@ -115,7 +116,7 @@ void exp_code_register_subrule(void* ptr, int type,  codegen_t child){
     if (type == sem_exp) code->exp = child;
 }
 
-CODEGEN_DEC(exp_code)
+CODEGEN_DEC(exp_code, sem_exp)
 
 void arg_code_register_elem(void* ptr, int type, Token elem){
    
@@ -129,7 +130,7 @@ void arg_code_register_subrule(void* ptr, int type, codegen_t child){
         code->exp = child;
 }
 
-CODEGEN_DEC(arg_code)
+CODEGEN_DEC(arg_code, sem_args)
 
 void param_code_register_elem(void* ptr, int type, Token elem){
     param_code *code = (param_code*)ptr;
@@ -145,7 +146,7 @@ void param_code_register_subrule(void* ptr, int type, codegen_t child){
         code->chain = child;
 }
 
-CODEGEN_DEC(param_code)
+CODEGEN_DEC(param_code, sem_param)
 
 void func_code_register_elem(void* ptr, int type, Token elem){
     func_code *code = (func_code*)ptr;
@@ -162,7 +163,7 @@ void func_code_register_subrule(void* ptr, int type, codegen_t child){
     if (type == sem_scope) code->body = child;
 }
 
-CODEGEN_DEC(func_code)
+CODEGEN_DEC(func_code, sem_func)
 
 void for_code_register_elem(void* ptr, int type, Token elem){
 
@@ -178,7 +179,7 @@ void for_code_register_subrule(void* ptr, int type, codegen_t child){
     }
 }
 
-CODEGEN_DEC(for_code)
+CODEGEN_DEC(for_code, sem_for)
 
 void while_code_register_elem(void* ptr, int type, Token elem){
 
@@ -192,7 +193,7 @@ void while_code_register_subrule(void* ptr, int type, codegen_t child){
     }
 }
 
-CODEGEN_DEC(while_code)
+CODEGEN_DEC(while_code, sem_while)
 
 void dowhile_code_register_elem(void* ptr, int type, Token elem){
 
@@ -206,7 +207,7 @@ void dowhile_code_register_subrule(void* ptr, int type, codegen_t child){
     }
 }
 
-CODEGEN_DEC(dowhile_code)
+CODEGEN_DEC(dowhile_code, sem_dowhile)
 
 void var_code_register_elem(void* ptr, int type, Token elem){
     var_code *code = (var_code*)ptr;
@@ -224,7 +225,7 @@ void var_code_register_subrule(void* ptr, int type, codegen_t child){
         code->var = child;
 }
 
-CODEGEN_DEC(var_code)
+CODEGEN_DEC(var_code, sem_var)
 
 void inc_code_register_elem(void *ptr, int type, Token elem){
     inc_code *code = (inc_code*)ptr;
@@ -235,10 +236,11 @@ void inc_code_register_subrule(void *ptr, int type, codegen_t child){
     
 }
 
-CODEGEN_DEC(inc_code)
+CODEGEN_DEC(inc_code, sem_inc)
 
 void struct_code_register_elem(void *ptr, int type, Token elem){
     struct_code *code = (struct_code*)ptr;
+    if (type == sem_elem_parent) code->parent = elem;
     if (type == sem_elem_name) code->name = elem;
 }
 
@@ -247,7 +249,7 @@ void struct_code_register_subrule(void *ptr, int type, codegen_t child){
     code->contents = child;
 }
 
-CODEGEN_DEC(struct_code)
+CODEGEN_DEC(struct_code, sem_struct)
 
 void ret_code_register_elem(void *ptr, int type, Token elem){
     
@@ -258,7 +260,7 @@ void ret_code_register_subrule(void *ptr, int type, codegen_t child){
     code->expression = child;
 }
 
-CODEGEN_DEC(ret_code)
+CODEGEN_DEC(ret_code, sem_ret)
 
 void def_code_register_elem(void *ptr, int type, Token elem){
     
@@ -269,7 +271,7 @@ void def_code_register_subrule(void *ptr, int type, codegen_t child){
     code->expression = child;
 }
 
-CODEGEN_DEC(def_code)
+CODEGEN_DEC(def_code, sem_def)
 
 void int_code_register_elem(void *ptr, int type, Token elem){
     struct_code *code = (struct_code*)ptr;
@@ -281,4 +283,4 @@ void int_code_register_subrule(void *ptr, int type, codegen_t child){
     code->contents = child;
 }
 
-CODEGEN_DEC(int_code)
+CODEGEN_DEC(int_code, sem_interf)
