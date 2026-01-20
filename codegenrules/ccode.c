@@ -140,8 +140,12 @@ void func_code_emit_code(void *ptr){
     if (ctx.context_rule == sem_struct){
         switch_block_section(block_section_epilogue);
     }
-    if (code->type.kind){
-        emit_token(code->type);//TODO: fetch from symbol table
+    func_code *sig;
+    if (code->signature.ptr){
+        sig = code->signature.ptr;
+    } else sig = code;
+    if (sig->type.kind){
+        emit_token(sig->type);//TODO: fetch from symbol table
         emit_const(" ");
     } else 
         emit_const("void ");
@@ -149,42 +153,56 @@ void func_code_emit_code(void *ptr){
         emit_slice(ctx.context_prefix);
         emit_const("_");
     }
-    emit_token(code->name);//TODO: fetch from symbol table
+    if (ctx.context_rule == sem_interf){
+        emit_const("(*");
+    }
+    emit_token(sig->name);//TODO: fetch from symbol table
+    if (ctx.context_rule == sem_interf){
+        emit_const(")");
+    }
     emit_const("(");
-    if (ctx.context_rule == sem_struct){
+    if (ctx.context_rule == sem_struct || ctx.context_rule == sem_interf){
+        if (ctx.context_rule == sem_interf)
+            emit_const("struct ");
         emit_slice(ctx.context_prefix);
         emit_const(" *instance");
-        if (code->args.ptr)
+        if (sig->args.ptr)
             emit_const(", ");
     }
-    emit_code(code->args);
-    emit_const("){");
-    emit_block original = save_and_push_block();
-    emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false, .has_defer = false });
-    increase_indent();
-    emit_newline();
-    emit_code(code->body);
-    switch_block_section(block_section_epilogue);
-    decrease_indent();
-    if (ctx.has_defer){
-        switch_block_section(block_section_prologue);
-        emit_const("int _return_val = 0;");
-        switch_block_section(block_section_epilogue);
-        emit_const("return _return_val;");
+    emit_code(sig->args);
+    if (ctx.context_rule == sem_interf){
+        emit_const(");");
+    } else {
+        emit_const("){");
+        emit_block original = save_and_push_block();
+        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false, .has_defer = false });
+        increase_indent();
         emit_newline();
-    }
-    emit_const("}");
-    emit_newline();
-    switch_block_section(block_section_body);
-    emit_block fnblock = pop_and_restore_emit_block(original);
-    if (orig.context_rule == sem_struct){
+        emit_code(code->body);
         switch_block_section(block_section_epilogue);
-    }
-    collapse_block(fnblock);
-    if (orig.context_rule == sem_struct){
+        decrease_indent();
+        if (ctx.has_defer){
+            switch_block_section(block_section_prologue);
+            emit_newline();
+            increase_indent();
+            emit_const("int _return_val = 0;");
+            switch_block_section(block_section_epilogue);
+            emit_const("return _return_val;");
+            emit_newline();
+        }
+        emit_const("}");
+        emit_newline();
         switch_block_section(block_section_body);
+        emit_block fnblock = pop_and_restore_emit_block(original);
+        if (orig.context_rule == sem_struct){
+            switch_block_section(block_section_epilogue);
+        }
+        collapse_block(fnblock);
+        if (orig.context_rule == sem_struct){
+            switch_block_section(block_section_body);
+        }
+        pop_and_restore_context(orig);
     }
-    pop_and_restore_context(orig);
 }
 
 void for_code_emit_code(void* ptr){
@@ -298,6 +316,25 @@ void def_code_emit_code(void *ptr){
     emit_newline();
     ctx.has_defer = true;
     switch_block_section(block_section_body);
+}
+
+void int_code_emit_code(void *ptr){
+    int_code *code = (int_code*)ptr;
+    emit_block original = save_and_push_block();
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_interf, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name) });
+    emit_const("typedef struct ");
+    emit_token(code->name);
+    emit_const(" { ");
+    increase_indent();
+    emit_newline();
+    emit_code(code->contents);
+    decrease_indent();
+    emit_newline();
+    emit(" } %v;",token_to_slice(code->name));
+    emit_newline();
+    emit_block new_b = pop_and_restore_emit_block(original);
+    pop_and_restore_context(orig);
+    collapse_block(new_b);
 }
 
 #endif

@@ -80,6 +80,7 @@ codegen_t param_code_init();
 typedef struct {
     Token type;
     Token name;
+    codegen_t signature;
     codegen_t args;
     codegen_t body;
 } func_code;
@@ -140,3 +141,10 @@ typedef struct {
 } def_code;
 
 codegen_t def_code_init();
+
+typedef struct {
+    Token name;
+    codegen_t contents;
+} int_code;
+
+codegen_t int_code_init();

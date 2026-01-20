@@ -28,19 +28,19 @@ char *sem_action_name(semantic_action kind){
 
 char *sem_rule_name(semantic_rules rule){
     switch (rule){
-        case sem_var: return "var";
-        case sem_func: return "func";
-        case sem_jmp: return "jmp";
+        case sem_var: return "variable";
+        case sem_func: return "function";
+        case sem_jmp: return "jump";
         case sem_scope: return "scope";
-        case sem_val: return "val";
+        case sem_val: return "value";
         case sem_cond: return "condition";
         case sem_call: return "call";
-        case sem_args: return "arg";
-        case sem_dec: return "dec"; 
+        case sem_args: return "argument";
+        case sem_dec: return "declaration"; 
         case sem_assign: return "assign"; 
-        case sem_exp: return "exp"; 
+        case sem_exp: return "expression"; 
         case sem_label: return "label"; 
-        case sem_op: return "op"; 
+        case sem_op: return "operand"; 
         case sem_stat: return "";
         case sem_param: return "parameter";
         case sem_for: return "for";
@@ -50,6 +50,7 @@ char *sem_rule_name(semantic_rules rule){
         case sem_struct: return "struct";
         case sem_ret: return "return";
         case sem_def: return "defer";
+        case sem_interf: return "interface";
         case sem_none: 
         case sem_rules_count: return "";
     }

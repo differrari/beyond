@@ -157,10 +157,9 @@ void func_code_register_elem(void* ptr, int type, Token elem){
 
 void func_code_register_subrule(void* ptr, int type, codegen_t child){
     func_code *code = (func_code*)ptr;
-    if (type == sem_param)
-        code->args = child;
-    if (type == sem_scope)
-        code->body = child;
+    if (type == sem_func) code->signature = child;
+    if (type == sem_param) code->args = child;
+    if (type == sem_scope) code->body = child;
 }
 
 CODEGEN_DEC(func_code)
@@ -271,3 +270,15 @@ void def_code_register_subrule(void *ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(def_code)
+
+void int_code_register_elem(void *ptr, int type, Token elem){
+    struct_code *code = (struct_code*)ptr;
+    if (type == sem_elem_name) code->name = elem;
+}
+
+void int_code_register_subrule(void *ptr, int type, codegen_t child){
+    struct_code *code = (struct_code*)ptr;
+    code->contents = child;
+}
+
+CODEGEN_DEC(int_code)

@@ -7,6 +7,11 @@ void print(){
 
 }
 
+interface hello {
+    void func();
+    test;
+}
+
 struct testType {
     func { 
         int a = 0;

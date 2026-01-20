@@ -23,6 +23,7 @@ codegen_t begin_rule(semantic_rules type){
         case sem_struct: return struct_code_init();
         case sem_ret: return ret_code_init();
         case sem_def: return def_code_init();
+        case sem_interf: return int_code_init();
         case sem_val: 
         case sem_op: 
         case sem_none:
