@@ -141,7 +141,7 @@ void param_code_emit_code(void *ptr){
 
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    if (ctx.context_rule == sem_struct){
+    if (ctx.context_rule == sem_rule_struct){
         switch_block_section(block_section_epilogue);
     }
     func_code *sig;
@@ -153,23 +153,23 @@ void func_code_emit_code(void *ptr){
         emit_const(" ");
     } else 
         emit_const("void ");
-    if (ctx.context_rule == sem_struct){
+    if (ctx.context_rule == sem_rule_struct){
         emit_slice(ctx.context_prefix);
         emit_const("_");
     }
-    if (ctx.context_rule == sem_interf){
+    if (ctx.context_rule == sem_rule_interf){
         emit_const("(*");
     }
     emit_token(sig->name);//TODO: fetch from symbol table
-    if (ctx.context_rule == sem_interf){
+    if (ctx.context_rule == sem_rule_interf){
         emit_const(")");
     }
     emit_const("(");
-    if (ctx.context_rule == sem_struct || ctx.context_rule == sem_interf){
+    if (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf){
         if (ctx.context_parent.length){
             emit_const("void *parent");
         } else {
-            if (ctx.context_rule == sem_interf)
+            if (ctx.context_rule == sem_rule_interf)
                 emit_const("void");
             else 
                 emit_slice(ctx.context_prefix);
@@ -179,7 +179,7 @@ void func_code_emit_code(void *ptr){
             emit_const(", ");
     }
     emit_code(sig->args);
-    if (ctx.context_rule == sem_interf){
+    if (ctx.context_rule == sem_rule_interf){
         emit_const(");");
     } else {
         emit_const("){");
@@ -211,11 +211,11 @@ void func_code_emit_code(void *ptr){
         emit_newline();
         switch_block_section(block_section_body);
         emit_block fnblock = pop_and_restore_emit_block(original);
-        if (orig.context_rule == sem_struct){
+        if (orig.context_rule == sem_rule_struct){
             switch_block_section(block_section_epilogue);
         }
         collapse_block(fnblock);
-        if (orig.context_rule == sem_struct){
+        if (orig.context_rule == sem_rule_struct){
             switch_block_section(block_section_body);
         }
         pop_and_restore_context(orig);
@@ -287,7 +287,7 @@ void inc_code_emit_code(void *ptr){
 void struct_code_emit_code(void *ptr){
     struct_code *code = (struct_code*)ptr;
     emit_block original = save_and_push_block();
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_struct, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name), .context_parent = token_to_slice(code->parent) });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name), .context_parent = token_to_slice(code->parent) });
     // switch_block_section(block_section_prologue);
     emit_const("typedef struct { ");
     increase_indent();
@@ -355,7 +355,7 @@ void gen_invoke_param(codegen_t contents){
 
 void gen_int_stubs(codegen_t contents, string_slice name){
     blk_code *scope = (blk_code*)contents.ptr;
-    if (scope->stat.ptr && scope->stat.type == sem_func){
+    if (scope->stat.ptr && scope->stat.type == sem_rule_func){
         func_code *func = scope->stat.ptr;
         if (func->type.length) emit("%v ",token_to_slice(func->type));
         else emit_const("void ");
@@ -390,7 +390,7 @@ void gen_int_stubs(codegen_t contents, string_slice name){
 void int_code_emit_code(void *ptr){
     int_code *code = (int_code*)ptr;
     emit_block original = save_and_push_block();
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_interf, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name) });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name) });
     emit_const("typedef struct { ");
     increase_indent();
     emit_newline();
@@ -424,7 +424,7 @@ void enum_code_emit_code(void *ptr){
     
     emit_newlines(2);
     
-    emit_const("char* ");
+    emit_const("static inline char* ");
     emit_token(code->name);
     emit_const("_to_string(");
     emit_token(code->name);

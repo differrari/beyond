@@ -43,7 +43,7 @@ void output_literal(char* lit, bool space){
 
 codegen_t eval_rule(int current_rule, int curr_option){
     
-    semantic_rules statement_type = language_rules[current_rule].action;
+    sem_rule statement_type = language_rules[current_rule].action;
     codegen_t gen = begin_rule(statement_type);
 
     // print("Current rule %s@%i",rule_name(current_rule),curr_option);

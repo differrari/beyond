@@ -23,8 +23,19 @@ bool rulegen {
     return 0;
 }
 
-compiler {
+bool genc {
     if (rulegen()){
+        new_module("genc");
+        source("sem_enum.cred");
+        set_name("semantic_rules.h");
+        cred_compile();
+        return true;
+    }
+    return false;
+}
+
+compiler {
+    if (genc()){
         new_module("compiler");
         
         set_name("cred");

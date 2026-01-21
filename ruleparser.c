@@ -193,7 +193,7 @@ void emit_rules(){
         decrease_indent();
         emit_newline();
         if (e->tag.length)
-            emit("},%i, sem_%v},",subrule_count,token_to_slice(e->tag));
+            emit("},%i, sem_rule_%v},",subrule_count,token_to_slice(e->tag));
         else 
             emit("},%i, 0},",subrule_count);
     }

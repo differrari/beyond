@@ -1,0 +1,44 @@
+enum sem_rule { 
+    none, 
+    dec, 
+    stat, 
+    var, 
+    assign, 
+    exp, 
+    func, 
+    label, 
+    jmp, 
+    scope, 
+    param, 
+    val, 
+    op, 
+    cond, 
+    call, 
+    args, 
+    for, 
+    while, 
+    dowhile, 
+    inc, 
+    struct, 
+    rules_count, 
+    ret, 
+    def, 
+    interf, 
+    enum, 
+    enum_case, 
+    parent 
+}
+
+enum sem_elem { 
+    none, 
+    type, 
+    name, 
+    parent, 
+    count 
+}
+
+enum sem_action { 
+    none, 
+    declare, 
+    check 
+}
