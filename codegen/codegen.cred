@@ -7,7 +7,3 @@ interface codegen_t {
     void register_subrule(int type, codegen_t child);
     void emit_code();
 }
-
-codegen_t begin_rule(sem_rule type){
-    /*switch*/
-}

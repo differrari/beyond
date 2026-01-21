@@ -28,7 +28,7 @@ ln_report parse_ln(uint32_t pos, char *content){
     return rep;
 }
 
-const char* outname = "output.c";
+const char* outname = "output";
 buffer buf;
 
 void parse_arguments(int argc, char *argv[]){

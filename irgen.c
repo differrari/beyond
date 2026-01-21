@@ -88,6 +88,6 @@ void gen_code(ast_node *stack, uint32_t count, const char *out_name){
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
     codegen_t cg = eval_rule(new_rule,new_opt);
-    emit_code(cg);
-    output_code(out_name);
+    
+    generate_code(out_name, cg);
 }

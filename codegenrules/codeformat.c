@@ -138,19 +138,34 @@ void collapse_block(emit_block old_block){
     if (old_block.prologue.buffer_size){
         emit_const(old_block.prologue.buffer);
         emit_newline();
+        buffer_destroy(&old_block.prologue);
     }
     if (old_block.body.buffer_size){
         emit_const(old_block.body.buffer);
         emit_newline();
+        buffer_destroy(&old_block.body);
     }
-    if (old_block.epilogue.buffer_size)
+    if (old_block.epilogue.buffer_size){
         emit_const(old_block.epilogue.buffer);
+        buffer_destroy(&old_block.epilogue);
+    }
 }
 
-void output_code(const char *path){
+void output_code(const char *path, const char *extension){
     buffer joined = new_buffer();
     if (current_eblock.prologue.buffer_size){ buffer_write_lim(&joined, current_eblock.prologue.buffer, current_eblock.prologue.buffer_size); }
     if (current_eblock.body.buffer_size){ buffer_write_lim(&joined, current_eblock.body.buffer, current_eblock.body.buffer_size); }
     if (current_eblock.epilogue.buffer_size){ buffer_write_lim(&joined, current_eblock.epilogue.buffer, current_eblock.epilogue.buffer_size); }
-    write_full_file(path,joined.buffer,joined.buffer_size);
+    
+    buffer_destroy(&current_eblock.prologue);
+    buffer_destroy(&current_eblock.body);
+    buffer_destroy(&current_eblock.epilogue);
+    
+    save_and_push_block();
+    
+    string s = strlen(extension) ? string_format("%s.%s",path,extension) : string_from_literal(path);
+    
+    write_full_file(s.data,joined.buffer,joined.buffer_size);
+    
+    string_free(s);
 }

@@ -286,7 +286,7 @@ int main(int argc, char *argv[]){
     
     if (strlen(code_buf) < MAX_BUF-1) code_buf[strlen(code_buf)] = '\0';
     
-    output_code("rules.c");
+    output_code("rules","c");
     
     return 0;
 }

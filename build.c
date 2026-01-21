@@ -1,5 +1,7 @@
 #include "redbuild.h"
+
 #include "syscalls/syscalls.h"
+
 bool rulegen(){
 	new_module("rulegen");
 	set_name("rulegen");
@@ -24,7 +26,7 @@ bool genc(){
 	if (rulegen()){
 		new_module("genc");
 		source("sem_enum.cred");
-		set_name("semantic_rules.h");
+		set_name("semantic_rules");
 		cred_compile();
 		return true;
 	}
@@ -41,10 +43,10 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
-		ignore_source("codegen_exp.c");
+
 		source_all(".c");
 		if (compile()){
-			
+			run();
 		}
 		
 	}

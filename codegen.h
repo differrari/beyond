@@ -11,6 +11,7 @@ typedef struct codegen_t {
     void *ptr;
 } codegen_t;
 
+void generate_code(const char *name, codegen_t cg);
 codegen_t begin_rule(sem_rule type);
 void register_elem(codegen_t gen, int type, Token elem);
 void register_subrule(codegen_t gen, int type, codegen_t child);

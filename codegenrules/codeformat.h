@@ -32,4 +32,4 @@ void emit_space();
 void increase_indent();
 void decrease_indent();
 
-void output_code(const char *path);
+void output_code(const char *path, const char *extension);
