@@ -130,6 +130,8 @@ void arg_code_emit_code(void *ptr){
 
 void param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
+    if ((ctx.context_rule == sem_rule_interf || ctx.context_rule == sem_rule_struct) && slices_equal(token_to_slice(code->type), ctx.context_prefix, false))
+        emit_const("struct ");
     emit_token(code->type);//TODO: fetch from symbol table
     emit_space();
     emit_token(code->name);//TODO: fetch from symbol table
@@ -282,6 +284,7 @@ void inc_code_emit_code(void *ptr){
     inc_code *code = (inc_code*)ptr;
     emit_const("#include ");
     emit_token(code->value);
+    emit_newline();
 }
 
 void struct_code_emit_code(void *ptr){
@@ -289,7 +292,9 @@ void struct_code_emit_code(void *ptr){
     emit_block original = save_and_push_block();
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name), .context_parent = token_to_slice(code->parent) });
     // switch_block_section(block_section_prologue);
-    emit_const("typedef struct { ");
+    emit_const("typedef struct ");
+    emit_token(code->name);
+    emit_const(" { ");
     increase_indent();
     emit_code(code->contents);
     decrease_indent();
@@ -363,13 +368,13 @@ void gen_int_stubs(codegen_t contents, string_slice name){
         emit_slice(name);
         emit_const("_");
         emit_token(func->name);
-        emit("(%v parent",name);
-        if (func->args.ptr) emit_const(",");
+        emit("(%v instance",name);
+        if (func->args.ptr) emit_const(" ,");
         emit_code(func->args);
         emit_const("){");
         increase_indent();
         emit_newline();
-        emit("if (parent.%v) parent.%v(parent.ptr",token_to_slice(func->name),token_to_slice(func->name));
+        emit("if (instance.%v) instance.%v(instance.ptr",token_to_slice(func->name),token_to_slice(func->name));
         if (func->args.ptr) gen_invoke_param(func->args);
         emit_const(");");
         decrease_indent();
@@ -391,7 +396,9 @@ void int_code_emit_code(void *ptr){
     int_code *code = (int_code*)ptr;
     emit_block original = save_and_push_block();
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name) });
-    emit_const("typedef struct { ");
+    emit_const("typedef struct ");
+    emit_token(code->name);
+    emit_const(" { ");
     increase_indent();
     emit_newline();
     emit_const("void* ptr;");

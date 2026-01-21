@@ -75,8 +75,6 @@ codegen_t eval_rule(int current_rule, int curr_option){
             if (gen.ptr && node.sem_value) register_elem(gen, node.action == sem_action_declare ? node.sem_value : node.sem_value, node.t);
         }
     }
-
-    end_rule(statement_type);
     
     return gen;
 }

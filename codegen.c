@@ -40,10 +40,6 @@ void register_elem(codegen_t gen, int type, Token elem){
    if (gen.register_elem) gen.register_elem(gen.ptr, type, elem);
 }
 
-void end_rule(int type){
-    
-}
-
 void register_subrule(codegen_t gen, int type, codegen_t child){
     if (gen.register_subrule) gen.register_subrule(gen.ptr, type, child);
 }
