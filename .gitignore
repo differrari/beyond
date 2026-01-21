@@ -22,7 +22,5 @@ trace
 cred
 rulegen
 output.c
-rules.c
 build
-semantic_rules.h
 publish
