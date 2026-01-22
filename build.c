@@ -43,7 +43,6 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
-
 		source_all(".c");
 		if (compile()){
 			run();

@@ -29,7 +29,7 @@ ln_report parse_ln(uint32_t pos, char *content){
 }
 
 const char* outname = "output";
-buffer buf;
+static buffer buf;
 
 void parse_arguments(int argc, char *argv[]){
     buf = (buffer){
