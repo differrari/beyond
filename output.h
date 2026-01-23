@@ -2,7 +2,7 @@ int a();
 void draw(int x, int y, int color, int overwrite);
 void c(int x);
 void print();
-extern int t = ;
+extern int t;
 typedef enum {
 	test_enum_one,
 	test_enum_two,

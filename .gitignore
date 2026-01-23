@@ -21,7 +21,5 @@ trace
 *.dSYM
 cred
 rulegen
-output.c
 build
 publish
-output.h

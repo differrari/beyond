@@ -110,10 +110,12 @@ void exp_code_register_elem(void* ptr, int type, Token elem){
     else code->operand = elem;
 }
 
-void exp_code_register_subrule(void* ptr, int type,  codegen_t child){
+void exp_code_register_subrule(void* ptr, int type, codegen_t child){
     exp_code *code = (exp_code*)ptr;
     if (type == sem_rule_var) code->var = child;
-    if (type == sem_rule_exp) code->exp = child;
+    if (type == sem_rule_exp){ 
+        code->exp = child;
+    }
 }
 
 CODEGEN_DEC(exp_code, sem_rule_exp)

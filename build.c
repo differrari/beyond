@@ -11,12 +11,7 @@ bool rulegen(){
 	source("codegenrules/codeformat.c");
 	source("ruleparser.c");
 	if (compile()){
-		int i = run();
-		if (i == 0){
-			return 1;
-		}
-		
-		return 0;
+		return run() == 0;
 	}
 	
 	return 0;

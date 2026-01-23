@@ -82,23 +82,24 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ SYMDEC(IDENTIFIER,name), TOKEN(COLON),  },2},
 	},1, sem_rule_label},
 	[rule_expression] = {{
-		{{ SYMRULE(funccall,exp),  },1},
-		{{ SYMRULE(chain,exp),  },1},
 		{{ TOKEN(LPAREN), SYMRULE(expression,exp), TOKEN(RPAREN),  },3},
 		{{ SYMRULE(math,exp),  },1},
-	},4, 0},
+		{{ SYMRULE(funccall,exp),  },1},
+		{{ SYMRULE(chain,exp),  },1},
+		{{ SYMCHECK(CONST,val),  },1},
+		{{ SYMRULE(variable,var),  },1},
+	},6, sem_rule_exp},
 	[rule_chain] = {{
 		{{ SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(funccall,exp),  },3},
 		{{ SYMRULE(variable,var), SYMCHECK(DOT,op), SYMCHECK(IDENTIFIER,exp),  },3},
 	},2, sem_rule_var},
 	[rule_math] = {{
+		{{ SYMRULE(funccall,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
 		{{ SYMCHECK(CONST,val), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
 		{{ SYMRULE(variable,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
-		{{ SYMCHECK(CONST,val),  },1},
-		{{ SYMRULE(variable,var),  },1},
-	},4, sem_rule_exp},
+	},3, sem_rule_exp},
 	[rule_variable] = {{
-		{{ SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(math,exp), TOKEN(RBRACKET),  },4},
+		{{ SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET),  },4},
 		{{ SYMCHECK(IDENTIFIER,var),  },1},
 	},2, sem_rule_var},
 	[rule_forloop] = {{

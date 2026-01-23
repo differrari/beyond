@@ -65,7 +65,7 @@ void dec_code_emit_code(void* ptr){
     emit_token(code->type);//TODO: fetch from symbol table
     emit_space();
     emit_token(code->name);//TODO: fetch from symbol table
-    if (is_header != false && code->initial_value.ptr){
+    if (is_header != true && code->initial_value.ptr){
         emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
         emit_const(" = ");
         emit_code(code->initial_value);
@@ -229,7 +229,7 @@ void func_code_emit_code(void *ptr){
             emit_newline();
         }
         emit_block original = save_and_push_block();
-        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false, .has_defer = false });
+        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(sig->name), .ignore_semicolon = false, .has_defer = false });
         increase_indent();
         emit_newline();
         emit_code(code->body);
@@ -370,13 +370,13 @@ void ret_code_emit_code(void *ptr){
     if (is_header == true) return;
     ret_code *code = (ret_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
-    if (ctx.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
+    if (orig.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
         emit_const("_return_val = ");
         emit_code(code->expression);
         emit_const(";");
         emit_newline();
         emit_const("goto ");
-        emit_slice(ctx.context_prefix);
+        emit_slice(orig.context_prefix);
         emit_const("_defer"); 
     } else {
         emit_const("return ");

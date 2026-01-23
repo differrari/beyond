@@ -1,6 +1,6 @@
 int a {
     if (compile()){
-        return run();
+        return run() == 0;
     }
 }
 

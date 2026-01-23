@@ -72,7 +72,7 @@ codegen_t eval_rule(int current_rule, int curr_option){
                 print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
                 return (codegen_t){};
             }
-            if (gen.ptr && node.sem_value) register_elem(gen, node.action == sem_action_declare ? node.sem_value : node.sem_value, node.t);
+            if (gen.ptr && node.sem_value) register_elem(gen, node.sem_value, node.t);
         }
     }
     
