@@ -27,7 +27,8 @@ enum sem_rule {
     enum, 
     enum_case, 
     parent,
-    else
+    else,
+    syn
 }
 
 enum sem_elem { 

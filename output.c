@@ -1,8 +1,8 @@
 #include "output.h"
 
 int a(){
-	if ( compile()){
-		return  run() == 0;
+	if (compile()){
+		return run() == 0;
 	}
 	
 }
@@ -23,7 +23,7 @@ void print(){
 	
 }
 
-int t =  u + i;
+int t = u + i;
 
 
 char* test_enum_to_string(test_enum val){
@@ -57,13 +57,13 @@ hello testType_init(){
 int main(){
 int _return_val = 0;
 
-	int y =  a();
-	int x =  1 -   0 - 2;
+	int y = a();
+	int x = 1 - (0 - 2);
 	int z = x[0];
-	printf("This is democracy");
+	print("This is democracy");
 	
 	
-	for (int i = 0;  i < 10; i =  i + 1){}
+	for (int i = 0; i < 10; i = i + 1){}
 	while (0){print();}
 	_return_val = 0;
 	goto main_defer;
@@ -71,17 +71,17 @@ int _return_val = 0;
 	y_loop:
 	x_loop:
 	draw(x, y, 0xFF00FF00, 0);
-	x =  x + 1;
-	x =  y.run();
-	if ( x < 100){
+	x = x + 1;
+	x = y.run();
+	if (x < 100){
 		goto x_loop;
 	} else {
 		print("Done with x");
 	}
-	y =  y + 1;
-	if ( y < 100){
+	y = y + 1;
+	if (y < 100){
 		goto y_loop;
-	} else if ( y == 100){
+	} else if (y == 100){
 		print("Exactly 100 y");
 	}
 	

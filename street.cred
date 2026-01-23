@@ -43,7 +43,7 @@ int main {
     int x = 1-(0-2);
     int z = x[0];
     {
-        printf("This is democracy");
+        print("This is democracy");
     }
     defer {
         cleanup();

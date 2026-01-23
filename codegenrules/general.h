@@ -39,6 +39,7 @@ typedef struct {
     codegen_t var;
     Token operand;
     codegen_t exp;
+    bool paren;
 } exp_code;
 
 codegen_t exp_code_init();

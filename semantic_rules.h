@@ -28,6 +28,7 @@ typedef enum {
 	sem_rule_enum_case,
 	sem_rule_parent,
 	sem_rule_else,
+	sem_rule_syn,
 } sem_rule;
 
 char* sem_rule_to_string(sem_rule val);

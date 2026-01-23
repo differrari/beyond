@@ -82,7 +82,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ SYMDEC(IDENTIFIER,name), TOKEN(COLON),  },2},
 	},1, sem_rule_label},
 	[rule_expression] = {{
-		{{ TOKEN(LPAREN), SYMRULE(expression,exp), TOKEN(RPAREN),  },3},
+		{{ SYMCHECK(LPAREN,syn), SYMRULE(expression,exp), TOKEN(RPAREN),  },3},
 		{{ SYMRULE(math,exp),  },1},
 		{{ SYMRULE(funccall,exp),  },1},
 		{{ SYMRULE(chain,exp),  },1},

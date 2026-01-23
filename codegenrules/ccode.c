@@ -134,19 +134,23 @@ void exp_code_emit_code(void *ptr){
     if (is_header == true) return;
     exp_code *code = (exp_code*)ptr;
     //TODO: fetch from symbol table
-    // emit_const("(");
+    if (code->paren)
+        emit_const("(");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     if (code->var.ptr) emit_code(code->var);
     else emit_token(code->val);
     // emit_const(",");
     if (code->exp.ptr){
         if (code->val.kind || code->var.ptr) emit_space();
-        emit_token(code->operand);
-        emit_space();
+        if (code->operand.kind){
+            emit_token(code->operand);
+            emit_space();
+        }
         emit_code(code->exp);
     }
     pop_and_restore_context(orig);
-    // emit_const(")");
+    if (code->paren)
+        emit_const(")");
 }
 
 void arg_code_emit_code(void *ptr){

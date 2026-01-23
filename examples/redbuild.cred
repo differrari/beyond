@@ -42,12 +42,12 @@ comp {
         memset(buff, 0, BUF_SIZE);
         clinkedlist_for_each(comp_files, process_out_files);
         string_format_buf(buff, BUF_SIZE, "ar rcs %s %s",output.data,ofiles.data);
-        printf("%{buff}");
+        print("%{buff}");
         system(buff);
     } else {
         clinkedlist_for_each(comp_files, process_comp_files);
         string_format_buf(buff, BUF_SIZE, "%s %s %s %s %s %s %s -o %s", compiler, preproc_flags.data ? preproc_flags.data : "", comp_flags.data ? comp_flags.data : "", link_flags.data ? link_flags.data : "", includes.data ? includes.data : "",sources.data ? sources.data : "",link_libs.data ? link_libs.data : "", output.data);
-        printf("%s",buff);
+        print("%s",buff);
         system(buff);
     }
 }

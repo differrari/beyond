@@ -14,9 +14,9 @@ stack_navigator gsn;
 void print_stack(ast_node *stack, uint32_t count){
     for (uint32_t i = 0; i < count; i++){
         if (!stack[i].t.kind)
-            printf("%c[%i,%i] %s ->",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth));
+            print("%c[%i,%i] %s ->",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth));
         else
-            printf("%c[%i,%i] %s %v",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth),token_to_slice(stack[i].t));
+            print("%c[%i,%i] %s %v",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth),token_to_slice(stack[i].t));
     }
 }
 
