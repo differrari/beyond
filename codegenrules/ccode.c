@@ -60,6 +60,7 @@ void blk_code_emit_code(void* ptr){
 
 void dec_code_emit_code(void* ptr){
     dec_code *code = (dec_code*)ptr;
+    if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
     emit_token(code->type);//TODO: fetch from symbol table
@@ -345,10 +346,9 @@ void struct_code_emit_code(void *ptr){
         decrease_indent();
         emit_newline();
         emit(" } %v;",token_to_slice(code->name));
-    }
+    } else emit_code(code->contents);
     emit_newline();
     emit_block new_b = pop_and_restore_emit_block(original);
-    print("Block has body of %i, epilogue of %i",new_b.body.buffer_size, new_b.epilogue.buffer_size);
     pop_and_restore_context(orig);
     collapse_block(new_b);
 
