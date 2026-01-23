@@ -20,7 +20,8 @@ typedef struct {
 typedef struct {
     grammar_rule_opt options[64];
     uint8_t num_elements;
-    sem_rule action;
+    sem_rule semrule;
+    sem_action action;
 } grammar_rule;
 
 #define TOKEN(name) { false, TOK_##name, 0, sem_action_none, 0 }

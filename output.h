@@ -23,12 +23,14 @@ void hello_test(hello instance);
 
 typedef struct testType { 
 	
+	
 	int prop1;
 	int prop2;
  } testType;
 
 void testType_func(void *parent, int rule, Token elem);
 void testType_test(void *parent);
+void testType_helper(void *parent);
 hello testType_init();
 
 int main();

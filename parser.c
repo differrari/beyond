@@ -49,7 +49,7 @@ bool push_ast_rule(int rule, int option, int sequence){
         .option = option,
         .depth = parser_depth,
         .sequence = sequence,
-        .sem_value = language_rules[rule].action,
+        .sem_value = language_rules[rule].semrule,
     };
     return true;
 }

@@ -1,5 +1,6 @@
 #include "general.h"
 #include "codeformat.h"
+#include "sem_analysis.h"
 
 #ifdef CCODEGEN
 
@@ -358,15 +359,34 @@ void struct_code_emit_code(void *ptr){
             emit_const(";");
             emit_newline();
         } 
-        else emit("{\n\
-/* Parent conformance here. Requires semantic analysis \n\
-    return (%v){\n\
-        .ptr = zalloc(sizeof(%v)),\n\
-        .fn1 = %v_fn1,\n\
-        .fn2 = %v_fn2,\n\
-        .fn3 = %v_fn3,\n\
-    };*/\n\
-}\n",token_to_slice(code->parent),token_to_slice(code->name),token_to_slice(code->name),token_to_slice(code->name),token_to_slice(code->name));
+        else {
+            emit_const("{");
+            increase_indent();
+            emit_newline();
+            emit("return (%v){",token_to_slice(code->parent));
+            increase_indent();
+            emit_newline();
+            emit(".ptr = zalloc(sizeof(%v)),",token_to_slice(code->name));
+            symbol_t *parent_sym = find_symbol(sem_rule_interf, token_to_slice(code->parent));
+            if (!parent_sym || !parent_sym->child){
+                print("Error: interface %v not found. Should've done better semantic analysis. smh",token_to_slice(code->parent));
+                return;
+            }
+            symbol_table *table = parent_sym->child;
+            for (int i = 0; i < table->symbol_count; i++){
+                symbol_t *sym = &table->symbol_table[i];
+                if (sym->name.length && sym->sym_type == sem_rule_func){
+                    emit_newline();
+                    emit(".%v = %v_%v,",sym->name,token_to_slice(code->name),sym->name);
+                }
+            }
+            decrease_indent();
+            emit_newline();
+            emit_const("};");
+            decrease_indent();
+            emit_newline();
+            emit_const("}");
+        }
     }
 }
 

@@ -3,139 +3,377 @@ typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,ru
 
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
-		{{ SYMRULE(statement,stat), SYMRULE(block,scope),  },2},{{ SYMRULE(statement,stat),  },1},
-	},2, sem_rule_scope},
+		{{ 
+			SYMRULE(statement,stat), SYMRULE(block,scope), 
+		 },2},
+		{{ 
+			SYMRULE(statement,stat), 
+		 },1},
+	},2, sem_rule_scope, sem_action_none},
 	[rule_statement] = {{
-		{{ SYMRULE(interface,interf),  },1},
-		{{ SYMRULE(enum,enum),  },1},
-		{{ SYMRULE(def,def),  },1},
-		{{ SYMRULE(struct,struct),  },1},
-		{{ SYMRULE(include,inc),  },1},
-		{{ SYMRULE(dowhile,dowhile), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(funcdec,func),  },1},
-		{{ TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },3},{{ TOKEN(LBRACE), TOKEN(RBRACE),  },2},
-		{{ SYMRULE(forloop,for),  },1},
-		{{ SYMRULE(whileloop,while),  },1},
-		{{ SYMRULE(conditional,cond),  },1},
-		{{ SYMRULE(jump,jmp), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(label,label),  },1},
-		{{ SYMRULE(return,ret), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(assignment,assign), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(declaration,dec), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(funccall,call), TOKEN(SEMICOLON),  },2},
+		{{ 
+			SYMRULE(interface,interf), 
+		 },1},
+		{{ 
+			SYMRULE(enum,enum), 
+		 },1},
+		{{ 
+			SYMRULE(def,def), 
+		 },1},
+		{{ 
+			SYMRULE(struct,struct), 
+		 },1},
+		{{ 
+			SYMRULE(include,inc), 
+		 },1},
+		{{ 
+			SYMRULE(dowhile,dowhile), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(funcdec,func), 
+		 },1},
+		{{ 
+			TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },3},
+		{{ 
+			TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },2},
+		{{ 
+			SYMRULE(forloop,for), 
+		 },1},
+		{{ 
+			SYMRULE(whileloop,while), 
+		 },1},
+		{{ 
+			SYMRULE(conditional,cond), 
+		 },1},
+		{{ 
+			SYMRULE(jump,jmp), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(label,label), 
+		 },1},
+		{{ 
+			SYMRULE(return,ret), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(assignment,assign), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(declaration,dec), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(funccall,call), TOKEN(SEMICOLON), 
+		 },2},
 	},18, 0},
 	[rule_def] = {{
-		{{ LITERAL("defer"), SYMRULE(statement,exp),  },2},
-	},1, sem_rule_def},
+		{{ 
+			LITERAL("defer"), SYMRULE(statement,exp), 
+		 },2},
+	},1, sem_rule_def, sem_action_none},
 	[rule_include] = {{
-		{{ LITTOK(SYMBOL,"@"), LITERAL("includeC"), TOKEN(LPAREN), SYMCHECK(CONST,inc), TOKEN(RPAREN),  },5},
-	},1, sem_rule_inc},
+		{{ 
+			LITTOK(SYMBOL,"@"), LITERAL("includeC"), TOKEN(LPAREN), SYMCHECK(CONST,inc), TOKEN(RPAREN), 
+		 },5},
+	},1, sem_rule_inc, sem_action_none},
 	[rule_separator] = {{
-		{{ TOKEN(SEMICOLON),  },1},
-		{{ TOKEN(NEWLINE),  },1},
+		{{ 
+			TOKEN(SEMICOLON), 
+		 },1},
+		{{ 
+			TOKEN(NEWLINE), 
+		 },1},
 	},2, 0},
 	[rule_assignment] = {{
-		{{ SYMCHECK(IDENTIFIER,var), LITTOK(OPERATOR,"="), SYMRULE(expression,exp),  },3},
-	},1, sem_rule_assign},
+		{{ 
+			SYMCHECK(IDENTIFIER,var), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+		 },3},
+	},1, sem_rule_assign, sem_action_none},
 	[rule_funccall] = {{
-		{{ SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN),  },4},{{ SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN),  },3},
-	},2, sem_rule_call},
+		{{ 
+			SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN), 
+		 },4},
+		{{ 
+			SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN), 
+		 },3},
+	},2, sem_rule_call, sem_action_none},
 	[rule_funcdec] = {{
-		{{ SYMRULE(funcsign,func), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },4},{{ SYMRULE(funcsign,func), TOKEN(LBRACE), TOKEN(RBRACE),  },3},
-	},2, sem_rule_func},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },3},
+	},8, sem_rule_func, sem_action_declare},
 	[rule_funcsign] = {{
-		{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param),  },3},{{ SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param),  },2},{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name),  },2},{{ SYMDEC(IDENTIFIER,name),  },1},
-	},4, sem_rule_func},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), 
+		 },3},
+		{{ 
+			SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), 
+		 },2},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
+		 },2},
+		{{ 
+			SYMDEC(IDENTIFIER,name), 
+		 },1},
+	},4, sem_rule_func, sem_action_declare},
 	[rule_funcarguments] = {{
-		{{ TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN),  },3},{{ TOKEN(LPAREN), TOKEN(RPAREN),  },2},
+		{{ 
+			TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), 
+		 },3},
+		{{ 
+			TOKEN(LPAREN), TOKEN(RPAREN), 
+		 },2},
 	},2, 0},
 	[rule_argdec] = {{
-		{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), TOKEN(COMMA), SYMRULE(argdec,param),  },4},
-		{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name),  },2},
-	},2, sem_rule_param},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), TOKEN(COMMA), SYMRULE(argdec,param), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
+		 },2},
+	},2, sem_rule_param, sem_action_declare},
 	[rule_argument] = {{
-		{{ RULE(argname), SYMRULE(expression,exp), TOKEN(COMMA), SYMRULE(argument,args),  },4},{{ SYMRULE(expression,exp), TOKEN(COMMA), SYMRULE(argument,args),  },3},
-		{{ RULE(argname), SYMRULE(expression,exp),  },2},{{ SYMRULE(expression,exp),  },1},
-	},4, sem_rule_args},
+		{{ 
+			RULE(argname), SYMRULE(expression,exp), TOKEN(COMMA), SYMRULE(argument,args), 
+		 },4},
+		{{ 
+			SYMRULE(expression,exp), TOKEN(COMMA), SYMRULE(argument,args), 
+		 },3},
+		{{ 
+			RULE(argname), SYMRULE(expression,exp), 
+		 },2},
+		{{ 
+			SYMRULE(expression,exp), 
+		 },1},
+	},4, sem_rule_args, sem_action_none},
 	[rule_argname] = {{
-		{{ TOKEN(IDENTIFIER), TOKEN(COLON),  },2},
+		{{ 
+			TOKEN(IDENTIFIER), TOKEN(COLON), 
+		 },2},
 	},1, 0},
 	[rule_conditional] = {{
-		{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), SYMRULE(else,else),  },6},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE), SYMRULE(else,else),  },5},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },5},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-	},4, sem_rule_cond},
+		{{ 
+			LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), SYMRULE(else,else), 
+		 },6},
+		{{ 
+			LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE), SYMRULE(else,else), 
+		 },5},
+		{{ 
+			LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},4, sem_rule_cond, sem_action_none},
 	[rule_else] = {{
-		{{ LITERAL("else"), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },4},{{ LITERAL("else"), TOKEN(LBRACE), TOKEN(RBRACE),  },3},
-		{{ LITERAL("else"), SYMRULE(conditional,cond),  },2},
-	},3, sem_rule_else},
+		{{ 
+			LITERAL("else"), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },4},
+		{{ 
+			LITERAL("else"), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },3},
+		{{ 
+			LITERAL("else"), SYMRULE(conditional,cond), 
+		 },2},
+	},3, sem_rule_else, sem_action_none},
 	[rule_condition] = {{
-		{{ TOKEN(LPAREN), SYMRULE(expression,cond), TOKEN(RPAREN),  },3},
-		{{ SYMRULE(expression,cond),  },1},
+		{{ 
+			TOKEN(LPAREN), SYMRULE(expression,cond), TOKEN(RPAREN), 
+		 },3},
+		{{ 
+			SYMRULE(expression,cond), 
+		 },1},
 	},2, 0},
 	[rule_declaration] = {{
-		{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp),  },4},
-		{{ SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name),  },2},
-	},2, sem_rule_dec},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
+		 },2},
+	},2, sem_rule_dec, sem_action_declare},
 	[rule_jump] = {{
-		{{ LITERAL("goto"), SYMCHECK(IDENTIFIER,jmp),  },2},
-	},1, sem_rule_jmp},
+		{{ 
+			LITERAL("goto"), SYMCHECK(IDENTIFIER,jmp), 
+		 },2},
+	},1, sem_rule_jmp, sem_action_none},
 	[rule_label] = {{
-		{{ SYMDEC(IDENTIFIER,name), TOKEN(COLON),  },2},
-	},1, sem_rule_label},
+		{{ 
+			SYMDEC(IDENTIFIER,name), TOKEN(COLON), 
+		 },2},
+	},1, sem_rule_label, sem_action_declare},
 	[rule_expression] = {{
-		{{ SYMCHECK(LPAREN,syn), SYMRULE(expression,exp), TOKEN(RPAREN),  },3},
-		{{ SYMRULE(math,exp),  },1},
-		{{ SYMRULE(funccall,exp),  },1},
-		{{ SYMRULE(chain,exp),  },1},
-		{{ SYMCHECK(CONST,val),  },1},
-		{{ SYMRULE(variable,var),  },1},
-	},6, sem_rule_exp},
+		{{ 
+			SYMCHECK(LPAREN,syn), SYMRULE(expression,exp), TOKEN(RPAREN), 
+		 },3},
+		{{ 
+			SYMRULE(math,exp), 
+		 },1},
+		{{ 
+			SYMRULE(funccall,exp), 
+		 },1},
+		{{ 
+			SYMRULE(chain,exp), 
+		 },1},
+		{{ 
+			SYMCHECK(CONST,val), 
+		 },1},
+		{{ 
+			SYMRULE(variable,var), 
+		 },1},
+	},6, sem_rule_exp, sem_action_none},
 	[rule_chain] = {{
-		{{ SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(funccall,exp),  },3},
-		{{ SYMRULE(variable,var), SYMCHECK(DOT,op), SYMCHECK(IDENTIFIER,exp),  },3},
-	},2, sem_rule_var},
+		{{ 
+			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(funccall,exp), 
+		 },3},
+		{{ 
+			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMCHECK(IDENTIFIER,exp), 
+		 },3},
+	},2, sem_rule_var, sem_action_none},
 	[rule_math] = {{
-		{{ SYMRULE(funccall,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
-		{{ SYMCHECK(CONST,val), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
-		{{ SYMRULE(variable,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp),  },3},
-	},3, sem_rule_exp},
+		{{ 
+			SYMRULE(funccall,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp), 
+		 },3},
+		{{ 
+			SYMCHECK(CONST,val), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp), 
+		 },3},
+		{{ 
+			SYMRULE(variable,var), SYMCHECK(OPERATOR,op), SYMRULE(expression,exp), 
+		 },3},
+	},3, sem_rule_exp, sem_action_none},
 	[rule_variable] = {{
-		{{ SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET),  },4},
-		{{ SYMCHECK(IDENTIFIER,var),  },1},
-	},2, sem_rule_var},
+		{{ 
+			SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET), 
+		 },4},
+		{{ 
+			SYMCHECK(IDENTIFIER,var), 
+		 },1},
+	},2, sem_rule_var, sem_action_none},
 	[rule_forloop] = {{
-		{{ LITERAL("for"), TOKEN(LPAREN), SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(condition,cond), TOKEN(SEMICOLON), SYMRULE(assignment,assign), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },11},{{ LITERAL("for"), TOKEN(LPAREN), SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(condition,cond), TOKEN(SEMICOLON), SYMRULE(assignment,assign), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE),  },10},
-	},2, sem_rule_for},
+		{{ 
+			LITERAL("for"), TOKEN(LPAREN), SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(condition,cond), TOKEN(SEMICOLON), SYMRULE(assignment,assign), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },11},
+		{{ 
+			LITERAL("for"), TOKEN(LPAREN), SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(condition,cond), TOKEN(SEMICOLON), SYMRULE(assignment,assign), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },10},
+	},2, sem_rule_for, sem_action_none},
 	[rule_whileloop] = {{
-		{{ LITERAL("while"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },5},{{ LITERAL("while"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-	},2, sem_rule_while},
+		{{ 
+			LITERAL("while"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("while"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},2, sem_rule_while, sem_action_none},
 	[rule_dowhile] = {{
-		{{ LITERAL("do"), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), LITERAL("while"), SYMRULE(condition,cond),  },6},{{ LITERAL("do"), TOKEN(LBRACE), TOKEN(RBRACE), LITERAL("while"), SYMRULE(condition,cond),  },5},
-	},2, sem_rule_dowhile},
+		{{ 
+			LITERAL("do"), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), LITERAL("while"), SYMRULE(condition,cond), 
+		 },6},
+		{{ 
+			LITERAL("do"), TOKEN(LBRACE), TOKEN(RBRACE), LITERAL("while"), SYMRULE(condition,cond), 
+		 },5},
+	},2, sem_rule_dowhile, sem_action_none},
 	[rule_enum] = {{
-		{{ LITERAL("enum"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(enumcase,enum_case), TOKEN(RBRACE),  },5},{{ LITERAL("enum"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-	},2, sem_rule_enum},
+		{{ 
+			LITERAL("enum"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(enumcase,enum_case), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("enum"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},2, sem_rule_enum, sem_action_declare},
 	[rule_enumcase] = {{
-		{{ SYMDEC(IDENTIFIER,name), TOKEN(COMMA), SYMRULE(enumcase,enum_case),  },3},{{ SYMDEC(IDENTIFIER,name), TOKEN(COMMA),  },2},
-		{{ SYMDEC(IDENTIFIER,name),  },1},
-	},3, sem_rule_enum_case},
+		{{ 
+			SYMDEC(IDENTIFIER,name), TOKEN(COMMA), SYMRULE(enumcase,enum_case), 
+		 },3},
+		{{ 
+			SYMDEC(IDENTIFIER,name), TOKEN(COMMA), 
+		 },2},
+		{{ 
+			SYMDEC(IDENTIFIER,name), 
+		 },1},
+	},3, sem_rule_enum_case, sem_action_declare},
 	[rule_struct] = {{
-		{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE),  },5},{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-		{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), SYMDEC(IDENTIFIER,parent), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE),  },7},{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE),  },6},{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), SYMDEC(IDENTIFIER,parent), TOKEN(LBRACE), TOKEN(RBRACE),  },6},{{ LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE),  },5},
-	},6, sem_rule_struct},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), SYMDEC(IDENTIFIER,parent), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE), 
+		 },7},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(decblock,scope), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), SYMDEC(IDENTIFIER,parent), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			LITERAL("struct"), SYMDEC(IDENTIFIER,name), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },5},
+	},6, sem_rule_struct, sem_action_declare},
 	[rule_decblock] = {{
-		{{ SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(decblock,scope),  },3},{{ SYMRULE(declaration,dec), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(funcdec,func), SYMRULE(decblock,scope),  },2},{{ SYMRULE(funcdec,func),  },1},
-	},4, sem_rule_scope},
+		{{ 
+			SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(decblock,scope), 
+		 },3},
+		{{ 
+			SYMRULE(declaration,dec), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(funcdec,func), SYMRULE(decblock,scope), 
+		 },2},
+		{{ 
+			SYMRULE(funcdec,func), 
+		 },1},
+	},4, sem_rule_scope, sem_action_none},
 	[rule_return] = {{
-		{{ LITERAL("return"), SYMRULE(expression,exp),  },2},
-	},1, sem_rule_ret},
+		{{ 
+			LITERAL("return"), SYMRULE(expression,exp), 
+		 },2},
+	},1, sem_rule_ret, sem_action_none},
 	[rule_interface] = {{
-		{{ LITERAL("interface"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(intblock,scope), TOKEN(RBRACE),  },5},{{ LITERAL("interface"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-	},2, sem_rule_interf},
+		{{ 
+			LITERAL("interface"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(intblock,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("interface"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},2, sem_rule_interf, sem_action_declare},
 	[rule_intblock] = {{
-		{{ SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(intblock,scope),  },3},{{ SYMRULE(declaration,dec), TOKEN(SEMICOLON),  },2},
-		{{ SYMRULE(funcsign,func), TOKEN(SEMICOLON), SYMRULE(intblock,scope),  },3},{{ SYMRULE(funcsign,func), TOKEN(SEMICOLON),  },2},
-	},4, sem_rule_scope},
+		{{ 
+			SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(intblock,scope), 
+		 },3},
+		{{ 
+			SYMRULE(declaration,dec), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
+			SYMRULE(funcsign,func), TOKEN(SEMICOLON), SYMRULE(intblock,scope), 
+		 },3},
+		{{ 
+			SYMRULE(funcsign,func), TOKEN(SEMICOLON), 
+		 },2},
+	},4, sem_rule_scope, sem_action_none},
 };
 
 char* rule_names[num_grammar_rules] = {

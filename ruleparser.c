@@ -32,6 +32,7 @@ typedef struct {
     string_slice name;
     clinkedlist_t *list;  
     Token tag;
+    bool declaration;
 } rule_entry;
 
 clinkedlist_t *allrules;
@@ -57,10 +58,11 @@ int emit_sequence(clinkedlist_t *list){
         if (s && s->optional){ opt_mask |= (1 << num_optionals++); }
         count++;
     }
-    emit_newline();
     for (int i = (1 << num_optionals)-1; i >= 0; i--){
+        emit_newline();
         emit("{{ ");
         increase_indent();
+        emit_newline();
         int opts = 0;
         int count = 0;
         for (clinkedlist_node_t* node = list->head; node; node = node->next){
@@ -80,6 +82,7 @@ int emit_sequence(clinkedlist_t *list){
             }
         }
         decrease_indent();
+        emit_newline();
         emit(" },%i},",count);
     }
     return (1 << num_optionals++)-1;
@@ -193,7 +196,7 @@ void emit_rules(){
         decrease_indent();
         emit_newline();
         if (e->tag.length)
-            emit("},%i, sem_rule_%v},",subrule_count,token_to_slice(e->tag));
+            emit("},%i, sem_rule_%v, sem_action_%s},",subrule_count,token_to_slice(e->tag),e->declaration ? "declare" : "none");
         else 
             emit("},%i, 0},",subrule_count);
     }
@@ -264,6 +267,7 @@ int main(int argc, char *argv[]){
             rule_entry *entry = zalloc(sizeof(rule_entry));
             entry->name = token_to_slice(t);
             entry->list = parse_rule(t, &ts);
+            entry->declaration = is_dec;
             if (tag.length) entry->tag = tag;
             clinkedlist_push(allrules, entry);
         } else {

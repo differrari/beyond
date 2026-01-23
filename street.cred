@@ -34,6 +34,10 @@ struct testType: hello {
         print("Test succeeded");
     }
     
+    helper {
+        
+    }
+    
     int prop1;
     int prop2;
 }
@@ -58,13 +62,11 @@ int main {
     do {
         print();
     } while(0);
-    y_loop:
-        x_loop:
-            draw(x, y, 0xFF00FF00, overwrite: 0);
-            x = x + 1;
-            x = y.run();
-            if (x < 100) { goto x_loop; } else { print("Done with x"); }
-        y = y + 1;
-        if y < 100 { goto y_loop; } else if (y == 100) { print("Exactly 100 y"); }
-        print();
+        draw(x, y, 0xFF00FF00, overwrite: 0);
+        x = x + 1;
+        x = y.run();
+        if (x < 100) {  } else { print("Done with x"); }
+    y = y + 1;
+    if y < 100 { } else if (y == 100) { print("Exactly 100 y"); }
+    print();
 }

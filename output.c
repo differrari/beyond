@@ -44,16 +44,32 @@ void hello_test(hello instance){
 
 
 
-hello testType_init(){
-/* Parent conformance here. Requires semantic analysis 
-    return (hello){
-        .ptr = zalloc(sizeof(testType)),
-        .fn1 = testType_fn1,
-        .fn2 = testType_fn2,
-        .fn3 = testType_fn3,
-    };*/
-}
 
+
+
+
+void testType_func(void *parent, int rule, Token elem){
+testType *instance = (testType*)parent;
+
+	int a = 0;
+}
+void testType_test(void *parent){
+testType *instance = (testType*)parent;
+
+	print("Test succeeded");
+}
+void testType_helper(void *parent){
+testType *instance = (testType*)parent;
+
+	
+}
+hello testType_init(){
+	return (hello){
+		.ptr = zalloc(sizeof(testType)),
+		.func = testType_func,
+		.test = testType_test,
+	};
+}
 int main(){
 int _return_val = 0;
 
@@ -68,19 +84,17 @@ int _return_val = 0;
 	_return_val = 0;
 	goto main_defer;
 	do {print();}while (0);
-	y_loop:
-	x_loop:
 	draw(x, y, 0xFF00FF00, 0);
 	x = x + 1;
 	x = y.run();
 	if (x < 100){
-		goto x_loop;
+		
 	} else {
 		print("Done with x");
 	}
 	y = y + 1;
 	if (y < 100){
-		goto y_loop;
+		
 	} else if (y == 100){
 		print("Exactly 100 y");
 	}
