@@ -76,6 +76,7 @@ void cond_code_register_subrule(void* ptr, int type, codegen_t child){
     switch (type){
         case sem_rule_cond: code->cond = child; break;
         case sem_rule_scope: code->scope = child; break;
+        case sem_rule_else: code->chain = child; break;
     }
 }
 
@@ -312,3 +313,15 @@ void enum_case_code_register_subrule(void *ptr, int type, codegen_t child){
 }
 
 CODEGEN_DEC(enum_case_code, sem_rule_enum_case)
+
+void else_code_register_elem(void* ptr, int type, Token elem){
+    
+}
+
+void else_code_register_subrule(void* ptr, int type, codegen_t child){
+    else_code *code = (else_code*)ptr;
+    // print("REG CONDITION %i",type);
+    code->block = child;
+}
+
+CODEGEN_DEC(else_code, sem_rule_else)

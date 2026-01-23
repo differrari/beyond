@@ -2,7 +2,7 @@ int a { int a = 0; return a; }
 
 void draw(int x, int y, int color, int overwrite) { int b = 0; }
 
-c(int x) { int l; }
+c(int x) { int l; if (x) { return 0; } }
 void print(){
 
 }
@@ -59,8 +59,8 @@ int main {
             draw(x, y, 0xFF00FF00, overwrite: 0);
             x = x + 1;
             x = y.run();
-            if (x < 100) { goto x_loop; }
+            if (x < 100) { goto x_loop; } else { print("Done with x"); }
         y = y + 1;
-        if y < 100 { goto y_loop; }
+        if y < 100 { goto y_loop; } else if (y == 100) { print("Exactly 100 y"); }
         print();
 }

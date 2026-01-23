@@ -24,3 +24,4 @@ rulegen
 output.c
 build
 publish
+output.h

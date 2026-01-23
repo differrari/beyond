@@ -26,7 +26,8 @@ enum sem_rule {
     interf, 
     enum, 
     enum_case, 
-    parent 
+    parent,
+    else
 }
 
 enum sem_elem { 

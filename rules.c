@@ -1,5 +1,5 @@
 #include "rules.h"
-typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock, num_grammar_rules } grammar_rules;
+typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_else,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock, num_grammar_rules } grammar_rules;
 
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
@@ -61,8 +61,12 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ TOKEN(IDENTIFIER), TOKEN(COLON),  },2},
 	},1, 0},
 	[rule_conditional] = {{
-		{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },5},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
-	},2, sem_rule_cond},
+		{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), SYMRULE(else,else),  },6},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE), SYMRULE(else,else),  },5},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },5},{{ LITERAL("if"), SYMRULE(condition,cond), TOKEN(LBRACE), TOKEN(RBRACE),  },4},
+	},4, sem_rule_cond},
+	[rule_else] = {{
+		{{ LITERAL("else"), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE),  },4},{{ LITERAL("else"), TOKEN(LBRACE), TOKEN(RBRACE),  },3},
+		{{ LITERAL("else"), SYMRULE(conditional,cond),  },2},
+	},3, sem_rule_else},
 	[rule_condition] = {{
 		{{ TOKEN(LPAREN), SYMRULE(expression,cond), TOKEN(RPAREN),  },3},
 		{{ SYMRULE(expression,cond),  },1},
@@ -148,6 +152,7 @@ char* rule_names[num_grammar_rules] = {
 		[rule_argument] = "argument",
 		[rule_argname] = "argname",
 		[rule_conditional] = "conditional",
+		[rule_else] = "else",
 		[rule_condition] = "condition",
 		[rule_declaration] = "declaration",
 		[rule_jump] = "jump",

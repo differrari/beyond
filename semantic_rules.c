@@ -32,6 +32,7 @@ char* sem_rule_to_string(sem_rule val){
 		case sem_rule_enum: return "enum";
 		case sem_rule_enum_case: return "enum_case";
 		case sem_rule_parent: return "parent";
+		case sem_rule_else: return "else";
 	} 
 } 
 

@@ -110,7 +110,8 @@ void cond_code_emit_code(void *ptr){
     decrease_indent();
     emit_newline();
     emit_const("}");
-    emit_newline();
+    if (code->chain.ptr) emit_code(code->chain);
+    else emit_newline();
 }
 
 void jmp_code_emit_code(void *ptr){
@@ -549,6 +550,22 @@ void enum_case_code_emit_code(void *ptr){
         emit_code(code->chain);
     }
     
+}
+
+void else_code_emit_code(void *ptr){
+    else_code *code = (else_code*)ptr;
+    emit_const(" else ");
+    if (code->block.type == sem_rule_cond){
+        emit_code(code->block);
+    } else {
+        emit_const("{");
+        increase_indent();
+        emit_newline();
+        emit_code(code->block);
+        decrease_indent();
+        emit_newline();
+        emit_const("}");
+    }
 }
 
 #endif

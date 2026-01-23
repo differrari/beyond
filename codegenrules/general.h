@@ -53,6 +53,7 @@ codegen_t call_code_init();
 typedef struct {
     codegen_t cond;
     codegen_t scope;
+    codegen_t chain;
 } cond_code;
 
 codegen_t cond_code_init();
@@ -163,3 +164,9 @@ typedef struct {
 } enum_case_code;
 
 codegen_t enum_case_code_init();
+
+typedef struct {
+    codegen_t block;
+} else_code;
+
+codegen_t else_code_init();
