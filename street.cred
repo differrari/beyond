@@ -1,4 +1,8 @@
-int a { int a = 0; return a; }
+int a {
+    if (compile()){
+        return run();
+    }
+}
 
 void draw(int x, int y, int color, int overwrite) { int b = 0; }
 

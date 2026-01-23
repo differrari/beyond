@@ -369,6 +369,7 @@ void struct_code_emit_code(void *ptr){
 void ret_code_emit_code(void *ptr){
     if (is_header == true) return;
     ret_code *code = (ret_code*)ptr;
+    emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
     if (ctx.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
         emit_const("_return_val = ");
         emit_code(code->expression);
@@ -381,6 +382,7 @@ void ret_code_emit_code(void *ptr){
         emit_const("return ");
         emit_code(code->expression);
     }
+    pop_and_restore_context(orig);
     emit_const(";");
 }
 
