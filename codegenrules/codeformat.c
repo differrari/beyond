@@ -2,6 +2,8 @@
 #include "common.h"
 #include "syscalls/syscalls.h"
 #include "files/buffer.h"
+#include "math/math.h"
+#include "files/helpers.h"
 
 #define MAX_BUF 0x10000
 

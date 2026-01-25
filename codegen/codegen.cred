@@ -1,4 +1,4 @@
-@includeC("data/tokenizer/tokenizer.h")
+@includeC("data/format/tokenizer/tokenizer.h")
 @includeC("rules.h")
 
 interface codegen_t {
@@ -6,4 +6,22 @@ interface codegen_t {
     void register_elem(int type, Token elem);
     void register_subrule(int type, codegen_t child);
     void emit_code();
+}
+
+struct blk_code : codegen_t {
+    void register_elem(int type, Token elem){
+        print("Should be part of hello");
+    }
+    
+    void register_subrule(int type, codegen_t child){
+        print("Should be part of hello");
+    }
+    
+    void emit_code(){
+        print("Should be part of hello");
+    }
+    
+    void helper(){
+        print("Should NOT be part of hello");
+    } 
 }

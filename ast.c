@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "common.h"
 
 bool pop_stack(stack_navigator *sn, ast_node* node){
     if (sn->stack_cursor >= sn->stack_count) return false;

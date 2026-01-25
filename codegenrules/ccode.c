@@ -1,6 +1,7 @@
 #include "general.h"
 #include "codeformat.h"
 #include "sem_analysis.h"
+#include "common.h"
 
 #ifdef CCODEGEN
 

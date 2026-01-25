@@ -1,9 +1,10 @@
 #include "syscalls/syscalls.h"
-#include "data/scanner/scanner.h"
-#include "data/tokenizer/tokenizer.h"
-#include "data/helpers/token_stream.h"
-#include "data_struct/linked_list.h"
+#include "data/format/scanner/scanner.h"
+#include "data/format/tokenizer/tokenizer.h"
+#include "data/format/helpers/token_stream.h"
+#include "data/struct/linked_list.h"
 #include "codegenrules/codeformat.h"
+#include "files/helpers.h"
 
 #define MAX_BUF 0x10000
 
@@ -220,7 +221,7 @@ void emit_rule_prints(){
 }
 
 int main(int argc, char *argv[]){
-    char *content = read_full_file("rules.config");
+    char *content = read_full_file("rules.config",0);
     
     Scanner s = scanner_make(content, strlen(content));
     Tokenizer tk = tokenizer_make(&s);

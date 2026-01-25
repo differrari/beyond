@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data/helpers/token_stream.h"
+#include "data/format/helpers/token_stream.h"
 #include "ast.h"
 
 typedef struct {

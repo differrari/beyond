@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "data/tokenizer/tokenizer.h"
+#include "data/format/tokenizer/tokenizer.h"
 #include "semantic_rules.h"
 
 typedef struct {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "std/string_slice.h"
-#include "data/tokenizer/tokenizer.h"
+#include "data/format/tokenizer/tokenizer.h"
 #include "files/buffer.h"
 
 typedef struct {

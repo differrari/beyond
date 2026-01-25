@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data/tokenizer/tokenizer.h"
+#include "data/format/tokenizer/tokenizer.h"
 #include "rules.h"
 
 typedef struct codegen_t {

@@ -1,5 +1,6 @@
 #include "rules.h"
 #include "general.h"
+#include "syscalls/syscalls.h"
 
 #define CODEGEN_DEC(name,t) \
 extern void name##_emit_code(void*ptr);\

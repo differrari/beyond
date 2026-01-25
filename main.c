@@ -1,11 +1,12 @@
 #include "syscalls/syscalls.h" 
-#include "data/scanner/scanner.h"
+#include "data/format/scanner/scanner.h"
 #include "parser.h"
-#include "data/helpers/token_stream.h"
+#include "data/format/helpers/token_stream.h"
 #include "common.h"
 #include "irgen.h"
 #include "sem_analysis.h"
 #include "files/buffer.h"
+#include "files/helpers.h"
 
 Scanner scan;
 
@@ -42,7 +43,7 @@ void parse_arguments(int argc, char *argv[]){
     };
     for (int i = 1; i < argc; i++){
         if (*argv[i] != '-'){
-            char *content = read_full_file(argv[i]);
+            char *content = read_full_file(argv[i],0);
             buffer_write_const(&buf, content);
         } else {
             if (strcmp(argv[i], "-o") == 0){
@@ -52,7 +53,7 @@ void parse_arguments(int argc, char *argv[]){
         }
     }
     if (!buf.buffer_size){
-        char *content = read_full_file("street.cred");
+        char *content = read_full_file("street.cred",0);
         buffer_write_const(&buf, content);
     }
 }
