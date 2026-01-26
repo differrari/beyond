@@ -69,4 +69,16 @@ int main {
     y = y + 1;
     if y < 100 { } else if (y == 100) { print("Exactly 100 y"); }
     print();
+    
+    traverse_directory(s.data, true, (literal directory, literal name){//Parse lambdas as unnamed functions
+        slice simplename = name.slice_to(".");
+        slice existing = project.find(simplename, (slice item, slice query){
+            return item.match(query);
+        });
+        if (not projects.contains(simplename)){
+            print("Skip known project %s",name);//TODO: in-string formats
+        } else {
+            projects.push(simplename);
+        }
+    });
 }

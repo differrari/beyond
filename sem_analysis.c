@@ -39,12 +39,17 @@ symbol_t * find_symbol(sem_rule type, string_slice name){
     return find_symbol_in_table(global, type, name);
 }
 
-semantic_types analyze_type(Token t){
+void analyze_type(Token t, symbol_t *sym){
     //TODO: allow making this dynamic
     if (slice_lit_match(token_to_slice(t), "literal", false)){
-        return semantic_types_literal;
+        sym->resolved_type = semantic_types_literal;
+        sym->reference_type = false;
+        return;
     }
-    return semantic_types_passthrough;
+    if (slice_lit_match(token_to_slice(t), "chunk_array", false)){
+        sym->reference_type = true;
+    }
+    sym->resolved_type = semantic_types_passthrough;
 }
 
 bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
@@ -80,7 +85,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
              if (node.action == sem_action_declare) {
                  if (sym && node.sem_value == sem_elem_type){
                      sym->type = node.t;
-                     sym->resolved_type = analyze_type(node.t);
+                     analyze_type(node.t,sym);
                  } 
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
                  // print("SYMBOL: %s = %v",sem_rule_to_string(elem.sem_value),token_to_slice(node.t));

@@ -62,13 +62,19 @@ void blk_code_emit_code(void* ptr){
     }
 }
 
-void emit_type(symbol_t *sym){
+void emit_type(symbol_t *sym, bool extra){
     switch (sym->resolved_type) {
     case semantic_types_literal: emit_const("char*"); break;
     case semantic_types_int64: emit_const("int64_t"); break;
     case semantic_types_int32: emit_const("int32_t"); break;
     default:
     case semantic_types_passthrough: emit_token(sym->type); break;
+    }
+    if (extra){
+        if (sym->reference_type){
+            emit_const("_t");
+            emit_const("*");
+        } 
     }
 }
 
@@ -80,7 +86,7 @@ void dec_code_emit_code(void* ptr){
     symbol_t *sym = find_symbol(sem_rule_dec, token_to_slice(code->name));
     if (!sym) return;
     
-    emit_type(sym);
+    emit_type(sym, true);
     emit_space();
     emit_slice(sym->name);
     if (is_header != true && code->initial_value.ptr){
@@ -190,7 +196,7 @@ void param_code_emit_code(void *ptr){
         emit_const("struct ");
     symbol_t *sym = find_symbol(sem_rule_param, token_to_slice(code->name));
     if (!sym) return;
-    emit_type(sym);
+    emit_type(sym, true);
     emit_space();
     emit_slice(sym->name);
     if (code->chain.ptr){
@@ -211,7 +217,7 @@ void func_code_emit_code(void *ptr){
     symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(sig->name));
     if (!sym) return;
     if (sig->type.kind){
-        emit_type(sym);
+        emit_type(sym, true);
         emit_const(" ");
     } else 
         emit_const("void ");
@@ -348,7 +354,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name){
     
     if (!sym) return;
     
-    emit_type(sym);
+    emit_type(sym,false);
     
     emit_const("_");
     
@@ -502,7 +508,7 @@ void gen_int_stubs(codegen_t contents, string_slice name){
         if (func->type.length){
             symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(func->name));
             if (!sym) return;
-            emit_type(sym);
+            emit_type(sym,false);
             emit_const(" ");
         } 
         else emit_const("void ");

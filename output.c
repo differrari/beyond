@@ -100,6 +100,7 @@ int _return_val = 0;
 	}
 	
 	print();
+	traverse_directory(s.data, true, LAMBDA);
 main_defer:
 cleanup();
 x = 0;

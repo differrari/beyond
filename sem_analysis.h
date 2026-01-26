@@ -15,6 +15,7 @@ typedef struct symbol_t {
     sem_rule sym_type;
     symbol_table *child;
     semantic_types resolved_type;
+    bool reference_type;
 } symbol_t;
 
 bool analyze_semantics(ast_node *stack, uint32_t count);
