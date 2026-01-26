@@ -37,8 +37,7 @@ void parse_arguments(int argc, char *argv[]){
         .buffer = zalloc(0x10000),
         .limit = 0x10000,
         .buffer_size = 0,
-        .can_grow = true,
-        .circular = 0,
+        .options = buffer_can_grow,
         .cursor = 0,
     };
     for (int i = 1; i < argc; i++){

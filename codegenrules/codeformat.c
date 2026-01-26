@@ -16,10 +16,9 @@ buffer new_buffer(){
     return (buffer){
         .buffer = zalloc(0x10000),
         .limit = 0x10000,
-        .can_grow = true,
+        .options = buffer_can_grow,
         .buffer_size = 0,
         .cursor = 0,
-        .circular = false,
     };
 }
 
