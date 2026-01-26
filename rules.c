@@ -1,5 +1,5 @@
 #include "rules.h"
-typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_else,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock, num_grammar_rules } grammar_rules;
+typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_else,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_lambda,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock, num_grammar_rules } grammar_rules;
 
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
@@ -57,6 +57,9 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(return,ret), TOKEN(SEMICOLON), 
 		 },2},
 		{{ 
+			SYMRULE(chain,exp), TOKEN(SEMICOLON), 
+		 },2},
+		{{ 
 			SYMRULE(assignment,assign), TOKEN(SEMICOLON), 
 		 },2},
 		{{ 
@@ -65,7 +68,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			SYMRULE(funccall,call), TOKEN(SEMICOLON), 
 		 },2},
-	},18, 0},
+	},19, 0},
 	[rule_def] = {{
 		{{ 
 			LITERAL("defer"), SYMRULE(statement,exp), 
@@ -225,10 +228,16 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1, sem_rule_label, sem_action_declare},
 	[rule_expression] = {{
 		{{ 
+			LITERAL("not"), SYMRULE(expression,exp), 
+		 },2},
+		{{ 
 			SYMCHECK(LPAREN,syn), SYMRULE(expression,exp), TOKEN(RPAREN), 
 		 },3},
 		{{ 
 			SYMRULE(math,exp), 
+		 },1},
+		{{ 
+			SYMRULE(lambda,func), 
 		 },1},
 		{{ 
 			SYMRULE(funccall,exp), 
@@ -242,13 +251,21 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			SYMRULE(variable,var), 
 		 },1},
-	},6, sem_rule_exp, sem_action_none},
+	},8, sem_rule_exp, sem_action_none},
+	[rule_lambda] = {{
+		{{ 
+			TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },5},
+	},2, sem_rule_func, sem_action_declare},
 	[rule_chain] = {{
 		{{ 
 			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(funccall,exp), 
 		 },3},
 		{{ 
-			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMCHECK(IDENTIFIER,exp), 
+			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(variable,exp), 
 		 },3},
 	},2, sem_rule_var, sem_action_none},
 	[rule_math] = {{
@@ -397,6 +414,7 @@ char* rule_names[num_grammar_rules] = {
 		[rule_jump] = "jump",
 		[rule_label] = "label",
 		[rule_expression] = "expression",
+		[rule_lambda] = "lambda",
 		[rule_chain] = "chain",
 		[rule_math] = "math",
 		[rule_variable] = "variable",
