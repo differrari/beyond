@@ -44,3 +44,11 @@ enum sem_action {
     declare, 
     check 
 }
+
+enum semantic_types {
+    none,
+    literal,
+    int64,
+    int32,
+    passthrough
+}

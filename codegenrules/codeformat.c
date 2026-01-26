@@ -12,6 +12,8 @@ int *current_indent;
 
 emit_block current_eblock = {};
 
+emit_block_section current_section = block_section_body;
+
 buffer new_buffer(){
     return (buffer){
         .buffer = zalloc(0x10000),
@@ -22,7 +24,25 @@ buffer new_buffer(){
     };
 }
 
-void switch_block_section(emit_block_section section){
+void new_block(){
+    current_eblock = (emit_block){
+        .prologue = new_buffer(),
+        .pindent = current_indent ? *current_indent : 0,
+        .body = new_buffer(),
+        .bindent = current_indent ? *current_indent : 0,
+        .epilogue = new_buffer(),
+        .eindent = current_indent ? *current_indent : 0,
+    };
+    code_buf = &current_eblock.body;
+    current_indent = &current_eblock.bindent;
+}
+
+emit_block_section switch_block_section(emit_block_section section){
+    if (!code_buf){
+        new_block();
+    }
+    emit_block_section old = current_section;
+    current_section = section;
     switch (section) {
     case block_section_prologue:
         code_buf = &current_eblock.prologue;
@@ -37,19 +57,7 @@ void switch_block_section(emit_block_section section){
         current_indent = &current_eblock.eindent;
     break;
     }
-}
-
-void new_block(){
-    current_eblock = (emit_block){
-        .prologue = new_buffer(),
-        .pindent = current_indent ? *current_indent : 0,
-        .body = new_buffer(),
-        .bindent = current_indent ? *current_indent : 0,
-        .epilogue = new_buffer(),
-        .eindent = current_indent ? *current_indent : 0,
-    };
-    code_buf = &current_eblock.body;
-    current_indent = &current_eblock.bindent;
+    return old;
 }
 
 emit_block save_and_push_block(){

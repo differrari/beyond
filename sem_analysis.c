@@ -39,6 +39,13 @@ symbol_t * find_symbol(sem_rule type, string_slice name){
     return find_symbol_in_table(global, type, name);
 }
 
+semantic_types analyze_type(Token t){
+    //TODO: allow making this dynamic
+    if (slice_lit_match(token_to_slice(t), "literal", false)){
+        return semantic_types_literal;
+    }
+    return semantic_types_passthrough;
+}
 
 bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
     symbol_t *sym = &table->symbol_table[table->symbol_count++];
@@ -71,7 +78,10 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
              ast_node node;
              pop_stack(&ssn, &node);
              if (node.action == sem_action_declare) {
-                 if (sym && node.sem_value == sem_elem_type) sym->type = node.t;
+                 if (sym && node.sem_value == sem_elem_type){
+                     sym->type = node.t;
+                     sym->resolved_type = analyze_type(node.t);
+                 } 
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
                  // print("SYMBOL: %s = %v",sem_rule_to_string(elem.sem_value),token_to_slice(node.t));
              } else if (node.action == sem_action_check && (node.sem_value == sem_rule_var || node.sem_value == sem_rule_jmp /*&& elem.sem_value != sem_func*/)){

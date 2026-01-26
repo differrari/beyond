@@ -75,7 +75,7 @@ int _return_val = 0;
 
 	int y = a();
 	int x = 1 - (0 - 2);
-	int z = x[0];
+	int z = int_get(x);
 	print("This is democracy");
 	
 	
@@ -86,7 +86,7 @@ int _return_val = 0;
 	do {print();}while (0);
 	draw(x, y, 0xFF00FF00, 0);
 	x = x + 1;
-	x = y.run();
+	x = int_run(y);
 	if (x < 100){
 		
 	} else {

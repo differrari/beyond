@@ -50,3 +50,13 @@ typedef enum {
 } sem_action;
 
 char* sem_action_to_string(sem_action val);
+
+typedef enum {
+	semantic_types_none,
+	semantic_types_literal,
+	semantic_types_int64,
+	semantic_types_int32,
+	semantic_types_passthrough,
+} semantic_types;
+
+char* semantic_types_to_string(semantic_types val);

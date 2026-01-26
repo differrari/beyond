@@ -18,8 +18,9 @@ typedef enum { block_section_prologue, block_section_body, block_section_epilogu
 extern emit_block current_eblock;
 
 emit_block save_and_push_block();
+emit_block save_and_push_existing(emit_block existing);
 emit_block pop_and_restore_emit_block(emit_block block);
-void switch_block_section(emit_block_section section);
+emit_block_section switch_block_section(emit_block_section section);
 void collapse_block(emit_block old_block);
 
 void emit_const(char *lit);

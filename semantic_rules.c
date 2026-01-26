@@ -58,3 +58,15 @@ char* sem_action_to_string(sem_action val){
 		case sem_action_check: return "check";
 	} 
 } 
+
+
+
+char* semantic_types_to_string(semantic_types val){
+	switch (val) {
+		case semantic_types_none: return "none";
+		case semantic_types_literal: return "literal";
+		case semantic_types_int64: return "int64";
+		case semantic_types_int32: return "int32";
+		case semantic_types_passthrough: return "passthrough";
+	} 
+} 
