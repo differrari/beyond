@@ -499,7 +499,7 @@ void int_code_emit_code(void *ptr){
 
 void enum_code_emit_code(void *ptr){
     enum_code *code = (enum_code*)ptr;
-    
+    //TODO: turn into array and use const char*
     if (is_header != false){
         emit_const("typedef enum {");
         increase_indent();
