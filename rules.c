@@ -30,6 +30,12 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(dowhile,dowhile), TOKEN(SEMICOLON), 
 		 },2},
 		{{ 
+			SYMRULE(whileloop,while), 
+		 },1},
+		{{ 
+			SYMRULE(conditional,cond), 
+		 },1},
+		{{ 
 			SYMRULE(funcdec,func), 
 		 },1},
 		{{ 
@@ -40,12 +46,6 @@ grammar_rule language_rules[num_grammar_rules] = {
 		 },2},
 		{{ 
 			SYMRULE(forloop,for), 
-		 },1},
-		{{ 
-			SYMRULE(whileloop,while), 
-		 },1},
-		{{ 
-			SYMRULE(conditional,cond), 
 		 },1},
 		{{ 
 			SYMRULE(jump,jmp), TOKEN(SEMICOLON), 

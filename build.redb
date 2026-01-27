@@ -24,8 +24,7 @@ bool genc {
         new_module("genc");
         source("sem_enum.cred");
         set_name("semantic_rules");
-        cred_compile();
-        return true;
+        return cred_compile();
     }
     return false;
 }

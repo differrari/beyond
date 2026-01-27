@@ -23,6 +23,7 @@ symbol_t * find_symbol_in_table(symbol_table *table,sem_rule type, string_slice 
     for (int i = 0; i < table->symbol_count; i++){
         symbol_t *sym = &table->symbol_table[i];
         if (sym->sym_type == type && slices_equal(name, sym->name, false)){
+            sym->table_type = table->table_type;
             return sym;
         }
         if (sym){//TODO: hack
@@ -64,15 +65,17 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
     symbol_t *sym = &table->symbol_table[table->symbol_count++];
     
     if (language_rules[current_rule].action == sem_action_declare){
-        sym->sym_type = language_rules[current_rule].semrule;
+        sym->sym_type = language_rules[current_rule].semrule; 
     }
     
     symbol_table *current_table = table;
     
     if (language_rules[current_rule].semrule == sem_rule_func ||
         language_rules[current_rule].semrule == sem_rule_struct || 
-        language_rules[current_rule].semrule == sem_rule_interf){
+        language_rules[current_rule].semrule == sem_rule_interf ||
+        language_rules[current_rule].semrule == sem_rule_enum){
             current_table = new_table();
+            current_table->table_type = language_rules[current_rule].semrule;
             sym->child = current_table;
         }
     
@@ -115,6 +118,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
 int ind = 0;
 
 void debug_table(symbol_table *table){
+    print("TABLE %s",sem_rule_to_string(table->table_type));
     for (int i = 0; i < table->symbol_count; i++){
         symbol_t *sym = &table->symbol_table[i];
         if (!sym){
@@ -122,7 +126,7 @@ void debug_table(symbol_table *table){
             return;
         }
         if (sym->name.length){//TODO: hack
-            print("%sSYMBOL = %s TYPE = %v NAME = %v",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->name);
+            print("%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name);
             if (sym->child){
                 ind++;
                 print("Has %i children",sym->child->symbol_count);

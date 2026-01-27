@@ -7,6 +7,7 @@ struct symbol_t;
 typedef struct {
     struct symbol_t *symbol_table;
     uint16_t symbol_count; 
+    int table_type;
 } symbol_table;
 
 typedef struct symbol_t {
@@ -18,6 +19,7 @@ typedef struct symbol_t {
     semantic_types resolved_type;
     semantic_types resolved_subtype;
     bool reference_type;
+    int table_type;
 } symbol_t;
 
 bool analyze_semantics(ast_node *stack, uint32_t count);
