@@ -41,6 +41,7 @@ void compiler(){
 		add_linker_flag("-g", false);
 		source_all(".c");
 		if (compile()){
+			gen_compile_commands();
 			run();
 		}
 		
