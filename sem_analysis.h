@@ -11,10 +11,12 @@ typedef struct {
 
 typedef struct symbol_t {
     Token type;
+    Token subtype;
     string_slice name;
     sem_rule sym_type;
     symbol_table *child;
     semantic_types resolved_type;
+    semantic_types resolved_subtype;
     bool reference_type;
 } symbol_t;
 

@@ -36,7 +36,8 @@ enum sem_elem {
     type, 
     name, 
     parent, 
-    count 
+    subtype,
+    count
 }
 
 enum sem_action { 

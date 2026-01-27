@@ -45,6 +45,7 @@ char* sem_elem_to_string(sem_elem val){
 		case sem_elem_type: return "type";
 		case sem_elem_name: return "name";
 		case sem_elem_parent: return "parent";
+		case sem_elem_subtype: return "subtype";
 		case sem_elem_count: return "count";
 	} 
 } 

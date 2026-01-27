@@ -51,9 +51,6 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(jump,jmp), TOKEN(SEMICOLON), 
 		 },2},
 		{{ 
-			SYMRULE(label,label), 
-		 },1},
-		{{ 
 			SYMRULE(return,ret), TOKEN(SEMICOLON), 
 		 },2},
 		{{ 
@@ -65,6 +62,9 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			SYMRULE(declaration,dec), TOKEN(SEMICOLON), 
 		 },2},
+		{{ 
+			SYMRULE(label,label), 
+		 },1},
 		{{ 
 			SYMRULE(funccall,call), TOKEN(SEMICOLON), 
 		 },2},
@@ -210,12 +210,27 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, 0},
 	[rule_declaration] = {{
 		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+		 },6},
+		{{ 
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
 		 },4},
 		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMDEC(IDENTIFIER,name), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,subtype), SYMDEC(IDENTIFIER,name), 
+		 },3},
+		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,name), 
+		 },3},
+		{{ 
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
 		 },2},
-	},2, sem_rule_dec, sem_action_declare},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
+		 },2},
+	},7, sem_rule_dec, sem_action_declare},
 	[rule_jump] = {{
 		{{ 
 			LITERAL("goto"), SYMCHECK(IDENTIFIER,jmp), 

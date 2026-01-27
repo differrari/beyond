@@ -372,12 +372,16 @@ string_slice resolve_symbol_name(var_code *code){
     } else return token_to_slice(code->name);
 }
 
-void emit_var_type_resolution(var_code *code, string_slice access_name){
+void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret_type){
     call_code *call = (call_code*)code->expression.ptr;
     
     string_slice name_slice = resolve_symbol_name(code);
     
     FIND_SLICE(sem_rule_dec, name_slice);
+    
+    if (ret_type && sym->subtype.kind){
+        emit("*(%v*)",token_to_slice(sym->subtype));
+    }
     
     emit_type(sym,false);
     
@@ -408,9 +412,9 @@ void var_code_emit_code(void* ptr){
         }
         else if (*code->operation.start == '['){
             char *operation = "get";
-            emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) });
+            emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) }, true);
         } else if (*code->operation.start == '.'){
-            emit_var_type_resolution(code, (string_slice){});
+            emit_var_type_resolution(code, (string_slice){}, false);
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else {
         if (code->var.ptr) emit_code(code->var); else emit_token(code->name);

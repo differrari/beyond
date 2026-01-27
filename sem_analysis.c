@@ -52,6 +52,14 @@ void analyze_type(Token t, symbol_t *sym){
     sym->resolved_type = semantic_types_passthrough;
 }
 
+void analyze_subtype(Token t, symbol_t *sym){
+    if (slice_lit_match(token_to_slice(t), "literal", false)){
+        sym->resolved_subtype = semantic_types_literal;
+        return;
+    }
+    sym->resolved_subtype = semantic_types_passthrough;
+}
+
 bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
     symbol_t *sym = &table->symbol_table[table->symbol_count++];
     
@@ -86,6 +94,10 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
                  if (sym && node.sem_value == sem_elem_type){
                      sym->type = node.t;
                      analyze_type(node.t,sym);
+                 } 
+                 if (sym && node.sem_value == sem_elem_subtype){
+                     sym->subtype = node.t;
+                     analyze_subtype(node.t,sym);
                  } 
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
                  // print("SYMBOL: %s = %v",sem_rule_to_string(elem.sem_value),token_to_slice(node.t));

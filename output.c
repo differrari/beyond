@@ -1,13 +1,11 @@
 #include "output.h"
 
-void _temp_func_0(char* directory, char* name){
-	slice ofpie = slice();
-	print("HERE");
-}
-
 int a(){
+	chunk_array_t* testarr;
 	var test = 0;
-	var calc = _temp_func_0();
+	testarr = chunk_array_create(12, sizeof(int));
+	int x = *(int*)chunk_array_get(testarr);
+	chunk_array_push(testarr, 0)
 }
 
 void draw(int x, int y, int color, int overwrite){
@@ -72,7 +70,7 @@ hello testType_init(){
 		.test = testType_test,
 	};
 }
-void _temp_func_1(char* directory, char* name){
+void _temp_func_0(char* directory, char* name){
 	print("Inside lambda");
 }
 
@@ -106,7 +104,7 @@ int _return_val = 0;
 	}
 	
 	print();
-	traverse_directory(s.data, true, _temp_func_1);
+	traverse_directory(s.data, true, _temp_func_0);
 main_defer:
 cleanup();
 x = 0;

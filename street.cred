@@ -1,9 +1,10 @@
 int a {
+    chunk_array : int testarr;
+    
     var test = 0;
-    var calc = (literal directory, literal name){
-        slice ofpie = slice();
-        print("HERE");
-    };
+    testarr = chunk_array_create(12,sizeof(int));
+    int x = testarr[0];
+    testarr.push(0);
 }
 
 void draw(int x, int y, int color, int overwrite) { int b = 0; }

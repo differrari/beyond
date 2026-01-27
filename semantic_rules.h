@@ -38,6 +38,7 @@ typedef enum {
 	sem_elem_type,
 	sem_elem_name,
 	sem_elem_parent,
+	sem_elem_subtype,
 	sem_elem_count,
 } sem_elem;
 
