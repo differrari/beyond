@@ -79,7 +79,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
                 return res;
             }
             if (!analyze_rule(new_rule, new_opt, current_table)) return false;
-        } else if (elem.sem_value && !elem.lit){
+        } else if (elem.sem_value){
              ast_node node;
              pop_stack(&ssn, &node);
              if (node.action == sem_action_declare) {

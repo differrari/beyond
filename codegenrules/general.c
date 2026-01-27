@@ -110,6 +110,8 @@ void exp_code_register_elem(void* ptr, int type, Token elem){
         code->val = elem;
     if (type == sem_rule_syn)
         code->paren = true;
+    if (type == sem_rule_op && slice_lit_match(token_to_slice(elem), "not", false))
+        code->invert = true;
     else code->operand = elem;
 }
 

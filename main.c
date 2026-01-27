@@ -32,7 +32,7 @@ ln_report parse_ln(uint32_t pos, char *content){
 const char* outname = "output";
 static buffer buf;
 
-void parse_arguments(int argc, char *argv[]){
+bool parse_arguments(int argc, char *argv[]){
     buf = (buffer){
         .buffer = zalloc(0x10000),
         .limit = 0x10000,
@@ -43,6 +43,10 @@ void parse_arguments(int argc, char *argv[]){
     for (int i = 1; i < argc; i++){
         if (*argv[i] != '-'){
             char *content = read_full_file(argv[i],0);
+            if (!content){
+                print("Failed to open file %s",argv[i]);
+                return false;
+            }
             buffer_write_const(&buf, content);
         } else {
             if (strcmp(argv[i], "-o") == 0){
@@ -55,11 +59,12 @@ void parse_arguments(int argc, char *argv[]){
         char *content = read_full_file("street.cred",0);
         buffer_write_const(&buf, content);
     }
+    return true;
 }
 
 int main(int argc, char *argv[]){
     
-    parse_arguments(argc, argv);
+    if (!parse_arguments(argc, argv)) return -1;
     
     scan = scanner_make(buf.buffer,strlen(buf.buffer));
     

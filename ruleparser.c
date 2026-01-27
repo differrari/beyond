@@ -117,12 +117,10 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
             }
             rule_sequence *seqrule = zalloc(sizeof(rule_sequence));
             if (t.kind == TOK_STRING){
-                if (has_tag) {
-                    print("Literal isn't expected to have a tag");
-                    break;
-                }
+                if (has_tag)
+                    seqrule->tag = tag;
                 seqrule->t = t;
-                seqrule->type = "LITERAL";
+                seqrule->type = has_tag ? "LITTAG" : "LITERAL";
             } else if (is_capitalized(token_to_slice(t))){
                 Token p1, s, p2;
                 uint32_t p = ts->tz->s->pos;

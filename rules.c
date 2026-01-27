@@ -228,7 +228,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},1, sem_rule_label, sem_action_declare},
 	[rule_expression] = {{
 		{{ 
-			LITERAL("not"), SYMRULE(expression,exp), 
+			LITTAG("not",op), SYMRULE(expression,exp), 
 		 },2},
 		{{ 
 			SYMCHECK(LPAREN,syn), SYMRULE(expression,exp), TOKEN(RPAREN), 

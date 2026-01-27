@@ -21,6 +21,12 @@ typedef struct {
 
 emit_context ctx;
 
+#define FIND_SYM(rule, name) symbol_t *sym = find_symbol(rule, token_to_slice(name));\
+if (!sym) { print("Symbol not found: %v",token_to_slice(name)); return; }
+
+#define FIND_SLICE(rule, name) symbol_t *sym = find_symbol(rule, name);\
+if (!sym) { print("Symbol not found: %v",name); return; }
+
 emit_context save_and_push_context(emit_context nctx){
     emit_context orig = ctx;
     ctx = nctx;
@@ -84,8 +90,7 @@ void dec_code_emit_code(void* ptr){
     if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
-    symbol_t *sym = find_symbol(sem_rule_dec, token_to_slice(code->name));
-    if (!sym) return;//FIXME: looks like declarations inside of lamdbas are not in symbol table
+    FIND_SYM(sem_rule_dec, code->name);
     
     emit_type(sym, true);
     emit_space();
@@ -102,8 +107,7 @@ void dec_code_emit_code(void* ptr){
 void ass_code_emit_code(void *ptr){
     if (is_header == true) return;
     ass_code *code = (ass_code*)ptr;
-    symbol_t *sym = find_symbol(sem_rule_dec, token_to_slice(code->name));
-    if (!sym) return;
+    FIND_SYM(sem_rule_dec, code->name);
     emit_slice(sym->name);
     emit_const(" = ");
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
@@ -165,6 +169,8 @@ void exp_code_emit_code(void *ptr){
     //TODO: fetch from symbol table
     if (code->paren)
         emit_const("(");
+    if (code->invert)
+        emit_const("!");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     if (code->var.ptr) emit_code(code->var);
     else emit_token(code->val);
@@ -211,8 +217,7 @@ void param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
     if ((ctx.context_rule == sem_rule_interf || ctx.context_rule == sem_rule_struct) && slices_equal(token_to_slice(code->type), ctx.context_prefix, false))
         emit_const("struct ");
-    symbol_t *sym = find_symbol(sem_rule_param, token_to_slice(code->name));
-    if (!sym) return;
+    FIND_SYM(sem_rule_param, code->name);
     emit_type(sym, true);
     emit_space();
     emit_slice(sym->name);
@@ -372,9 +377,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name){
     
     string_slice name_slice = resolve_symbol_name(code);
     
-    symbol_t *sym = find_symbol(sem_rule_dec, name_slice);
-    
-    if (!sym) return;
+    FIND_SLICE(sem_rule_dec, name_slice);
     
     emit_type(sym,false);
     
@@ -528,8 +531,7 @@ void gen_int_stubs(codegen_t contents, string_slice name){
     if (scope->stat.ptr && scope->stat.type == sem_rule_func){
         func_code *func = scope->stat.ptr;
         if (func->type.length){
-            symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(func->name));
-            if (!sym) return;
+            FIND_SYM(sem_rule_func, func->name);
             emit_type(sym,false);
             emit_const(" ");
         } 

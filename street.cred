@@ -74,9 +74,5 @@ int main {
     
     traverse_directory(s.data, true, (literal directory, literal name){
         print("Inside lambda");
-        slice simplename = name.slice_to(".");
-        slice existing = project.find(simplename, (int a){
-            print("Inside second lambda called by first lambda of main");
-        });
     });
 }

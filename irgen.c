@@ -65,7 +65,7 @@ codegen_t eval_rule(int current_rule, int curr_option){
                 if (gen.ptr) register_subrule(gen, elem.sem_value, new_codegen);
                 else return new_codegen;
             } else eval_rule(new_rule, new_opt);
-        } else if (elem.sem_value && !elem.lit){
+        } else if (elem.sem_value){
             ast_node node;
             pop_stack(&gsn, &node);
             if (node.t.kind != elem.value){

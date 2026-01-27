@@ -28,6 +28,7 @@ typedef struct {
 #define RULE(name) { true, rule_##name, 0, sem_action_none, 0 }
 #define LITERAL(val) { false, TOK_IDENTIFIER, val, sem_action_none, 0 }
 #define LITTOK(tok,val) { false, TOK_##tok, val, sem_action_none, 0 }
+#define LITTAG(val,type) { false, TOK_IDENTIFIER, val, sem_action_check, sem_rule_##type }
 
 #define SYMDEC(name,type) { false, TOK_##name, 0, sem_action_declare, sem_elem_##type }
 #define SYMCHECK(name,type) { false, TOK_##name, 0, sem_action_check, sem_rule_##type }

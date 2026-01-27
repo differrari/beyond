@@ -41,6 +41,7 @@ typedef struct {
     codegen_t exp;
     codegen_t lambda;
     bool paren;
+    bool invert;
 } exp_code;
 
 codegen_t exp_code_init();
