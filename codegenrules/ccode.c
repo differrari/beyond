@@ -6,6 +6,7 @@
 #ifdef CCODEGEN
 
 tern is_header = false;
+emit_block aux_fn_block;
 
 typedef enum { convenience_type_none, convenience_type_to_string, convenience_type_from_string, convenience_type_to_int, convenience_type_from_int} convenience_type;
 
@@ -84,13 +85,13 @@ void dec_code_emit_code(void* ptr){
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
     symbol_t *sym = find_symbol(sem_rule_dec, token_to_slice(code->name));
-    if (!sym) return;
+    if (!sym) return;//FIXME: looks like declarations inside of lamdbas are not in symbol table
     
     emit_type(sym, true);
     emit_space();
     emit_slice(sym->name);
     if (is_header != true && code->initial_value.ptr){
-        emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
+        emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_dec, .ignore_semicolon = true });
         emit_const(" = ");
         emit_code(code->initial_value);
         pop_and_restore_context(orig);
@@ -105,7 +106,7 @@ void ass_code_emit_code(void *ptr){
     if (!sym) return;
     emit_slice(sym->name);
     emit_const(" = ");
-    emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
     emit_code(code->expression);
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
@@ -114,10 +115,12 @@ void ass_code_emit_code(void *ptr){
 void call_code_emit_code(void *ptr){
     if (is_header == true) return;
     call_code *code = (call_code*)ptr;
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
     emit_token(code->name);
     emit_const("(");
     emit_code(code->args);
     emit_const(")");
+    pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
 }
 
@@ -173,7 +176,21 @@ void exp_code_emit_code(void *ptr){
         }
         emit_code(code->exp);
     } else if (code->lambda.ptr){
-        emit_const("LAMBDA");
+        //TODO: symbol for lamdba. 
+        string_slice name = make_temp_name(sem_rule_func);
+        emit_slice(name);
+        if (orig.context_rule != sem_rule_call){
+            emit_const("()");//TODO: arguments and captures
+        }
+        if (aux_fn_block.prologue.buffer){
+            emit_block saved_block = save_and_push_existing(aux_fn_block);
+            emit_block_section section = switch_block_section(block_section_prologue);
+            func_code *lmbda = (func_code*)code->lambda.ptr;
+            lmbda->name = (Token){.start = name.data,.length = name.length };//TODO: undo this conversion once we just use slices
+            emit_code(code->lambda);
+            switch_block_section(section);
+            aux_fn_block = pop_and_restore_emit_block(saved_block);
+        }
     }
     pop_and_restore_context(orig);
     if (code->paren)
@@ -207,16 +224,13 @@ void param_code_emit_code(void *ptr){
 
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    if (ctx.context_rule == sem_rule_struct){
-        switch_block_section(block_section_epilogue);
-    }
+    emit_block parent_block = save_and_push_block();
     func_code *sig;
     if (code->signature.ptr){
         sig = code->signature.ptr;
     } else sig = code;
     symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(sig->name));
-    if (!sym) return;
-    if (sig->type.kind){
+    if (sym && sig->type.kind){
         emit_type(sym, true);
         emit_const(" ");
     } else 
@@ -228,7 +242,9 @@ void func_code_emit_code(void *ptr){
     if (ctx.context_rule == sem_rule_interf){
         emit_const("(*");
     }
-    emit_slice(sym->name);
+    if (sym)
+        emit_slice(sym->name);
+    else emit_token(sig->name);
     if (ctx.context_rule == sem_rule_interf){
         emit_const(")");
     }
@@ -249,10 +265,6 @@ void func_code_emit_code(void *ptr){
     emit_code(sig->args);
     if (ctx.context_rule == sem_rule_interf || is_header == true){
         emit_const(");");
-        if (ctx.context_rule == sem_rule_struct){
-            emit_newline();
-            switch_block_section(block_section_body);
-        }
     } else {
         emit_const("){");
         if (ctx.context_parent.length){
@@ -264,12 +276,13 @@ void func_code_emit_code(void *ptr){
             emit_newline();
         }
         emit_block original = save_and_push_block();
+        emit_block saved_aux = aux_fn_block;
+        aux_fn_block = original;
         emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(sig->name), .ignore_semicolon = false, .has_defer = false });
         increase_indent();
         emit_newline();
         emit_code(code->body);
-        switch_block_section(block_section_epilogue);
-        decrease_indent();
+        emit_block_section saved_sec = switch_block_section(block_section_epilogue);
         if (ctx.has_defer){
             switch_block_section(block_section_prologue);
             emit_newline();
@@ -277,20 +290,31 @@ void func_code_emit_code(void *ptr){
             emit_const("int _return_val = 0;");
             switch_block_section(block_section_epilogue);
             emit_const("return _return_val;");
-            emit_newline();
         }
+        decrease_indent();
+        emit_newline();
         emit_const("}");
         emit_newline();
-        switch_block_section(block_section_body);
+        switch_block_section(saved_sec);
+        original = aux_fn_block;
         emit_block fnblock = pop_and_restore_emit_block(original);
-        if (orig.context_rule == sem_rule_struct){
-            switch_block_section(block_section_epilogue);
-        }
+        aux_fn_block = saved_aux;
+        emit_const("|");
         collapse_block(fnblock);
+        emit_const("|");
         if (orig.context_rule == sem_rule_struct){
             switch_block_section(block_section_body);
         }
         pop_and_restore_context(orig);
+    }
+    emit_block full_block = pop_and_restore_emit_block(parent_block);
+    if (ctx.context_rule == sem_rule_struct){
+        switch_block_section(block_section_epilogue);
+    }
+    if (aux_fn_block.body.buffer) switch_block_section(block_section_prologue);
+    collapse_block(full_block);
+    if (ctx.context_rule == sem_rule_struct){
+        switch_block_section(block_section_body);
     }
 }
 

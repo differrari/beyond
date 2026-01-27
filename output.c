@@ -1,28 +1,29 @@
 #include "output.h"
 
-int a(){
-	if (compile()){
-		return run() == 0;
-	}
-	
+void _temp_func_0(){|
+	print("HERE");
 }
-
-void draw(int x, int y, int color, int overwrite){
+|
+int a(){|
+	var calc = _temp_func_0();
+}
+|
+void draw(int x, int y, int color, int overwrite){|
 	int b = 0;
 }
-
-void c(int x){
+|
+void c(int x){|
 	int l;
 	if (x){
 		return 0;
 	}
 	
 }
-
-void print(){
+|
+void print(){|
 	
 }
-
+|
 int t = u + i;
 
 
@@ -47,30 +48,36 @@ void hello_test(hello instance){
 
 
 
-
 void testType_func(void *parent, int rule, Token elem){
 testType *instance = (testType*)parent;
-
+|
 	int a = 0;
 }
-void testType_test(void *parent){
+|void testType_test(void *parent){
 testType *instance = (testType*)parent;
-
+|
 	print("Test succeeded");
 }
-void testType_helper(void *parent){
+|void testType_helper(void *parent){
 testType *instance = (testType*)parent;
-
+|
 	
 }
-hello testType_init(){
+|hello testType_init(){
 	return (hello){
 		.ptr = zalloc(sizeof(testType)),
 		.func = testType_func,
 		.test = testType_test,
 	};
 }
-int main(){
+void _temp_func_1(){|
+	print("Inside lamdba");
+	
+	
+	
+}
+|
+int main(){|
 int _return_val = 0;
 
 	int y = a();
@@ -100,9 +107,10 @@ int _return_val = 0;
 	}
 	
 	print();
-	traverse_directory(s.data, true, LAMBDA);
+	traverse_directory(s.data, true, _temp_func_1);
 main_defer:
 cleanup();
 x = 0;
 return _return_val;
 }
+|

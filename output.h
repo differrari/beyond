@@ -16,7 +16,6 @@ typedef struct hello {
 	void (*func)(void *instance, int rule, Token elem);
 	void (*test)(void *instance);
  } hello;
-
 void hello_func(hello instance ,int rule, Token elem);
 
 void hello_test(hello instance);
@@ -27,10 +26,6 @@ typedef struct testType {
 	int prop1;
 	int prop2;
  } testType;
-
-void testType_func(void *parent, int rule, Token elem);
-void testType_test(void *parent);
-void testType_helper(void *parent);
-hello testType_init();
+void testType_func(void *parent, int rule, Token elem);void testType_test(void *parent);void testType_helper(void *parent);hello testType_init();
 
 int main();

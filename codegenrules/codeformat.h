@@ -20,6 +20,7 @@ extern emit_block current_eblock;
 emit_block save_and_push_block();
 emit_block save_and_push_existing(emit_block existing);
 emit_block pop_and_restore_emit_block(emit_block block);
+emit_block_section get_block_section();
 emit_block_section switch_block_section(emit_block_section section);
 void collapse_block(emit_block old_block);
 

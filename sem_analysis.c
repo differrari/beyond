@@ -137,3 +137,15 @@ bool analyze_semantics(ast_node *stack, uint32_t count){
     print("Semantic analysis done");
     return true;
 }
+
+uint64_t genid = 0;
+
+string_slice make_temp_name(sem_rule type){
+    switch (type) {
+        case sem_rule_func: {
+            string s = string_format("_temp_func_%i",genid++);
+            return make_string_slice(s.data, 0, s.length);
+        }
+        default: return (string_slice){};
+    }
+}

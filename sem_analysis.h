@@ -20,3 +20,4 @@ typedef struct symbol_t {
 
 bool analyze_semantics(ast_node *stack, uint32_t count);
 symbol_t * find_symbol(sem_rule type, string_slice name);
+string_slice make_temp_name(sem_rule type);

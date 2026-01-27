@@ -33,6 +33,7 @@ void new_block(){
         .epilogue = new_buffer(),
         .eindent = current_indent ? *current_indent : 0,
     };
+    current_section = block_section_body;
     code_buf = &current_eblock.body;
     current_indent = &current_eblock.bindent;
 }
@@ -58,6 +59,21 @@ emit_block_section switch_block_section(emit_block_section section){
     break;
     }
     return old;
+}
+
+emit_block save_and_push_existing(emit_block existing){
+    if (!code_buf){
+        new_block();
+    }
+    emit_block orig = current_eblock;
+    current_eblock = existing;
+    code_buf = &current_eblock.body;
+    current_indent = &current_eblock.bindent;
+    return orig;
+}
+
+emit_block_section get_block_section(){
+    return current_section;
 }
 
 emit_block save_and_push_block(){
@@ -144,17 +160,19 @@ void decrease_indent(){
 }
 
 void collapse_block(emit_block old_block){
+    bool has_newline = false;
     if (old_block.prologue.buffer_size){
         emit_const(old_block.prologue.buffer);
-        emit_newline();
+        has_newline = true;
         buffer_destroy(&old_block.prologue);
     }
     if (old_block.body.buffer_size){
+        if (has_newline) emit_newline();
         emit_const(old_block.body.buffer);
-        emit_newline();
         buffer_destroy(&old_block.body);
-    }
+    } else has_newline = false;
     if (old_block.epilogue.buffer_size){
+        if (has_newline) emit_newline();
         emit_const(old_block.epilogue.buffer);
         buffer_destroy(&old_block.epilogue);
     }

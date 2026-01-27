@@ -1,7 +1,7 @@
 int a {
-    if (compile()){
-        return run() == 0;
-    }
+    var calc = (literal directory, literal name){
+        print("HERE");
+    };
 }
 
 void draw(int x, int y, int color, int overwrite) { int b = 0; }
@@ -70,15 +70,11 @@ int main {
     if y < 100 { } else if (y == 100) { print("Exactly 100 y"); }
     print();
     
-    traverse_directory(s.data, true, (literal directory, literal name){//Parse lambdas as unnamed functions
+    traverse_directory(s.data, true, (literal directory, literal name){
+        print("Inside lambda");
         slice simplename = name.slice_to(".");
-        slice existing = project.find(simplename, (slice item, slice query){
-            return item.match(query);
+        slice existing = project.find(simplename, (int a){
+            print("Inside second lambda called by first lambda of main");
         });
-        if (not projects.contains(simplename)){
-            print("Skip known project %s",name);//TODO: in-string formats
-        } else {
-            projects.push(simplename);
-        }
     });
 }
