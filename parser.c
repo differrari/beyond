@@ -56,6 +56,8 @@ bool push_ast_rule(int rule, int option, int sequence){
 
 size_t furthest_pos = 0;
 uint32_t tok_pos = 0;
+tok_fail furthest_fail = {};
+tok_fail latest_fail = {};
 
 bool parser_advance_to_token(parser_sm *parser, Token t){
     while (current_parser_rule(parser).rule){
@@ -106,7 +108,10 @@ bool parser_advance_option_sm(parser_sm *parser){
         parser->sequence = 0;
         parser_debug("%soption failed, backtrack to %i",curr_indent, parser->scanner_pos);
         parser_debug("%s%s [o:%i]",curr_indent,rule_names[parser->current_rule], parser->option);
-        if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
+        if (parser->scan->pos > furthest_pos) {
+            furthest_fail = latest_fail;
+            furthest_pos = tok_pos;
+        } 
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
         tree_count = parser->tree_pos;
@@ -135,6 +140,10 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
         if (!push_ast_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
     } else {
+        if (parser->scan->pos > furthest_pos) {
+            latest_fail.expected = element;
+            latest_fail.found = t;
+        }
         parser_debug("%s[%i] Failed to match token %s, found %s@%i. Skipping",curr_indent, parser->sequence, token_name(element.value), token_name(t.kind),parser->scan->pos);
         return parser_advance_option_sm(parser);
     }
@@ -153,8 +162,9 @@ parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
         // msleep(1000);
     }
     
-    if (ts->tz->err || !result)
-        return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos };
+    if (ts->tz->err || !result){
+        return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos, .fail_info = furthest_fail };
+    }
     
     return (parse_result){ .result = true, .ast_stack = tree_stack, .ast_count = tree_count };
 }

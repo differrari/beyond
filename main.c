@@ -88,6 +88,7 @@ int main(int argc, char *argv[]){
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.furthest_parse_pos, buf.buffer);
         print("Found syntax error on l%i:%i in file %i",ln.line_number,ln.column,ln.file);
+        print("Expected %s, found %v",token_name(parse_res.fail_info.expected.value),token_to_slice(parse_res.fail_info.found));
         return -1;
     } else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
         print("Generating %s",outname);

@@ -13,10 +13,16 @@ typedef struct {
 } parser_sm;
 
 typedef struct {
+    grammar_elem expected;
+    Token found;
+} tok_fail;
+
+typedef struct {
     bool result;
     uint32_t furthest_parse_pos;
     ast_node* ast_stack;
     uint32_t ast_count;
+    tok_fail fail_info;
 } parse_result;
 
 parse_result parse(const char *content, TokenStream *ts, parser_sm *parser);
