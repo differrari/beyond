@@ -1,5 +1,7 @@
 int a {
+    var test = 0;
     var calc = (literal directory, literal name){
+        slice ofpie = slice();
         print("HERE");
     };
 }

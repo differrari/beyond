@@ -1,29 +1,31 @@
 #include "output.h"
 
-void _temp_func_0(){|
+void _temp_func_0(char* directory, char* name){
+	slice ofpie = slice();
 	print("HERE");
 }
-|
-int a(){|
+
+int a(){
+	var test = 0;
 	var calc = _temp_func_0();
 }
-|
-void draw(int x, int y, int color, int overwrite){|
+
+void draw(int x, int y, int color, int overwrite){
 	int b = 0;
 }
-|
-void c(int x){|
+
+void c(int x){
 	int l;
 	if (x){
 		return 0;
 	}
 	
 }
-|
-void print(){|
+
+void print(){
 	
 }
-|
+
 int t = u + i;
 
 
@@ -50,34 +52,33 @@ void hello_test(hello instance){
 
 void testType_func(void *parent, int rule, Token elem){
 testType *instance = (testType*)parent;
-|
+
 	int a = 0;
 }
-|void testType_test(void *parent){
+void testType_test(void *parent){
 testType *instance = (testType*)parent;
-|
+
 	print("Test succeeded");
 }
-|void testType_helper(void *parent){
+void testType_helper(void *parent){
 testType *instance = (testType*)parent;
-|
+
 	
 }
-|hello testType_init(){
+hello testType_init(){
 	return (hello){
 		.ptr = zalloc(sizeof(testType)),
 		.func = testType_func,
 		.test = testType_test,
 	};
 }
-void _temp_func_1(){|
-	print("Inside lamdba");
-	
-	
-	
+void _temp_func_1(char* directory, char* name){
+	print("Inside lambda");
+	slice simplename = ;
+	slice existing = ;
 }
-|
-int main(){|
+
+int main(){
 int _return_val = 0;
 
 	int y = a();
@@ -113,4 +114,3 @@ cleanup();
 x = 0;
 return _return_val;
 }
-|

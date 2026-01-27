@@ -25,7 +25,7 @@ symbol_t * find_symbol_in_table(symbol_table *table,sem_rule type, string_slice 
         if (sym->sym_type == type && slices_equal(name, sym->name, false)){
             return sym;
         }
-        if (sym && sym->name.length){//TODO: hack
+        if (sym){//TODO: hack
             if (sym->child){
                 symbol_t *s = find_symbol_in_table(sym->child, type, name);
                 if (s) return s;

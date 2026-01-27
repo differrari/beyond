@@ -299,9 +299,7 @@ void func_code_emit_code(void *ptr){
         original = aux_fn_block;
         emit_block fnblock = pop_and_restore_emit_block(original);
         aux_fn_block = saved_aux;
-        emit_const("|");
         collapse_block(fnblock);
-        emit_const("|");
         if (orig.context_rule == sem_rule_struct){
             switch_block_section(block_section_body);
         }
