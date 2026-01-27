@@ -198,9 +198,9 @@ void exp_code_emit_code(void *ptr){
             aux_fn_block = pop_and_restore_emit_block(saved_block);
         }
     }
-    pop_and_restore_context(orig);
     if (code->paren)
         emit_const(")");
+    pop_and_restore_context(orig);
 }
 
 void arg_code_emit_code(void *ptr){

@@ -108,9 +108,9 @@ void exp_code_register_elem(void* ptr, int type, Token elem){
     exp_code *code = (exp_code*)ptr;
     if (type == sem_rule_val)
         code->val = elem;
-    if (type == sem_rule_syn)
+    else if (type == sem_rule_syn)
         code->paren = true;
-    if (type == sem_rule_op && slice_lit_match(token_to_slice(elem), "not", false))
+    else if (type == sem_rule_op && slice_lit_match(token_to_slice(elem), "not", false))
         code->invert = true;
     else code->operand = elem;
 }

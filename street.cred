@@ -49,7 +49,7 @@ int main {
     int x = 1-(0-2);
     int z = x[0];
     {
-        print("This is democracy");
+        print("This is democracy manifest");
     }
     defer {
         cleanup();

@@ -80,9 +80,9 @@ int main(){
 int _return_val = 0;
 
 	int y = a();
-	int x = 1 - (( 0 - 2);
+	int x = 1 - (0 - 2);
 	int z = int_get(x);
-	print("This is democracy");
+	print("This is democracy manifest");
 	
 	
 	for (int i = 0; i < 10; i = i + 1){}
