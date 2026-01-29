@@ -19,10 +19,7 @@ bool rulegen(){
 
 bool genc(){
 	if (rulegen()){
-		new_module("genc");
-		source("sem_enum.cred");
-		set_name("semantic_rules");
-		return cred_compile();
+		return quick_cred("sem_enum.cred", "semantic_rules") && quick_cred("codegen/codegen.cred", "codegen/codegen") && true;
 	}
 	
 	return false;
@@ -49,7 +46,6 @@ void compiler(){
 }
 
 int main(){
-	print("Hello world");
 	compiler();
 	return 0;
 }
