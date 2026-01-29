@@ -41,10 +41,10 @@ void output_literal(char* lit, bool space){
     }
 }
 
-codegen_t eval_rule(int current_rule, int curr_option){
+codegen eval_rule(int current_rule, int curr_option){
     
     sem_rule statement_type = language_rules[current_rule].semrule;
-    codegen_t gen = begin_rule(statement_type);
+    codegen gen = begin_rule(statement_type);
 
     // print("Current rule %s@%i",rule_name(current_rule),curr_option);
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
@@ -56,13 +56,13 @@ codegen_t eval_rule(int current_rule, int curr_option){
             if (res != true){
                 if (!res){
                     print("Rule not found %i",elem.value);
-                    return (codegen_t){};
+                    return (codegen){};
                 } 
                 return gen;
             }
             if (elem.sem_value){
-                codegen_t new_codegen = eval_rule(new_rule, new_opt);
-                if (gen.ptr) register_subrule(gen, elem.sem_value, new_codegen);
+                codegen new_codegen = eval_rule(new_rule, new_opt);
+                if (gen.ptr) codegen_register_subrule(gen, elem.sem_value, new_codegen);
                 else return new_codegen;
             } else eval_rule(new_rule, new_opt);
         } else if (elem.sem_value){
@@ -70,9 +70,9 @@ codegen_t eval_rule(int current_rule, int curr_option){
             pop_stack(&gsn, &node);
             if (node.t.kind != elem.value){
                 print("Wrong token found. Expected %i, found %i (%v)",elem.value, node.t.kind, token_to_slice(node.t));
-                return (codegen_t){};
+                return (codegen){};
             }
-            if (gen.ptr && node.sem_value) register_elem(gen, node.sem_value, node.t);
+            if (gen.ptr && node.sem_value) codegen_register_elem(gen, node.sem_value, node.t);
         }
     }
     
@@ -87,7 +87,7 @@ void gen_code(ast_node *stack, uint32_t count, const char *out_name){
     int new_rule;
     int new_opt;
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
-    codegen_t cg = eval_rule(new_rule,new_opt);
+    codegen cg = eval_rule(new_rule,new_opt);
     
     generate_code(out_name, cg);
 }

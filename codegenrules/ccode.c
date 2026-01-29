@@ -41,33 +41,33 @@ emit_context pop_and_restore_context(emit_context restore){
     return orig;
 }
 
-void generate_code(const char *name, codegen_t cg){
+void generate_code(const char *name, codegen cg){
     
     int32_t ext = str_has_char(name, 0, '.');
     if (ext >= 0){
         is_header = -1;
-        emit_code(cg);
+        codegen_emit_code(cg);
         output_code(name,"");
     } else {
         is_header = true;
-        emit_code(cg);
+        codegen_emit_code(cg);
         output_code(name,"h");
         
         is_header = false;
         switch_block_section(block_section_prologue);
         emit("#include \"%s.h\"\n\n",name);
         switch_block_section(block_section_body);
-        emit_code(cg);
+        codegen_emit_code(cg);
         output_code(name,"c");
     }
 }
 
 void blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
-    emit_code(code->stat);
+    codegen_emit_code(code->stat);
     if (code->chain.ptr){ 
         emit_newline(); 
-        emit_code(code->chain); 
+        codegen_emit_code(code->chain); 
     }
 }
 
@@ -99,7 +99,7 @@ void dec_code_emit_code(void* ptr){
     if (is_header != true && code->initial_value.ptr){
         emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_dec, .ignore_semicolon = true });
         emit_const(" = ");
-        emit_code(code->initial_value);
+        codegen_emit_code(code->initial_value);
         pop_and_restore_context(orig);
     }
     if (!ctx.ignore_semicolon) emit_const(";");
@@ -115,7 +115,7 @@ void ass_code_emit_code(void *ptr){
     emit_slice(sym->name);
     emit_const(" = ");
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
-    emit_code(code->expression);
+    codegen_emit_code(code->expression);
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
 }
@@ -126,7 +126,7 @@ void call_code_emit_code(void *ptr){
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
     emit_token(code->name);
     emit_const("(");
-    emit_code(code->args);
+    codegen_emit_code(code->args);
     emit_const(")");
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
@@ -138,16 +138,16 @@ void cond_code_emit_code(void *ptr){
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
     emit_const("if (");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
-    emit_code(code->cond);
+    codegen_emit_code(code->cond);
     pop_and_restore_context(orig);
     emit_const("){");
     increase_indent();
     emit_newline();
-    emit_code(code->scope);
+    codegen_emit_code(code->scope);
     decrease_indent();
     emit_newline();
     emit_const("}");
-    if (code->chain.ptr) emit_code(code->chain);
+    if (code->chain.ptr) codegen_emit_code(code->chain);
     else emit_newline();
 }
 
@@ -176,7 +176,7 @@ void exp_code_emit_code(void *ptr){
     if (code->invert)
         emit_const("!");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
-    if (code->var.ptr) emit_code(code->var);
+    if (code->var.ptr) codegen_emit_code(code->var);
     else emit_token(code->val);
     if (code->exp.ptr){
         if (code->val.kind || code->var.ptr) emit_space();
@@ -184,7 +184,7 @@ void exp_code_emit_code(void *ptr){
             emit_token(code->operand);
             emit_space();
         }
-        emit_code(code->exp);
+        codegen_emit_code(code->exp);
     } else if (code->lambda.ptr){
         //TODO: symbol for lamdba. 
         string_slice name = make_temp_name(sem_rule_func);
@@ -197,7 +197,7 @@ void exp_code_emit_code(void *ptr){
             emit_block_section section = switch_block_section(block_section_prologue);
             func_code *lmbda = (func_code*)code->lambda.ptr;
             lmbda->name = (Token){.start = name.data,.length = name.length };//TODO: undo this conversion once we just use slices
-            emit_code(code->lambda);
+            codegen_emit_code(code->lambda);
             switch_block_section(section);
             aux_fn_block = pop_and_restore_emit_block(saved_block);
         }
@@ -210,10 +210,10 @@ void exp_code_emit_code(void *ptr){
 void arg_code_emit_code(void *ptr){
     if (is_header == true) return;
     arg_code *code = (arg_code*)ptr;
-    emit_code(code->exp);
+    codegen_emit_code(code->exp);
     if (code->chain.ptr){
         emit_const(", ");
-        emit_code(code->chain);
+        codegen_emit_code(code->chain);
     }
 }
 
@@ -227,7 +227,7 @@ void param_code_emit_code(void *ptr){
     emit_slice(sym->name);
     if (code->chain.ptr){
         emit_const(", ");
-        emit_code(code->chain);
+        codegen_emit_code(code->chain);
     }
 }
 
@@ -271,7 +271,7 @@ void func_code_emit_code(void *ptr){
         if (sig->args.ptr)
             emit_const(", ");
     }
-    emit_code(sig->args);
+    codegen_emit_code(sig->args);
     if (ctx.context_rule == sem_rule_interf || is_header == true){
         emit_const(");");
     } else {
@@ -290,7 +290,7 @@ void func_code_emit_code(void *ptr){
         emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(sig->name), .ignore_semicolon = false, .has_defer = false });
         increase_indent();
         emit_newline();
-        emit_code(code->body);
+        codegen_emit_code(code->body);
         emit_block_section saved_sec = switch_block_section(block_section_epilogue);
         if (ctx.has_defer){
             switch_block_section(block_section_prologue);
@@ -330,16 +330,16 @@ void for_code_emit_code(void* ptr){
     for_code *code = (for_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     emit_const("for (");
-    emit_code(code->initial);
+    codegen_emit_code(code->initial);
     emit_const("; ");
-    emit_code(code->condition);
+    codegen_emit_code(code->condition);
     emit_const("; ");
-    emit_code(code->increment);
+    codegen_emit_code(code->increment);
     emit_const(")");
     pop_and_restore_context(orig);
     emit_const("{");
     increase_indent();
-    if (code->body.ptr) emit_code(code->body);
+    if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent();
     emit_const("}");
 }
@@ -348,10 +348,10 @@ void while_code_emit_code(void* ptr){
     if (is_header == true) return;
     while_code *code = (while_code*)ptr;
     emit_const("while (");
-    emit_code(code->condition);
+    codegen_emit_code(code->condition);
     emit_const("){");
     increase_indent();
-    if (code->body.ptr) emit_code(code->body);
+    if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent();
     emit_const("}");
 }
@@ -361,11 +361,11 @@ void dowhile_code_emit_code(void* ptr){
     dowhile_code *code = (dowhile_code*)ptr;
     emit_const("do {");
     increase_indent();
-    if (code->body.ptr) emit_code(code->body);
+    if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent();
     emit_const("}");
     emit_const("while (");
-    emit_code(code->condition);
+    codegen_emit_code(code->condition);
     emit_const(");");
 }
 
@@ -397,7 +397,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
         emit_token(call->name);
     
     emit_const("(");
-    if (code->var.ptr) emit_code(code->var); 
+    if (code->var.ptr) codegen_emit_code(code->var); 
     else { 
         FIND_SYM(sem_rule_dec, code->name);
         if (sym->table_type == sem_rule_struct){
@@ -407,7 +407,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
     }
     if (call->args.ptr){
         emit_const(", ");
-        emit_code(call->args);
+        codegen_emit_code(call->args);
     }
     emit_const(")");
 }
@@ -417,7 +417,7 @@ void var_code_emit_code(void* ptr){
     var_code *code = (var_code*)ptr;
     if (code->operation.kind){
         if (*code->operation.start == '.' && code->expression.type != sem_rule_call){
-            if (code->var.ptr) emit_code(code->var); else { 
+            if (code->var.ptr) codegen_emit_code(code->var); else { 
                 FIND_SYM(sem_rule_dec, code->name);
                 if (sym->table_type == sem_rule_struct){
                     emit_const("instance->");
@@ -425,7 +425,7 @@ void var_code_emit_code(void* ptr){
                 emit_slice(sym->name);
             }
             emit_const(".");//TODO: could be pointer
-            emit_code(code->expression);
+            codegen_emit_code(code->expression);
         }
         else if (*code->operation.start == '['){
             char *operation = "get";
@@ -434,14 +434,14 @@ void var_code_emit_code(void* ptr){
             emit_var_type_resolution(code, (string_slice){}, false);
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else {
-        if (code->var.ptr) emit_code(code->var); else { 
+        if (code->var.ptr) codegen_emit_code(code->var); else { 
             FIND_SYM(sem_rule_dec, code->name);
             if (sym->table_type == sem_rule_struct){
                 emit_const("instance->");
             }
             emit_slice(sym->name);
         }
-        if (code->expression.ptr) emit_code(code->expression);
+        if (code->expression.ptr) codegen_emit_code(code->expression);
     }
 }
 
@@ -463,11 +463,11 @@ void struct_code_emit_code(void *ptr){
         emit_token(code->name);
         emit_const(" { ");
         increase_indent();
-        emit_code(code->contents);
+        codegen_emit_code(code->contents);
         decrease_indent();
         emit_newline();
         emit(" } %v;",token_to_slice(code->name));
-    } else emit_code(code->contents);
+    } else codegen_emit_code(code->contents);
     emit_newline();
     emit_block new_b = pop_and_restore_emit_block(original);
     pop_and_restore_context(orig);
@@ -516,7 +516,7 @@ void ret_code_emit_code(void *ptr){
     emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
     if (orig.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
         emit_const("_return_val = ");
-        emit_code(code->expression);
+        codegen_emit_code(code->expression);
         emit_const(";");
         emit_newline();
         emit_const("goto ");
@@ -524,7 +524,7 @@ void ret_code_emit_code(void *ptr){
         emit_const("_defer"); 
     } else {
         emit_const("return ");
-        emit_code(code->expression);
+        codegen_emit_code(code->expression);
     }
     pop_and_restore_context(orig);
     emit_const(";");
@@ -540,20 +540,20 @@ void def_code_emit_code(void *ptr){
         emit_newline();
     }
     increase_indent();
-    emit_code(code->expression);
+    codegen_emit_code(code->expression);
     decrease_indent();
     emit_newline();
     ctx.has_defer = true;
     switch_block_section(block_section_body);
 }
 
-void gen_invoke_param(codegen_t contents){
+void gen_invoke_param(codegen contents){
     param_code *code = (param_code*)contents.ptr;
     if (code->name.length) emit(", %v",token_to_slice(code->name));
     if (code->chain.ptr) gen_invoke_param(code->chain);
 }
 
-void gen_int_stubs(codegen_t contents, string_slice name){
+void gen_int_stubs(codegen contents, string_slice name){
     blk_code *scope = (blk_code*)contents.ptr;
     if (scope->stat.ptr && scope->stat.type == sem_rule_func){
         func_code *func = scope->stat.ptr;
@@ -569,7 +569,7 @@ void gen_int_stubs(codegen_t contents, string_slice name){
         emit_token(func->name);
         emit("(%v instance",name);
         if (func->args.ptr) emit_const(" ,");
-        emit_code(func->args);
+        codegen_emit_code(func->args);
         if (is_header == true){
             emit_const(");");
             emit_newline();
@@ -608,7 +608,7 @@ void int_code_emit_code(void *ptr){
         emit_newline();
         emit_const("void* ptr;");
         emit_newline();
-        emit_code(code->contents);
+        codegen_emit_code(code->contents);
         decrease_indent();
         emit_newline();
         emit(" } %v;",token_to_slice(code->name));
@@ -628,7 +628,7 @@ void enum_code_emit_code(void *ptr){
         increase_indent();
         emit_newline();
         emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = token_to_slice(code->name) });
-        emit_code(code->contents);
+        codegen_emit_code(code->contents);
         pop_and_restore_context(orig);
         decrease_indent();
         emit_newline();
@@ -655,7 +655,7 @@ void enum_code_emit_code(void *ptr){
         increase_indent();
         emit_newline();
         emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
-        emit_code(code->contents);
+        codegen_emit_code(code->contents);
         pop_and_restore_context(orig);
         decrease_indent();
         emit_newline();
@@ -697,7 +697,7 @@ void enum_case_code_emit_code(void *ptr){
     }
     if (code->chain.ptr) {
         emit_newline();
-        emit_code(code->chain);
+        codegen_emit_code(code->chain);
     }
     
 }
@@ -706,12 +706,12 @@ void else_code_emit_code(void *ptr){
     else_code *code = (else_code*)ptr;
     emit_const(" else ");
     if (code->block.type == sem_rule_cond){
-        emit_code(code->block);
+        codegen_emit_code(code->block);
     } else {
         emit_const("{");
         increase_indent();
         emit_newline();
-        emit_code(code->block);
+        codegen_emit_code(code->block);
         decrease_indent();
         emit_newline();
         emit_const("}");

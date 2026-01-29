@@ -2,7 +2,7 @@
 #include "codegenrules/general.h"
 #include "rules.h"
 
-codegen_t begin_rule(sem_rule type){
+codegen begin_rule(sem_rule type){
     switch (type){
         case sem_rule_scope: return blk_code_init();
         case sem_rule_dec: return dec_code_init();
@@ -34,18 +34,6 @@ codegen_t begin_rule(sem_rule type){
         case sem_rule_none:
         case sem_rule_stat:
         case sem_rule_rules_count:
-            return (codegen_t){};
+            return (codegen){};
     }
-}
-
-void register_elem(codegen_t gen, int type, Token elem){
-   if (gen.register_elem) gen.register_elem(gen.ptr, type, elem);
-}
-
-void register_subrule(codegen_t gen, int type, codegen_t child){
-    if (gen.register_subrule) gen.register_subrule(gen.ptr, type, child);
-}
-
-void emit_code(codegen_t gen){
-    if (gen.emit_code) gen.emit_code(gen.ptr);
 }

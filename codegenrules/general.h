@@ -6,170 +6,170 @@
 // #define DEBUG_CODEGEN
 
 typedef struct {
-    codegen_t stat;
-    codegen_t chain;
+    codegen stat;
+    codegen chain;
 } blk_code;
 
-codegen_t blk_code_init();
+codegen blk_code_init();
 
 typedef struct {
     Token type;
     Token name;
-    codegen_t initial_value;
+    codegen initial_value;
 } dec_code;
 
-codegen_t dec_code_init();
+codegen dec_code_init();
 
 typedef struct {
     Token name;
-    codegen_t expression;
+    codegen expression;
 } ass_code;
 
-codegen_t ass_code_init();
+codegen ass_code_init();
 
 typedef struct {
-    codegen_t exp;
-    codegen_t chain;
+    codegen exp;
+    codegen chain;
 } arg_code;
 
-codegen_t arg_code_init();
+codegen arg_code_init();
 
 typedef struct {
     Token val;
-    codegen_t var;
+    codegen var;
     Token operand;
-    codegen_t exp;
-    codegen_t lambda;
+    codegen exp;
+    codegen lambda;
     bool paren;
     bool invert;
 } exp_code;
 
-codegen_t exp_code_init();
+codegen exp_code_init();
 
 typedef struct {
     Token name;
-    codegen_t args;
+    codegen args;
 } call_code;
 
-codegen_t call_code_init();
+codegen call_code_init();
 
 typedef struct {
-    codegen_t cond;
-    codegen_t scope;
-    codegen_t chain;
+    codegen cond;
+    codegen scope;
+    codegen chain;
 } cond_code;
 
-codegen_t cond_code_init();
+codegen cond_code_init();
 
 typedef struct {
     Token jump;
 } jmp_code;
 
-codegen_t jmp_code_init();
+codegen jmp_code_init();
 
 typedef struct {
     Token name;
 } label_code;
 
-codegen_t label_code_init();
+codegen label_code_init();
 
 typedef struct {
     Token type;
     Token name;
-    codegen_t chain;
+    codegen chain;
 } param_code;
 
-codegen_t param_code_init();
+codegen param_code_init();
 
 typedef struct {
     Token type;
     Token name;
-    codegen_t signature;
-    codegen_t args;
-    codegen_t body;
+    codegen signature;
+    codegen args;
+    codegen body;
 } func_code;
 
-codegen_t func_code_init();
+codegen func_code_init();
 
 typedef struct {
-    codegen_t initial;
-    codegen_t increment;
-    codegen_t condition;
-    codegen_t body;
+    codegen initial;
+    codegen increment;
+    codegen condition;
+    codegen body;
 } for_code;
 
-codegen_t for_code_init();
+codegen for_code_init();
 typedef struct {
-    codegen_t condition;
-    codegen_t body;
+    codegen condition;
+    codegen body;
 } while_code;
 
-codegen_t while_code_init();
+codegen while_code_init();
 typedef struct {
-    codegen_t condition;
-    codegen_t body;
+    codegen condition;
+    codegen body;
 } dowhile_code;
 
-codegen_t dowhile_code_init();
+codegen dowhile_code_init();
 
 typedef struct {
     Token name;
-    codegen_t var;
-    codegen_t expression;
+    codegen var;
+    codegen expression;
     Token operation;
 } var_code;
 
-codegen_t var_code_init();
+codegen var_code_init();
 
 typedef struct {
     Token value;
 } inc_code;
 
-codegen_t inc_code_init();
+codegen inc_code_init();
 
 typedef struct {
     Token name;
-    codegen_t contents;
+    codegen contents;
     Token parent;
 } struct_code;
 
-codegen_t struct_code_init();
+codegen struct_code_init();
 
 typedef struct {
-    codegen_t expression;
+    codegen expression;
 } ret_code;
 
-codegen_t ret_code_init();
+codegen ret_code_init();
 
 typedef struct {
-    codegen_t expression;
+    codegen expression;
 } def_code;
 
-codegen_t def_code_init();
+codegen def_code_init();
 
 typedef struct {
     Token name;
-    codegen_t contents;
+    codegen contents;
 } int_code;
 
-codegen_t int_code_init();
+codegen int_code_init();
 
 typedef struct {
     Token name;
-    codegen_t contents;
+    codegen contents;
 } enum_code;
 
-codegen_t enum_code_init();
+codegen enum_code_init();
 
 typedef struct {
     Token name;
-    codegen_t chain;
+    codegen chain;
 } enum_case_code;
 
-codegen_t enum_case_code_init();
+codegen enum_case_code_init();
 
 typedef struct {
-    codegen_t block;
+    codegen block;
 } else_code;
 
-codegen_t else_code_init();
+codegen else_code_init();
