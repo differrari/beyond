@@ -153,7 +153,7 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
 parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
     Token t;
     bool result;
-    if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos };
+    if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false };
     while (ts_next(ts, &t)) {
         // print("Read token@%i",parser->scan->pos);
         if (!t.kind)
@@ -164,7 +164,7 @@ parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
     }
     
     if (ts->tz->err || !result){
-        return (parse_result){ .result = false, .furthest_parse_pos = furthest_pos, .fail_info = furthest_fail };
+        return (parse_result){ .result = false, .fail_info = furthest_fail };
     }
     
     return (parse_result){ .result = true, .ast_stack = tree_stack, .ast_count = tree_count };

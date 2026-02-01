@@ -20,7 +20,6 @@ typedef struct {
 
 typedef struct {
     bool result;
-    uint32_t furthest_parse_pos;
     ast_node* ast_stack;
     uint32_t ast_count;
     tok_fail fail_info;
