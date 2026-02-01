@@ -27,7 +27,7 @@ if (!sym && rule == sem_rule_dec) sym = find_symbol(sem_rule_param, token_to_sli
 if (!sym) { print("Symbol not found: %v",token_to_slice(symname)); sym = zalloc(sizeof(symbol_t)); sym->name = token_to_slice(symname); }
 
 #define FIND_SLICE(rule, name) symbol_t *sym = find_symbol(rule, name);\
-if (!sym) { print("Symbol not found: %v",name); return; }
+if (!sym) { print("Symbol not found: %v",name); }
 
 emit_context save_and_push_context(emit_context nctx){
     emit_context orig = ctx;
@@ -376,7 +376,9 @@ string_slice resolve_symbol_name(var_code *code){
     } else return token_to_slice(code->name);
 }
 
-void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret_type){
+bool emit_variable(var_code *code);
+
+bool emit_var_type_resolution(var_code *code, string_slice access_name, bool ret_type){
     call_code *call = (call_code*)code->expression.ptr;
     
     string_slice name_slice = resolve_symbol_name(code);
@@ -384,7 +386,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
     FIND_SLICE(sem_rule_dec, name_slice);
     
     if (ret_type && sym->subtype.kind){
-        emit("*(%v*)",token_to_slice(sym->subtype));
+        emit("*(%v*)",token_to_slice(sym->subtype));//TODO: should know if this cast is needed based on the subtype and the function's return type
     }
     
     emit_type(sym,false);
@@ -397,7 +399,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
         emit_token(call->name);
     
     emit_const("(");
-    if (code->var.ptr) codegen_emit_code(code->var); 
+    if (code->var.ptr) emit_variable(code->var.ptr); 
     else { 
         FIND_SYM(sem_rule_dec, code->name);
         if (sym->table_type == sem_rule_struct){
@@ -410,6 +412,7 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
         codegen_emit_code(call->args);
     }
     emit_const(")");
+    return sym->reference_type;
 }
 
 bool emit_variable(var_code *code){
@@ -419,9 +422,6 @@ bool emit_variable(var_code *code){
             if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
                 FIND_SYM(sem_rule_dec, code->name);
                 is_ref = sym->reference_type;
-                if (is_ref){
-                    print("IS REFERENCE");
-                }
                 if (code->transform == var_deref){
                     emit_const("*");
                     is_ref = false;
@@ -436,16 +436,16 @@ bool emit_variable(var_code *code){
                 emit_slice(sym->name);
             }
             emit_const(is_ref ? "->" : ".");
+            emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
             codegen_emit_code(code->expression);
+            pop_and_restore_context(orig);
             return is_ref;
         }
         else if (*code->operation.start == '['){
             char *operation = "get";
-            emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) }, true);
-            return false;//TODO: should return if is ref
+            return emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) }, true);
         } else if (*code->operation.start == '.'){
-            emit_var_type_resolution(code, (string_slice){}, false);
-            return false;//TODO: should return if is ref
+            return emit_var_type_resolution(code, (string_slice){}, false);
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else {
         bool is_ref = false;
@@ -465,7 +465,11 @@ bool emit_variable(var_code *code){
             }
             emit_slice(sym->name);
         }
-        if (code->expression.ptr) codegen_emit_code(code->expression);
+        if (code->expression.ptr){
+            emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
+            codegen_emit_code(code->expression);
+            pop_and_restore_context(orig);
+        } 
         return is_ref;
     }
     return false;
@@ -475,6 +479,7 @@ void var_code_emit_code(void* ptr){
     if (is_header == true) return;
     var_code *code = (var_code*)ptr;
     emit_variable(code);
+    if (!ctx.ignore_semicolon) emit_const(";");
 }
 
 void inc_code_emit_code(void *ptr){

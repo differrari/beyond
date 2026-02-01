@@ -4,7 +4,7 @@ bool credbuild(){
 	redb_mod module = new_module("cred");
 	set_name(&module, "credgen");
 	set_target(&module, target_native);
-	redb_mod_source_all(&module, ".cred")
+	redb_mod_source_all(&module, ".cred");
 	return redb_mod_cred_compile(module);
 }
 
@@ -14,7 +14,7 @@ int a(){
 	int test = 0;
 	testarr = chunk_array_create(12, sizeof(int));
 	int x = *(int*)chunk_array_get(testarr);
-	chunk_array_push(testarr, 0)
+	chunk_array_push(testarr, 0);
 }
 
 void draw(int x, int y, int color, int overwrite){
