@@ -33,7 +33,7 @@ typedef struct {
 #define SYMDEC(name,type) { false, TOK_##name, 0, sem_action_declare, sem_elem_##type }
 #define SYMCHECK(name,type) { false, TOK_##name, 0, sem_action_check, sem_rule_##type }
 #define SYMRULE(name,type) { true, rule_##name, 0, sem_action_check, sem_rule_##type }
-
+#define SYMTOK(name,tag,action,type,val) { false, TOK_##name, val, sem_action_##action, type##_##tag}
 extern grammar_rule language_rules[];
 
 extern char* rule_names[];

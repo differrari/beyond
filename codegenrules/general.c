@@ -222,6 +222,8 @@ void var_code_register_elem(void* ptr, int type, Token elem){
     switch (type) {
         case sem_rule_var: code->name = elem; break;
         case sem_rule_op: code->operation = elem; break;
+        case sem_rule_deref: code->transform = var_deref; break;
+        case sem_rule_addr: code->transform = var_addr; break;
     }
 }
 

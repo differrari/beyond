@@ -28,7 +28,9 @@ enum sem_rule {
     enum_case, 
     parent,
     else,
-    syn
+    syn,
+    deref,
+    addr
 }
 
 enum sem_elem { 
@@ -37,6 +39,7 @@ enum sem_elem {
     name, 
     parent, 
     subtype,
+    ref,
     count
 }
 

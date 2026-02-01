@@ -143,6 +143,7 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
         if (parser->scan->pos > furthest_pos) {
             latest_fail.expected = element;
             latest_fail.found = t;
+            latest_fail.rule = parser->current_rule;
         }
         parser_debug("%s[%i] Failed to match token %s, found %s@%i. Skipping",curr_indent, parser->sequence, token_name(element.value), token_name(t.kind),parser->scan->pos);
         return parser_advance_option_sm(parser);

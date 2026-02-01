@@ -1,7 +1,21 @@
+bool credbuild {
+    redb_mod module = new_module("cred");
+	
+	set_name(&module, "credgen");
+
+	set_target(&module,target_native);
+
+	&module.source_all(".cred");
+
+	return module.cred_compile();
+}
+
 int a {
-    chunk_array : int testarr;
+    chunk_array:int *testarr;
     
-    var test = 0;
+    literal ly = "like";
+    
+    int test = 0;
     testarr = chunk_array_create(12,sizeof(int));
     int x = testarr[0];
     testarr.push(0);

@@ -1,3 +1,4 @@
+bool credbuild();
 int a();
 void draw(int x, int y, int color, int overwrite);
 void c(int x);

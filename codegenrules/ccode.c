@@ -412,37 +412,69 @@ void emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
     emit_const(")");
 }
 
-void var_code_emit_code(void* ptr){
-    if (is_header == true) return;
-    var_code *code = (var_code*)ptr;
+bool emit_variable(var_code *code){
     if (code->operation.kind){
         if (*code->operation.start == '.' && code->expression.type != sem_rule_call){
-            if (code->var.ptr) codegen_emit_code(code->var); else { 
+            bool is_ref = false;
+            if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
                 FIND_SYM(sem_rule_dec, code->name);
+                is_ref = sym->reference_type;
+                if (is_ref){
+                    print("IS REFERENCE");
+                }
+                if (code->transform == var_deref){
+                    emit_const("*");
+                    is_ref = false;
+                }
+                if (code->transform == var_addr){
+                    emit_const("&");
+                    is_ref = true;
+                }
                 if (sym->table_type == sem_rule_struct){
                     emit_const("instance->");
                 }
                 emit_slice(sym->name);
             }
-            emit_const(".");//TODO: could be pointer
+            emit_const(is_ref ? "->" : ".");
             codegen_emit_code(code->expression);
+            return is_ref;
         }
         else if (*code->operation.start == '['){
             char *operation = "get";
             emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) }, true);
+            return false;//TODO: should return if is ref
         } else if (*code->operation.start == '.'){
             emit_var_type_resolution(code, (string_slice){}, false);
+            return false;//TODO: should return if is ref
         } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
     } else {
-        if (code->var.ptr) codegen_emit_code(code->var); else { 
+        bool is_ref = false;
+        if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
             FIND_SYM(sem_rule_dec, code->name);
+            is_ref = sym->reference_type;
+            if (code->transform == var_deref){
+                emit_const("*");
+                is_ref = false;
+            }
+            if (code->transform == var_addr){
+                emit_const("&");
+                is_ref = true;
+            }
             if (sym->table_type == sem_rule_struct){
                 emit_const("instance->");
             }
             emit_slice(sym->name);
         }
         if (code->expression.ptr) codegen_emit_code(code->expression);
+        return is_ref;
     }
+    return false;
+}
+
+void var_code_emit_code(void* ptr){
+    if (is_header == true) return;
+    var_code *code = (var_code*)ptr;
+    emit_variable(code);
 }
 
 void inc_code_emit_code(void *ptr){

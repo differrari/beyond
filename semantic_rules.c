@@ -34,6 +34,8 @@ char* sem_rule_to_string(sem_rule val){
 		case sem_rule_parent: return "parent";
 		case sem_rule_else: return "else";
 		case sem_rule_syn: return "syn";
+		case sem_rule_deref: return "deref";
+		case sem_rule_addr: return "addr";
 	} 
 } 
 
@@ -46,6 +48,7 @@ char* sem_elem_to_string(sem_elem val){
 		case sem_elem_name: return "name";
 		case sem_elem_parent: return "parent";
 		case sem_elem_subtype: return "subtype";
+		case sem_elem_ref: return "ref";
 		case sem_elem_count: return "count";
 	} 
 } 

@@ -210,11 +210,29 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, 0},
 	[rule_declaration] = {{
 		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+		 },7},
+		{{ 
 			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
 		 },6},
 		{{ 
+			SYMDEC(IDENTIFIER,type), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+		 },5},
+		{{ 
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
 		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), 
+		 },5},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,subtype), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), 
+		 },4},
+		{{ 
+			SYMDEC(IDENTIFIER,type), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), 
+		 },3},
 		{{ 
 			SYMDEC(IDENTIFIER,type), TOKEN(COLON), SYMDEC(IDENTIFIER,subtype), SYMDEC(IDENTIFIER,name), 
 		 },4},
@@ -228,9 +246,12 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
 		 },2},
 		{{ 
+			SYMDEC(IDENTIFIER,type), SYMTOK(OPERATOR,ref,declare,sem_elem,"*"), SYMDEC(IDENTIFIER,name), 
+		 },3},
+		{{ 
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), 
 		 },2},
-	},7, sem_rule_dec, sem_action_declare},
+	},14, sem_rule_dec, sem_action_declare},
 	[rule_jump] = {{
 		{{ 
 			LITERAL("goto"), SYMCHECK(IDENTIFIER,jmp), 
@@ -296,12 +317,30 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},3, sem_rule_exp, sem_action_none},
 	[rule_variable] = {{
 		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET), 
+		 },6},
+		{{ 
+			SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET), 
+		 },5},
+		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET), 
+		 },5},
+		{{ 
 			SYMCHECK(IDENTIFIER,var), SYMCHECK(LBRACKET,op), SYMRULE(expression,exp), TOKEN(RBRACKET), 
 		 },4},
 		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,var), 
+		 },3},
+		{{ 
+			SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,var), 
+		 },2},
+		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMCHECK(IDENTIFIER,var), 
+		 },2},
+		{{ 
 			SYMCHECK(IDENTIFIER,var), 
 		 },1},
-	},2, sem_rule_var, sem_action_none},
+	},8, sem_rule_var, sem_action_none},
 	[rule_forloop] = {{
 		{{ 
 			LITERAL("for"), TOKEN(LPAREN), SYMRULE(declaration,dec), TOKEN(SEMICOLON), SYMRULE(condition,cond), TOKEN(SEMICOLON), SYMRULE(assignment,assign), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 

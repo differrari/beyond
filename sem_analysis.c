@@ -44,11 +44,7 @@ void analyze_type(Token t, symbol_t *sym){
     //TODO: allow making this dynamic
     if (slice_lit_match(token_to_slice(t), "literal", false)){
         sym->resolved_type = semantic_types_literal;
-        sym->reference_type = false;
         return;
-    }
-    if (slice_lit_match(token_to_slice(t), "chunk_array", false)){
-        sym->reference_type = true;
     }
     sym->resolved_type = semantic_types_passthrough;
 }
@@ -102,6 +98,9 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
                      sym->subtype = node.t;
                      analyze_subtype(node.t,sym);
                  } 
+                 if (sym && node.sem_value == sem_elem_ref){
+                     sym->reference_type = true;
+                 }
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
                  // print("SYMBOL: %s = %v",sem_rule_to_string(elem.sem_value),token_to_slice(node.t));
              } else if (node.action == sem_action_check && (node.sem_value == sem_rule_var || node.sem_value == sem_rule_jmp /*&& elem.sem_value != sem_func*/)){
@@ -126,7 +125,7 @@ void debug_table(symbol_table *table){
             return;
         }
         if (sym->name.length){//TODO: hack
-            print("%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name);
+            print("%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
             if (sym->child){
                 ind++;
                 print("Has %i children",sym->child->symbol_count);

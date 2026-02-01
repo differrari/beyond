@@ -15,6 +15,7 @@ typedef struct {
 typedef struct {
     grammar_elem expected;
     Token found;
+    int rule;
 } tok_fail;
 
 typedef struct {

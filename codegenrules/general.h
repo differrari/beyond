@@ -117,6 +117,7 @@ typedef struct {
     codegen var;
     codegen expression;
     Token operation;
+    enum { var_none, var_deref, var_addr } transform;
 } var_code;
 
 codegen var_code_init();

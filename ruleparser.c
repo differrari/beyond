@@ -25,8 +25,10 @@ bool is_dec;
 typedef struct {
     Token t;
     Token tag;
+    Token value;
     bool optional;
     char *type;
+    bool declare;
 } rule_sequence;
 
 typedef struct {
@@ -76,8 +78,11 @@ int emit_sequence(clinkedlist_t *list){
             }
             if (should_emit){
                 count++;
-                if (s->tag.kind)
-                    emit("%s(%v,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                if (s->tag.kind){
+                    if (s->value.kind){
+                        emit("%s(%v,%v,%s,%s,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag),s->declare ? "declare" : "check",s->declare ? "sem_elem" : "sem_rule", token_to_slice(s->value));
+                    } else emit("%s(%v,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                }
                 else 
                     emit("%s(%v), ",s->type,token_to_slice(s->t));
             }
@@ -125,13 +130,13 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
                 Token p1, s, p2;
                 uint32_t p = ts->tz->s->pos;
                 if (ts_peek(ts, &p1) && p1.kind == TOK_LPAREN && ts_next(ts, &p1) && ts_peek(ts, &s) && s.kind == TOK_STRING && ts_next(ts, &s) && ts_peek(ts, &p2) && p2.kind == TOK_RPAREN && ts_next(ts, &p2)){
-                    if (has_tag) {
-                        print("Literal isn't expected to have a tag");
-                        break;
-                    }
-                    seqrule->type = "LITTOK";
+                    seqrule->type = has_tag ? "SYMTOK" : "LITTOK";
                     seqrule->t = t;
-                    seqrule->tag = s;
+                    seqrule->declare = is_dec;
+                    if (has_tag){
+                        seqrule->value = s;
+                        seqrule->tag = tag;
+                    } else seqrule->tag = s;
                 } else {
                     ts->tz->s->pos = p;
                     if (has_tag){
