@@ -5,6 +5,7 @@
 #include "data/struct/linked_list.h"
 #include "codegenrules/codeformat.h"
 #include "files/helpers.h"
+#include "alloc/allocate.h"
 
 #define MAX_BUF 0x10000
 

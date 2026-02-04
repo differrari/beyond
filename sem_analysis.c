@@ -1,5 +1,6 @@
 #include "sem_analysis.h"
 #include "common.h"
+#include "alloc/allocate.h"
 
 stack_navigator ssn;
 

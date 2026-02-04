@@ -2,6 +2,7 @@
 #include "codeformat.h"
 #include "sem_analysis.h"
 #include "common.h"
+#include "alloc/allocate.h"
 
 #ifdef CCODEGEN
 

@@ -7,6 +7,7 @@
 #include "sem_analysis.h"
 #include "files/buffer.h"
 #include "files/helpers.h"
+#include "alloc/allocate.h"
 
 Scanner scan;
 
