@@ -194,7 +194,7 @@ void emit_rules(){
         emit_newline();
         emit("[rule_%v] = {{",e->name);
         increase_indent();
-        int subrule_count = clinkedlist_length(e->list);
+        int subrule_count = clinkedlist_count(e->list);
         for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
             subrule_count += emit_sequence(o->data);
         }

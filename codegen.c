@@ -34,6 +34,8 @@ codegen begin_rule(sem_rule type){
         case sem_rule_none:
         case sem_rule_stat:
         case sem_rule_rules_count:
+        case sem_rule_deref:
+        case sem_rule_addr:
             return (codegen){};
     }
 }
