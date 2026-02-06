@@ -174,3 +174,18 @@ typedef struct {
 } else_code;
 
 codegen else_code_init();
+
+typedef struct {
+    codegen condition;
+    codegen cases;
+} switch_code;
+
+codegen switch_code_init();
+
+typedef struct {
+    codegen match;
+    codegen body;
+    codegen chain;
+} case_code;
+
+codegen case_code_init();

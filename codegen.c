@@ -27,6 +27,8 @@ codegen begin_rule(sem_rule type){
         case sem_rule_enum: return enum_code_init();
         case sem_rule_enum_case: return enum_case_code_init();
         case sem_rule_else: return else_code_init();
+        case sem_rule_switch: return switch_code_init();
+        case sem_rule_cases: return case_code_init();
         case sem_rule_syn:
         case sem_rule_parent:
         case sem_rule_val: 

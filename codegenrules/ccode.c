@@ -243,6 +243,9 @@ void func_code_emit_code(void *ptr){
     if (sym && sig->type.kind){
         emit_type(sym, true);
         emit_const(" ");
+    } else if (code->type.pos){
+        emit_token(code->type);
+        emit_const(" ");
     } else 
         emit_const("void ");
     if (ctx.context_rule == sem_rule_struct){
@@ -753,6 +756,33 @@ void else_code_emit_code(void *ptr){
         decrease_indent();
         emit_newline();
         emit_const("}");
+    }
+}
+
+void switch_code_emit_code(void *ptr){
+    switch_code *code = (switch_code*)ptr;
+    emit_const("switch (");
+    codegen_emit_code(code->condition);
+    emit_const("){");
+    increase_indent();
+    emit_newline();
+    codegen_emit_code(code->cases);
+    decrease_indent();
+    emit_newline();
+    emit_const("}");
+}
+
+void case_code_emit_code(void *ptr){
+    case_code *code = (case_code*)ptr;
+    
+    emit_const("case ");
+    codegen_emit_code(code->match);
+    emit_const(": {");
+    codegen_emit_code(code->body);
+    emit_const("} break;");
+    if (code->chain.ptr){
+        emit_newline();
+        codegen_emit_code(code->chain);
     }
 }
 

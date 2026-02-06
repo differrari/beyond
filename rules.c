@@ -1,5 +1,5 @@
 #include "rules.h"
-typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_else,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_lambda,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock, num_grammar_rules } grammar_rules;
+typedef enum { rule_block,rule_statement,rule_def,rule_include,rule_separator,rule_assignment,rule_funccall,rule_funcdec,rule_funcsign,rule_funcarguments,rule_argdec,rule_argument,rule_argname,rule_conditional,rule_else,rule_condition,rule_declaration,rule_jump,rule_label,rule_expression,rule_lambda,rule_chain,rule_math,rule_variable,rule_forloop,rule_whileloop,rule_dowhile,rule_enum,rule_enumcase,rule_struct,rule_decblock,rule_return,rule_interface,rule_intblock,rule_switch,rule_switchbody, num_grammar_rules } grammar_rules;
 
 grammar_rule language_rules[num_grammar_rules] = {
 	[rule_block] = {{
@@ -36,6 +36,9 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(conditional,cond), 
 		 },1},
 		{{ 
+			SYMRULE(switch,switch), 
+		 },1},
+		{{ 
 			SYMRULE(funcdec,func), 
 		 },1},
 		{{ 
@@ -68,7 +71,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			SYMRULE(funccall,call), TOKEN(SEMICOLON), 
 		 },2},
-	},19, 0},
+	},20, 0},
 	[rule_def] = {{
 		{{ 
 			LITERAL("defer"), SYMRULE(statement,exp), 
@@ -78,7 +81,10 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			LITTOK(SYMBOL,"@"), LITERAL("includeC"), TOKEN(LPAREN), SYMCHECK(CONST,inc), TOKEN(RPAREN), 
 		 },5},
-	},1, sem_rule_inc, sem_action_none},
+		{{ 
+			LITTOK(SYMBOL,"#"), LITERAL("include"), SYMCHECK(CONST,inc), 
+		 },3},
+	},2, sem_rule_inc, sem_action_none},
 	[rule_separator] = {{
 		{{ 
 			TOKEN(SEMICOLON), 
@@ -290,12 +296,18 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},8, sem_rule_exp, sem_action_none},
 	[rule_lambda] = {{
 		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },7},
+		{{ 
 			TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			SYMDEC(IDENTIFIER,type), TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE), 
 		 },6},
 		{{ 
 			TOKEN(LPAREN), SYMRULE(argdec,param), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE), 
 		 },5},
-	},2, sem_rule_func, sem_action_declare},
+	},4, sem_rule_func, sem_action_declare},
 	[rule_chain] = {{
 		{{ 
 			SYMRULE(variable,var), SYMCHECK(DOT,op), SYMRULE(funccall,exp), 
@@ -445,6 +457,46 @@ grammar_rule language_rules[num_grammar_rules] = {
 			SYMRULE(funcsign,func), TOKEN(SEMICOLON), 
 		 },2},
 	},4, sem_rule_scope, sem_action_none},
+	[rule_switch] = {{
+		{{ 
+			LITERAL("switch"), TOKEN(LPAREN), SYMRULE(expression,exp), TOKEN(RPAREN), TOKEN(LBRACE), SYMRULE(switchbody,scope), TOKEN(RBRACE), 
+		 },7},
+		{{ 
+			LITERAL("switch"), TOKEN(LPAREN), SYMRULE(expression,exp), TOKEN(RPAREN), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			LITERAL("switch"), SYMRULE(expression,exp), TOKEN(LBRACE), SYMRULE(switchbody,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("switch"), SYMRULE(expression,exp), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},4, sem_rule_switch, sem_action_none},
+	[rule_switchbody] = {{
+		{{ 
+			LITERAL("case"), SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), SYMRULE(switchbody,cases), 
+		 },7},
+		{{ 
+			SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), SYMRULE(switchbody,cases), 
+		 },6},
+		{{ 
+			LITERAL("case"), SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE), SYMRULE(switchbody,cases), 
+		 },6},
+		{{ 
+			SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE), SYMRULE(switchbody,cases), 
+		 },5},
+		{{ 
+			LITERAL("case"), SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },6},
+		{{ 
+			SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			LITERAL("case"), SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },5},
+		{{ 
+			SYMRULE(expression,exp), TOKEN(COLON), TOKEN(LBRACE), TOKEN(RBRACE), 
+		 },4},
+	},8, sem_rule_cases, sem_action_none},
 };
 
 char* rule_names[num_grammar_rules] = {
@@ -482,5 +534,7 @@ char* rule_names[num_grammar_rules] = {
 		[rule_return] = "return",
 		[rule_interface] = "interface",
 		[rule_intblock] = "intblock",
+		[rule_switch] = "switch",
+		[rule_switchbody] = "switchbody",
 	
 };

@@ -333,3 +333,33 @@ void else_code_register_subrule(void* ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(else_code, sem_rule_else)
+
+void switch_code_register_elem(void* ptr, int type, Token elem){
+    
+}
+
+void switch_code_register_subrule(void* ptr, int type, codegen child){
+    switch_code *code = (switch_code*)ptr;
+    switch (type){
+        case sem_rule_exp: code->condition = child; break;
+        case sem_rule_scope: code->cases = child; break;    
+    }
+}
+CODEGEN_DEC(switch_code, sem_rule_switch)
+
+codegen switch_code_init();
+
+void case_code_register_elem(void* ptr, int type, Token elem){
+    
+}
+
+void case_code_register_subrule(void* ptr, int type, codegen child){
+    case_code *code = (case_code*)ptr;
+    switch (type){
+        case sem_rule_exp: code->match = child; break;
+        case sem_rule_scope: code->body = child; break;   
+        case sem_rule_cases: code->chain = child; break;    
+    }
+}
+
+CODEGEN_DEC(case_code, sem_rule_cases)

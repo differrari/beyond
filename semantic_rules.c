@@ -36,6 +36,8 @@ char* sem_rule_to_string(sem_rule val){
 		case sem_rule_syn: return "syn";
 		case sem_rule_deref: return "deref";
 		case sem_rule_addr: return "addr";
+		case sem_rule_switch: return "switch";
+		case sem_rule_cases: return "cases";
 	} 
 } 
 

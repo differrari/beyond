@@ -8,6 +8,15 @@ bool credbuild {
 	&module.source_all(".cred");
 
 	return module.cred_compile();
+	
+	switch (hello) {
+	    case 1: {print("1");}
+		case 2: {print("22"); }
+		case 3: {print("3"); }
+		// case 2 => {print("1"); }
+	 //    2 => {print("1"); }
+	}
+	
 }
 
 int a {
@@ -87,7 +96,7 @@ int main {
     if y < 100 { } else if (y == 100) { print("Exactly 100 y"); }
     print();
     
-    traverse_directory(s.data, true, (literal directory, literal name){
+    traverse_directory(s.data, recursive: true, int (literal directory, literal name){
         print("Inside lambda");
     });
 }

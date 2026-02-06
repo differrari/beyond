@@ -30,7 +30,9 @@ enum sem_rule {
     else,
     syn,
     deref,
-    addr
+    addr,
+    switch,
+    cases
 }
 
 enum sem_elem { 

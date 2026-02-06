@@ -6,6 +6,11 @@ bool credbuild(){
 	set_target(&module, target_native);
 	redb_mod_source_all(&module, ".cred");
 	return redb_mod_cred_compile(module);
+	switch (hello){
+		case 1: {print("1");} break;
+		case 2: {print("22");} break;
+		case 3: {print("3");} break;
+	}
 }
 
 int a(){
@@ -79,7 +84,7 @@ hello testType_init(){
 		.test = testType_test,
 	};
 }
-void _temp_func_0(char* directory, char* name){
+int _temp_func_0(char* directory, char* name){
 	print("Inside lambda");
 }
 
