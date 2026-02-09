@@ -1,7 +1,6 @@
 #include "irgen.h"
 #include "common.h"
-#include "codegen.h"
-#include "codegenrules/codeformat.h"
+#include "codegen/code_generator.h"
 
 #define MAX_CHARS 10000
 char buf[MAX_CHARS];

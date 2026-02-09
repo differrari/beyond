@@ -3,7 +3,7 @@
 #include "data/format/tokenizer/tokenizer.h"
 #include "data/format/helpers/token_stream.h"
 #include "data/struct/linked_list.h"
-#include "codegenrules/codeformat.h"
+#include "codegen/codeformat.h"
 #include "files/helpers.h"
 #include "alloc/allocate.h"
 

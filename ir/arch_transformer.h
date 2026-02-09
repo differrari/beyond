@@ -1,5 +1,5 @@
 #pragma once
 
-#include "codegen.h"
+#include "codegen/codegen.h"
 
 codegen perform_transformations(codegen root);

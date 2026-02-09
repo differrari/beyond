@@ -1,5 +1,5 @@
 #include "codegen.h"
-#include "codegenrules/general.h"
+#include "ir/general.h"
 #include "rules.h"
 
 codegen begin_rule(sem_rule type){

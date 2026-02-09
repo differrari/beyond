@@ -33,7 +33,7 @@ CODEGEN_DEC(blk_code, sem_rule_scope)
 void dec_code_register_elem(void* ptr, int type, Token elem){
     dec_code *code = (dec_code*)ptr;
     switch (type) {
-        case sem_elem_type: code->type = elem; break; 
+        case sem_elem_type: code->type = token_to_slice(elem); break; 
         case sem_elem_name: code->name = token_to_slice(elem); break;
     }
 }

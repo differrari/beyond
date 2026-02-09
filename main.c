@@ -1,15 +1,14 @@
 #include "syscalls/syscalls.h" 
 #include "data/format/scanner/scanner.h"
-#include "parser.h"
+#include "parser/parser.h"
 #include "data/format/helpers/token_stream.h"
 #include "ir/irgen.h"
-#include "sem_analysis.h"
+#include "semantic/sem_analysis.h"
 #include "files/buffer.h"
 #include "files/helpers.h"
 #include "alloc/allocate.h"
 #include "ir/arch_transformer.h"
-
-Scanner scan;
+#include "codegen/code_generator.h"
 
 typedef struct {
     uint32_t file;
@@ -70,7 +69,7 @@ int main(int argc, char *argv[]){
     
     if (!parse_arguments(argc, argv)) return -1;
     
-    scan = scanner_make(buf.buffer,strlen(buf.buffer));
+    Scanner scan = scanner_make(buf.buffer,strlen(buf.buffer));
     
     Tokenizer tk = tokenizer_make(&scan);
     tk.skip_type_check = true;

@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "data/format/tokenizer/tokenizer.h"
-#include "semantic_rules.h"
+#include "semantic/semantic_rules.h"
 
 typedef struct {
     bool rule;
@@ -37,5 +37,3 @@ typedef struct {
 extern grammar_rule language_rules[];
 
 extern char* rule_names[];
-
-char *tok_symbol(TokenKind kind);

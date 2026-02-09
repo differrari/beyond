@@ -7,9 +7,8 @@ bool rulegen(){
 	set_name("rulegen");
 	set_target(target_native);
 	set_package_type(package_bin);
-	source("common.c");
-	source("codegenrules/codeformat.c");
-	source("ruleparser.c");
+	source("codegen/codeformat.c");
+	source("rule_generator/ruleparser.c");
 	if (compile()){
 		return run() == 0;
 	}
@@ -19,7 +18,7 @@ bool rulegen(){
 
 bool genc(){
 	if (rulegen()){
-		return quick_cred("sem_enum.cred", "semantic_rules") && quick_cred("codegen/codegen.cred", "codegen/codegen") && true;
+		return quick_cred("semantic/sem_enum.cred", "semantic/semantic_rules") && quick_cred("codegen/codegen.cred", "codegen/codegen") && true;
 	}
 	
 	return false;

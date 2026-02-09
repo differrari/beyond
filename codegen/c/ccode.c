@@ -1,6 +1,6 @@
-#include "../general.h"
+#include "ir/general.h"
 #include "../codeformat.h"
-#include "sem_analysis.h"
+#include "semantic/sem_analysis.h"
 #include "emit_context.h"
 #include "alloc/allocate.h"
 #include "common.h"
@@ -72,7 +72,7 @@ void dec_code_emit_code(void* ptr){
         emit_const("extern ");
     FIND_SLICE(sem_rule_dec, code->name);
     if (sym->resolved_type) emit_type(sym, true);
-    else emit_token(code->type);
+    else emit_slice(code->type);
     emit_space();
     emit_slice(sym->name);
     if (is_header != true && code->initial_value.ptr){

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "codegen.h"
+#include "codegen/codegen.h"
 #include "string/slice.h"
 
 #define CCODEGEN
@@ -14,7 +14,7 @@ typedef struct {
 codegen blk_code_init();
 
 typedef struct {
-    Token type;
+    string_slice type;
     string_slice name;
     codegen initial_value;
 } dec_code;

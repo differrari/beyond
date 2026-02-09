@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast.h"
+#include "parser/ast.h"
 
 struct symbol_t;
 
