@@ -1,0 +1,10 @@
+template array {
+    u64 push(void* data);
+    void* get(u64 index);
+    size count();
+    
+    destroy();
+    reset();
+    
+    test();
+}

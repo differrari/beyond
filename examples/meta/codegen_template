@@ -1,0 +1,6 @@
+declaration?cond0 -> "extern"?cond1 SYM@type SYM@name {= CODE@rule}?cond2 ";"?cont3
+
+cond0 = is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf);
+cond1 = is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf);
+cond2 = is_header != true && code->initial_value.ptr;
+cond3 = ctx.ignore_semicolon;

@@ -79,15 +79,13 @@ codegen eval_rule(int current_rule, int curr_option){
     return gen;
 }
 
-void gen_code(ast_node *stack, uint32_t count, const char *out_name){
+codegen gen_code(ast_node *stack, uint32_t count, const char *out_name){
     gsn = (stack_navigator){};
     gsn.ast_stack = stack;
     gsn.stack_count = count;
     ast_node node = {};
     int new_rule;
     int new_opt;
-    if (!switch_rule(&gsn, &new_rule,&new_opt)) return;
-    codegen cg = eval_rule(new_rule,new_opt);
-    
-    generate_code(out_name, cg);
+    if (!switch_rule(&gsn, &new_rule,&new_opt)) return (codegen){};
+    return eval_rule(new_rule,new_opt);
 }

@@ -89,18 +89,15 @@ int _temp_func_0(char* directory, char* name){
 }
 
 int main(){
-int _return_val = 0;
-
+	int __return_val;
 	int y = a();
 	int x = 1 - (0 - 2);
 	int z = int_get(x);
 	print("This is democracy manifest");
-	
-	
 	for (int i = 0; i < 10; i = i + 1){}
 	while (0){print();}
-	_return_val = 0;
-	goto main_defer;
+	__return_val = 0;
+	goto defer;
 	do {print();}while (0);
 	draw(x, y, 0xFF00FF00, 0);
 	x = x + 1;
@@ -119,8 +116,8 @@ int _return_val = 0;
 	
 	print();
 	traverse_directory(s.data, true, _temp_func_0);
-main_defer:
-cleanup();
-x = 0;
-return _return_val;
+	defer:
+	cleanup();
+	x = 0;
+	return __return_val;
 }

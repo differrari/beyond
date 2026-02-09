@@ -43,6 +43,10 @@ symbol_t * find_symbol(sem_rule type, string_slice name){
 
 void analyze_type(Token t, symbol_t *sym){
     //TODO: allow making this dynamic
+    if (slice_lit_match(token_to_slice(t), "void", false)){
+        sym->resolved_type = semantic_types_none;
+        return;
+    }
     if (slice_lit_match(token_to_slice(t), "literal", false)){
         sym->resolved_type = semantic_types_literal;
         return;
@@ -51,6 +55,10 @@ void analyze_type(Token t, symbol_t *sym){
 }
 
 void analyze_subtype(Token t, symbol_t *sym){
+    if (slice_lit_match(token_to_slice(t), "void", false)){
+        sym->resolved_subtype = semantic_types_none;
+        return;
+    }
     if (slice_lit_match(token_to_slice(t), "literal", false)){
         sym->resolved_subtype = semantic_types_literal;
         return;

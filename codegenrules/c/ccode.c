@@ -1,46 +1,22 @@
-#include "general.h"
-#include "codeformat.h"
+#include "../general.h"
+#include "../codeformat.h"
 #include "sem_analysis.h"
-#include "common.h"
+#include "emit_context.h"
 #include "alloc/allocate.h"
+#include "common.h"
 
 #ifdef CCODEGEN
 
 tern is_header = false;
 emit_block aux_fn_block;
 
-typedef enum { convenience_type_none, convenience_type_to_string, convenience_type_from_string, convenience_type_to_int, convenience_type_from_int} convenience_type;
-
-typedef struct {
-    int context_rule;
-    string_slice context_prefix;
-    string_slice context_parent;
-    bool ignore_semicolon;
-    bool has_defer;
-    convenience_type convenience;
-} emit_context;
-
-emit_context ctx;
-
 //TODO: flags?
 #define FIND_SYM(rule, symname) symbol_t *sym = find_symbol(rule, token_to_slice(symname));\
 if (!sym && rule == sem_rule_dec) sym = find_symbol(sem_rule_param, token_to_slice(symname));\
 if (!sym) { print("Symbol not found: %v",token_to_slice(symname)); sym = zalloc(sizeof(symbol_t)); sym->name = token_to_slice(symname); }
 
-#define FIND_SLICE(rule, name) symbol_t *sym = find_symbol(rule, name);\
-if (!sym) { print("Symbol not found: %v",name); }
-
-emit_context save_and_push_context(emit_context nctx){
-    emit_context orig = ctx;
-    ctx = nctx;
-    return orig;
-}
-
-emit_context pop_and_restore_context(emit_context restore){
-    emit_context orig = ctx;
-    ctx = restore;
-    return orig;
-}
+#define FIND_SLICE(rule, name_slice) symbol_t *sym = find_symbol(rule, name_slice);\
+if (!sym) { print("Symbol not found: %v",name_slice); sym = zalloc(sizeof(symbol_t)); sym->name = name_slice; }
 
 void generate_code(const char *name, codegen cg){
     
@@ -51,6 +27,7 @@ void generate_code(const char *name, codegen cg){
         output_code(name,"");
     } else {
         is_header = true;
+        emit("#pragma once\n\n",name);
         codegen_emit_code(cg);
         output_code(name,"h");
         
@@ -67,7 +44,7 @@ void blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
     codegen_emit_code(code->stat);
     if (code->chain.ptr){ 
-        emit_newline(); 
+        if (code->stat.type) emit_newline(); 
         codegen_emit_code(code->chain); 
     }
 }
@@ -93,8 +70,9 @@ void dec_code_emit_code(void* ptr){
     if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
-    FIND_SYM(sem_rule_dec, code->name);
-    emit_type(sym, true);
+    FIND_SLICE(sem_rule_dec, code->name);
+    if (sym->resolved_type) emit_type(sym, true);
+    else emit_token(code->type);
     emit_space();
     emit_slice(sym->name);
     if (is_header != true && code->initial_value.ptr){
@@ -109,7 +87,7 @@ void dec_code_emit_code(void* ptr){
 void ass_code_emit_code(void *ptr){
     if (is_header == true) return;
     ass_code *code = (ass_code*)ptr;
-    FIND_SYM(sem_rule_dec, code->name);
+    FIND_SLICE(sem_rule_dec, code->name);
     if (sym->table_type == sem_rule_struct){
         emit_const("instance->");
     }
@@ -156,7 +134,7 @@ void jmp_code_emit_code(void *ptr){
     if (is_header == true) return;
     jmp_code *code = (jmp_code*)ptr;
     emit_const("goto ");
-    emit_token(code->jump);
+    emit_slice(code->jump);
     emit_const(";");
 }
 
@@ -164,7 +142,7 @@ void label_code_emit_code(void *ptr){
     if (is_header == true) return;
     label_code *code = (label_code*)ptr;
     emit_const("\r");
-    emit_token(code->name);
+    emit_slice(code->name);
     emit_const(":");
 }
 
@@ -178,9 +156,9 @@ void exp_code_emit_code(void *ptr){
         emit_const("!");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     if (code->var.ptr) codegen_emit_code(code->var);
-    else emit_token(code->val);
+    else emit_slice(code->val);
     if (code->exp.ptr){
-        if (code->val.kind || code->var.ptr) emit_space();
+        if (code->val.length || code->var.ptr) emit_space();
         if (code->operand.kind){
             emit_token(code->operand);
             emit_space();
@@ -220,8 +198,6 @@ void arg_code_emit_code(void *ptr){
 
 void param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
-    if ((ctx.context_rule == sem_rule_interf || ctx.context_rule == sem_rule_struct) && slices_equal(token_to_slice(code->type), ctx.context_prefix, false))
-        emit_const("struct ");
     FIND_SYM(sem_rule_param, code->name);
     emit_type(sym, true);
     emit_space();
@@ -235,12 +211,8 @@ void param_code_emit_code(void *ptr){
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
     emit_block parent_block = save_and_push_block();
-    func_code *sig;
-    if (code->signature.ptr){
-        sig = code->signature.ptr;
-    } else sig = code;
-    symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(sig->name));
-    if (sym && sig->type.kind){
+    symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(code->name));
+    if (sym && code->type.kind){
         emit_type(sym, true);
         emit_const(" ");
     } else if (code->type.pos){
@@ -257,7 +229,7 @@ void func_code_emit_code(void *ptr){
     }
     if (sym)
         emit_slice(sym->name);
-    else emit_token(sig->name);
+    else emit_token(code->name);
     if (ctx.context_rule == sem_rule_interf){
         emit_const(")");
     }
@@ -272,10 +244,10 @@ void func_code_emit_code(void *ptr){
                 emit_slice(ctx.context_prefix);
             emit_const(" *instance");
         }
-        if (sig->args.ptr)
+        if (code->args.ptr)
             emit_const(", ");
     }
-    codegen_emit_code(sig->args);
+    codegen_emit_code(code->args);
     if (ctx.context_rule == sem_rule_interf || is_header == true){
         emit_const(");");
     } else {
@@ -291,19 +263,11 @@ void func_code_emit_code(void *ptr){
         emit_block original = save_and_push_block();
         emit_block saved_aux = aux_fn_block;
         aux_fn_block = original;
-        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(sig->name), .ignore_semicolon = false, .has_defer = false });
+        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false });
         increase_indent();
         emit_newline();
         codegen_emit_code(code->body);
         emit_block_section saved_sec = switch_block_section(block_section_epilogue);
-        if (ctx.has_defer){
-            switch_block_section(block_section_prologue);
-            emit_newline();
-            increase_indent();
-            emit_const("int _return_val = 0;");
-            switch_block_section(block_section_epilogue);
-            emit_const("return _return_val;");
-        }
         decrease_indent();
         emit_newline();
         emit_const("}");
@@ -555,14 +519,8 @@ void ret_code_emit_code(void *ptr){
     if (is_header == true) return;
     ret_code *code = (ret_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
-    if (orig.has_defer){//TODO: can't know if it has defer until one has been encountered, but maybe that's logically ok?
-        emit_const("_return_val = ");
-        codegen_emit_code(code->expression);
-        emit_const(";");
-        emit_newline();
-        emit_const("goto ");
-        emit_slice(orig.context_prefix);
-        emit_const("_defer"); 
+    if (!code->expression.ptr){
+        emit_const("return");
     } else {
         emit_const("return ");
         codegen_emit_code(code->expression);
@@ -572,20 +530,7 @@ void ret_code_emit_code(void *ptr){
 }
 
 void def_code_emit_code(void *ptr){
-    if (is_header == true) return;
-    def_code *code = (def_code*)ptr;
-    switch_block_section(block_section_epilogue);
-    if (!ctx.has_defer){ 
-        emit_slice(ctx.context_prefix);
-        emit_const("_defer:"); 
-        emit_newline();
-    }
-    increase_indent();
-    codegen_emit_code(code->expression);
-    decrease_indent();
-    emit_newline();
-    ctx.has_defer = true;
-    switch_block_section(block_section_body);
+    return;
 }
 
 void gen_invoke_param(codegen contents){
@@ -598,9 +543,11 @@ void gen_int_stubs(codegen contents, string_slice name){
     blk_code *scope = (blk_code*)contents.ptr;
     if (scope->stat.ptr && scope->stat.type == sem_rule_func){
         func_code *func = scope->stat.ptr;
+        bool should_ret = false;
+        FIND_SYM(sem_rule_func, func->name);
         if (func->type.length){
-            FIND_SYM(sem_rule_func, func->name);
             emit_type(sym,false);
+            if (sym->resolved_type) should_ret = true;
             emit_const(" ");
         } 
         else emit_const("void ");
@@ -618,9 +565,18 @@ void gen_int_stubs(codegen contents, string_slice name){
             emit_const("){");
             increase_indent();
             emit_newline();
-            emit("if (instance.%v) instance.%v(instance.ptr",token_to_slice(func->name),token_to_slice(func->name));
+            emit("if (instance.%v) %sinstance.%v(instance.ptr",token_to_slice(func->name),should_ret ? "return " : "", token_to_slice(func->name));
             if (func->args.ptr) gen_invoke_param(func->args);
             emit_const(");");
+            if (should_ret){
+                emit_newline();
+                if (sym->reference_type) emit_const("return 0;");
+                else {
+                    emit("return (");
+                    emit_type(sym, false);
+                    emit_const("){};");
+                }
+            }
             decrease_indent();
             emit_newline();
             emit_const("}");
@@ -642,6 +598,13 @@ void int_code_emit_code(void *ptr){
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = token_to_slice(code->name) });
     if (is_header != false){
         emit_block original = save_and_push_block();
+        typedef struct codegen codegen;
+        emit_const("typedef struct ");
+        emit_token(code->name);
+        emit_const(" ");
+        emit_token(code->name);
+        emit_const(";");
+        emit_newline();
         emit_const("typedef struct ");
         emit_token(code->name);
         emit_const(" { ");

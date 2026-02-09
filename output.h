@@ -1,3 +1,5 @@
+#pragma once
+
 bool credbuild();
 int a();
 void draw(int x, int y, int color, int overwrite);
@@ -12,6 +14,7 @@ typedef enum {
 
 char* test_enum_to_string(test_enum val);
 
+typedef struct hello hello;
 typedef struct hello { 
 	void* ptr;
 	void (*func)(void *instance, int rule, Token elem);

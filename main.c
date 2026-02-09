@@ -2,12 +2,12 @@
 #include "data/format/scanner/scanner.h"
 #include "parser.h"
 #include "data/format/helpers/token_stream.h"
-#include "common.h"
-#include "irgen.h"
+#include "ir/irgen.h"
 #include "sem_analysis.h"
 #include "files/buffer.h"
 #include "files/helpers.h"
 #include "alloc/allocate.h"
+#include "ir/arch_transformer.h"
 
 Scanner scan;
 
@@ -93,10 +93,16 @@ int main(int argc, char *argv[]){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, buf.buffer);
         print("Expected %s, found %v in %s (l%i:%i in file %i)",token_name(parse_res.fail_info.expected.value),token_to_slice(parse_res.fail_info.found),rule_names[parse_res.fail_info.rule],ln.line_number,ln.column,ln.file);
         return -1;
-    } else if (analyze_semantics(parse_res.ast_stack, parse_res.ast_count)){
-        print("Generating %s",outname);
-        gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
-    }
+    } 
+    if (!analyze_semantics(parse_res.ast_stack, parse_res.ast_count)) return -1;
+    
+    codegen ir = gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
+    if (!ir.ptr) return -1;
+    
+    ir = perform_transformations(ir);
+    if (!ir.ptr) return -1;
+        
+    generate_code(outname, ir);
     
     return 0;
 }

@@ -434,7 +434,10 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			LITERAL("return"), SYMRULE(expression,exp), 
 		 },2},
-	},1, sem_rule_ret, sem_action_none},
+		{{ 
+			LITERAL("return"), 
+		 },1},
+	},2, sem_rule_ret, sem_action_none},
 	[rule_interface] = {{
 		{{ 
 			LITERAL("interface"), SYMDEC(IDENTIFIER,name), TOKEN(LBRACE), SYMRULE(intblock,scope), TOKEN(RBRACE), 

@@ -1,3 +1,5 @@
+#pragma once
+
 typedef enum {
 	sem_rule_none,
 	sem_rule_dec,

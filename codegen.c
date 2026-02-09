@@ -9,7 +9,7 @@ codegen begin_rule(sem_rule type){
         case sem_rule_assign: return ass_code_init();
         case sem_rule_exp: return exp_code_init();
         case sem_rule_call: return call_code_init();
-        case sem_rule_args: return arg_code_init(); break;
+        case sem_rule_args: return arg_code_init();
         case sem_rule_cond: return cond_code_init();
         case sem_rule_jmp: return jmp_code_init();
         case sem_rule_label: return label_code_init();

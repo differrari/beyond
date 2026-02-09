@@ -4,12 +4,14 @@
 
 #define CODEGEN_DEC(name,t) \
 extern void name##_emit_code(void*ptr);\
+extern codegen name##_transform(void*ptr, codegen this);\
 codegen name##_init(){\
     return (codegen){\
         .ptr = zalloc(sizeof(name)),\
         .register_elem = name##_register_elem,\
         .register_subrule = name##_register_subrule,\
         .emit_code = name##_emit_code,\
+        .transform = name##_transform,\
         .type = t,\
     };\
 }
@@ -32,7 +34,7 @@ void dec_code_register_elem(void* ptr, int type, Token elem){
     dec_code *code = (dec_code*)ptr;
     switch (type) {
         case sem_elem_type: code->type = elem; break; 
-        case sem_elem_name: code->name = elem; break;
+        case sem_elem_name: code->name = token_to_slice(elem); break;
     }
 }
 
@@ -45,7 +47,7 @@ CODEGEN_DEC(dec_code, sem_rule_dec)
 
 void ass_code_register_elem(void* ptr, int type, Token elem){
     ass_code *code = (ass_code*)ptr;
-    code->name = elem;
+    code->name = token_to_slice(elem);
 }
 
 void ass_code_register_subrule(void* ptr, int type, codegen child){
@@ -84,7 +86,7 @@ CODEGEN_DEC(cond_code, sem_rule_cond)
 
 void jmp_code_register_elem(void* ptr, int type, Token elem){
     jmp_code *code = (jmp_code*)ptr;
-    code->jump = elem;
+    code->jump = token_to_slice(elem);
 }
 
 void jmp_code_register_subrule(void* ptr, int type, codegen child){
@@ -95,7 +97,7 @@ CODEGEN_DEC(jmp_code, sem_rule_jmp)
 
 void label_code_register_elem(void* ptr, int type, Token elem){
     label_code *code = (label_code*)ptr;
-    code->name = elem;
+    code->name = token_to_slice(elem);
 }
 
 void label_code_register_subrule(void* ptr, int type, codegen child){
@@ -107,7 +109,7 @@ CODEGEN_DEC(label_code, sem_rule_label)
 void exp_code_register_elem(void* ptr, int type, Token elem){
     exp_code *code = (exp_code*)ptr;
     if (type == sem_rule_val)
-        code->val = elem;
+        code->val = token_to_slice(elem);
     else if (type == sem_rule_syn)
         code->paren = true;
     else if (type == sem_rule_op && slice_lit_match(token_to_slice(elem), "not", false))

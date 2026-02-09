@@ -6,4 +6,5 @@ interface codegen {
     void register_elem(int type, Token elem);
     void register_subrule(int type, codegen child);
     void emit_code();
+    codegen transform(codegen this);
 }

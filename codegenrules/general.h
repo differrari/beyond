@@ -1,6 +1,7 @@
 #pragma once
 
 #include "codegen.h"
+#include "string/slice.h"
 
 #define CCODEGEN
 // #define DEBUG_CODEGEN
@@ -14,14 +15,14 @@ codegen blk_code_init();
 
 typedef struct {
     Token type;
-    Token name;
+    string_slice name;
     codegen initial_value;
 } dec_code;
 
 codegen dec_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen expression;
 } ass_code;
 
@@ -35,7 +36,7 @@ typedef struct {
 codegen arg_code_init();
 
 typedef struct {
-    Token val;
+    string_slice val;
     codegen var;
     Token operand;
     codegen exp;
@@ -62,13 +63,13 @@ typedef struct {
 codegen cond_code_init();
 
 typedef struct {
-    Token jump;
+    string_slice jump;
 } jmp_code;
 
 codegen jmp_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
 } label_code;
 
 codegen label_code_init();

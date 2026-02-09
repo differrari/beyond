@@ -1,0 +1,37 @@
+@includeC("ecs/ecs.h")
+
+struct comp_lock_eval:computer_user:computer_mod {
+    bool evaluate(entity source, computer_user *c1, entity target, computer_mod *c2);
+}
+
+interface ir_gen {
+    int type;
+    void register_elem(int type, Token elem);
+    void register_subrule(int type, codegen child);
+}
+
+template code_action<ir_gen> {
+    void emit_code();
+}
+
+struct func_call:ir_gen {
+    Token name;
+}
+
+struct c:code_action<case_code<string>> {
+    void emit_code(void* ptr){
+        function_template(instance->name,instance->body);
+    }
+}
+
+struct c: code_action where T is func_call {
+    func a(){
+        
+    }
+}
+
+struct llvm: code_action where T is func_call {
+    func a(){
+        
+    }
+}
