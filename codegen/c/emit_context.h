@@ -11,6 +11,7 @@ typedef struct {
     string_slice context_parent;
     bool ignore_semicolon;
     codegen defer_statements;
+    codegen lambdas;
     convenience_type convenience;
 } emit_context;
 

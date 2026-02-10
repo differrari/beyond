@@ -84,7 +84,7 @@ codegen param_code_init();
 
 typedef struct {
     Token type;
-    Token name;
+    string_slice name;
     codegen signature;
     codegen args;
     codegen body;

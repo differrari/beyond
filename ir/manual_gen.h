@@ -9,4 +9,5 @@ codegen make_declaration(literal name, string_slice type, codegen initial);
 codegen make_return(codegen expression);
 codegen make_argument(codegen expression, codegen chain);
 codegen make_literal_expression(string_slice slice);
+codegen lambda_to_func(codegen lambda, string_slice name);
 codegen var_to_exp(codegen var);

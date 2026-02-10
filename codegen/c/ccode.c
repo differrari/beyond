@@ -3,7 +3,7 @@
 #include "semantic/sem_analysis.h"
 #include "emit_context.h"
 #include "alloc/allocate.h"
-#include "common.h"
+#include "syscalls/syscalls.h"
 #include "c_syms.h"
 
 #ifdef CCODEGEN
@@ -155,22 +155,6 @@ void exp_code_emit_code(void *ptr){
             emit_space();
         }
         codegen_emit_code(code->exp);
-    } else if (code->lambda.ptr){
-        //TODO: symbol for lamdba. 
-        string_slice name = make_temp_name(sem_rule_func);
-        emit_slice(name);
-        if (orig.context_rule != sem_rule_call){
-            emit_const("()");//TODO: arguments and captures
-        }
-        if (aux_fn_block.prologue.buffer){
-            emit_block saved_block = save_and_push_existing(aux_fn_block);
-            emit_block_section section = switch_block_section(block_section_prologue);
-            func_code *lmbda = (func_code*)code->lambda.ptr;
-            lmbda->name = (Token){.start = name.data,.length = name.length };//TODO: undo this conversion once we just use slices
-            codegen_emit_code(code->lambda);
-            switch_block_section(section);
-            aux_fn_block = pop_and_restore_emit_block(saved_block);
-        }
     }
     if (code->paren)
         emit_const(")");
@@ -202,7 +186,7 @@ void param_code_emit_code(void *ptr){
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
     emit_block parent_block = save_and_push_block();
-    symbol_t *sym = find_symbol(sem_rule_func, token_to_slice(code->name));
+    symbol_t *sym = find_symbol(sem_rule_func, code->name);
     if (sym && code->type.kind){
         emit_type(sym, true);
         emit_const(" ");
@@ -220,7 +204,7 @@ void func_code_emit_code(void *ptr){
     }
     if (sym)
         emit_slice(sym->name);
-    else emit_token(code->name);
+    else emit_slice(code->name);
     if (ctx.context_rule == sem_rule_interf){
         emit_const(")");
     }
@@ -254,7 +238,7 @@ void func_code_emit_code(void *ptr){
         emit_block original = save_and_push_block();
         emit_block saved_aux = aux_fn_block;
         aux_fn_block = original;
-        emit_context orig = save_and_push_context((emit_context){ .context_prefix = token_to_slice(code->name), .ignore_semicolon = false });
+        emit_context orig = save_and_push_context((emit_context){ .context_prefix = code->name, .ignore_semicolon = false });
         increase_indent();
         emit_newline();
         codegen_emit_code(code->body);
@@ -499,7 +483,7 @@ void gen_int_stubs(codegen contents, string_slice name){
     if (scope->stat.ptr && scope->stat.type == sem_rule_func){
         func_code *func = scope->stat.ptr;
         bool should_ret = false;
-        FIND_SYM(sem_rule_func, func->name);
+        FIND_SLICE(sem_rule_func, func->name);
         if (func->type.length){
             emit_type(sym,false);
             if (sym->resolved_type) should_ret = true;
@@ -509,7 +493,7 @@ void gen_int_stubs(codegen contents, string_slice name){
         
         emit_slice(name);
         emit_const("_");
-        emit_token(func->name);
+        emit_slice(func->name);
         emit("(%v instance",name);
         if (func->args.ptr) emit_const(" ,");
         codegen_emit_code(func->args);
@@ -520,7 +504,7 @@ void gen_int_stubs(codegen contents, string_slice name){
             emit_const("){");
             increase_indent();
             emit_newline();
-            emit("if (instance.%v) %sinstance.%v(instance.ptr",token_to_slice(func->name),should_ret ? "return " : "", token_to_slice(func->name));
+            emit("if (instance.%v) %sinstance.%v(instance.ptr",func->name,should_ret ? "return " : "", func->name);
             if (func->args.ptr) gen_invoke_param(func->args);
             emit_const(");");
             if (should_ret){

@@ -1,4 +1,3 @@
-#include "rules.h"
 #include "general.h"
 #include "alloc/allocate.h"
 
@@ -162,7 +161,7 @@ void func_code_register_elem(void* ptr, int type, Token elem){
     func_code *code = (func_code*)ptr;
     switch (type) {
         case sem_elem_type: code->type = elem; break; 
-        case sem_elem_name: code->name = elem; break;
+        case sem_elem_name: code->name = token_to_slice(elem); break;
     }
 }
 

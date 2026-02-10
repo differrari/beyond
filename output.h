@@ -32,4 +32,5 @@ typedef struct testType {
  } testType;
 void testType_func(void *parent, int rule, Token elem);void testType_test(void *parent);void testType_helper(void *parent);hello testType_init();
 
+int _temp_func_0(char* directory, char* name);
 int main();

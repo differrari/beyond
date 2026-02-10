@@ -14,6 +14,14 @@
 codegen blk_code_transform(void *ptr, codegen this){
     blk_code *code = (blk_code*)ptr;
     TRANSFORM(stat);
+    if (ctx.lambdas.ptr && code->stat.type == sem_rule_func){
+        blk_code *lcode = ctx.lambdas.ptr;
+        while (lcode->chain.ptr){
+            lcode = lcode->chain.ptr;
+        }
+        lcode->chain = this;
+        return ctx.lambdas;
+    }
     TRANSFORM(chain);
     return this;
 }
@@ -30,10 +38,23 @@ codegen ass_code_transform(void *ptr, codegen this){
     return this;
 }
 
+codegen lambda_to_func(codegen lambda, string_slice name){
+    codegen func = func_code_init();
+    func_code *code = func.ptr;
+    func_code *lcode = lambda.ptr;
+    code->name = name;
+    code->args = lcode->args;
+    code->body = lcode->body;
+    code->type = lcode->type;
+    return func;
+}
+
 codegen exp_code_transform(void *ptr, codegen this){
     exp_code *code = (exp_code*)ptr;
     if (code->lambda.ptr){
-        print("Need to transform");
+        string_slice lamname = make_temp_name(sem_rule_func);
+        ctx.lambdas = wrap_in_block(lambda_to_func(code->lambda,lamname), ctx.lambdas, false);
+        return make_literal_expression(lamname);
     }
     TRANSFORM(var);
     TRANSFORM(exp);
@@ -125,6 +146,7 @@ codegen func_code_transform(void *ptr, codegen this){
         replace_returns(code->body);
         code->body = wrap_in_block(make_return(make_const_exp(slice_from_literal("__return_val"))), code->body, true);
     }
+    orig.lambdas = ctx.lambdas;
     pop_and_restore_context(orig);
     
     return this;
