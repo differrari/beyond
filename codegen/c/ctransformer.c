@@ -19,6 +19,7 @@ codegen blk_code_transform(void *ptr, codegen this){
         while (lcode->chain.ptr){
             lcode = lcode->chain.ptr;
         }
+        TRANSFORM(chain);
         lcode->chain = this;
         return ctx.lambdas;
     }
@@ -28,6 +29,9 @@ codegen blk_code_transform(void *ptr, codegen this){
 
 codegen dec_code_transform(void *ptr, codegen this){
     dec_code *code = (dec_code*)ptr;
+    symbol_t *sym = find_symbol(sem_rule_dec, code->name);
+    if (sym)
+        code->type = slice_from_string(type_name(sym, false, true));
     TRANSFORM(initial_value);
     return this;
 }
@@ -51,6 +55,7 @@ codegen lambda_to_func(codegen lambda, string_slice name){
 
 codegen exp_code_transform(void *ptr, codegen this){
     exp_code *code = (exp_code*)ptr;
+    TRANSFORM(lambda);
     if (code->lambda.ptr){
         string_slice lamname = make_temp_name(sem_rule_func);
         ctx.lambdas = wrap_in_block(lambda_to_func(code->lambda,lamname), ctx.lambdas, false);
@@ -94,6 +99,10 @@ codegen label_code_transform(void *ptr, codegen this){
 
 codegen param_code_transform(void *ptr, codegen this){
     param_code *code = (param_code*)ptr;
+    symbol_t *sym = find_symbol(sem_rule_param, code->name);
+    if (sym){
+        code->type = slice_from_string(type_name(sym, false, true));
+    }
     TRANSFORM(chain);
     return this;
 }
@@ -129,9 +138,9 @@ codegen func_code_transform(void *ptr, codegen this){
     
     if (code->signature.ptr){
         func_code *sig = code->signature.ptr;
-        code->type = sig->type;
-        code->name = sig->name;
-        code->args = sig->args;
+        if (sig->type.length) code->type = sig->type;
+        if (sig->name.length) code->name = sig->name;
+        if (sig->args.ptr) code->args = sig->args;
         release(sig);
         code->signature = (codegen){};
     }

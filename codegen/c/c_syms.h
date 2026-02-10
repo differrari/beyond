@@ -3,6 +3,13 @@
 #include "string/string.h"
 #include "semantic/sem_analysis.h"
 
+#define FIND_SYM(rule, symname) symbol_t *sym = find_symbol(rule, token_to_slice(symname));\
+if (!sym && rule == sem_rule_dec) sym = find_symbol(sem_rule_param, token_to_slice(symname));\
+if (!sym) { print("Symbol not found: %v",token_to_slice(symname)); sym = zalloc(sizeof(symbol_t)); sym->name = token_to_slice(symname); }
+
+#define FIND_SLICE(rule, name_slice) symbol_t *sym = find_symbol(rule, name_slice);\
+if (!sym) { print("Symbol not found: %v",name_slice); sym = zalloc(sizeof(symbol_t)); sym->name = name_slice; }
+
 static inline string type_name(symbol_t *sym, bool sub, bool extra){
     string base = {};
     switch ((sub ? sym->resolved_subtype : sym->resolved_type)) {

@@ -144,8 +144,8 @@ CODEGEN_DEC(arg_code, sem_rule_args)
 void param_code_register_elem(void* ptr, int type, Token elem){
     param_code *code = (param_code*)ptr;
     switch (type) {
-        case sem_elem_type: code->type = elem; break; 
-        case sem_elem_name: code->name = elem; break;
+        case sem_elem_type: code->type = token_to_slice(elem); break; 
+        case sem_elem_name: code->name = token_to_slice(elem); break;
     }
 }
 

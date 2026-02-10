@@ -11,14 +11,6 @@
 tern is_header = false;
 emit_block aux_fn_block;
 
-//TODO: flags?
-#define FIND_SYM(rule, symname) symbol_t *sym = find_symbol(rule, token_to_slice(symname));\
-if (!sym && rule == sem_rule_dec) sym = find_symbol(sem_rule_param, token_to_slice(symname));\
-if (!sym) { print("Symbol not found: %v",token_to_slice(symname)); sym = zalloc(sizeof(symbol_t)); sym->name = token_to_slice(symname); }
-
-#define FIND_SLICE(rule, name_slice) symbol_t *sym = find_symbol(rule, name_slice);\
-if (!sym) { print("Symbol not found: %v",name_slice); sym = zalloc(sizeof(symbol_t)); sym->name = name_slice; }
-
 void generate_code(const char *name, codegen cg){
     
     int32_t ext = str_has_char(name, 0, '.');
@@ -61,11 +53,9 @@ void dec_code_emit_code(void* ptr){
     if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
-    FIND_SLICE(sem_rule_dec, code->name);
-    if (sym->resolved_type) emit_type(sym, true);
-    else emit_slice(code->type);
+    emit_slice(code->type);
     emit_space();
-    emit_slice(sym->name);
+    emit_slice(code->name);
     if (is_header != true && code->initial_value.ptr){
         emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_dec, .ignore_semicolon = true });
         emit_const(" = ");
@@ -173,10 +163,9 @@ void arg_code_emit_code(void *ptr){
 
 void param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
-    FIND_SYM(sem_rule_param, code->name);
-    emit_type(sym, true);
+    emit_slice(code->type);
     emit_space();
-    emit_slice(sym->name);
+    emit_slice(code->name);
     if (code->chain.ptr){
         emit_const(", ");
         codegen_emit_code(code->chain);
@@ -474,7 +463,7 @@ void def_code_emit_code(void *ptr){
 
 void gen_invoke_param(codegen contents){
     param_code *code = (param_code*)contents.ptr;
-    if (code->name.length) emit(", %v",token_to_slice(code->name));
+    if (code->name.length) emit(", %v",code->name);
     if (code->chain.ptr) gen_invoke_param(code->chain);
 }
 

@@ -111,8 +111,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
                      sym->reference_type = true;
                  }
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
-                 // print("SYMBOL: %s = %v",sem_rule_to_string(elem.sem_value),token_to_slice(node.t));
-             } else if (node.action == sem_action_check && (node.sem_value == sem_rule_var || node.sem_value == sem_rule_jmp /*&& elem.sem_value != sem_func*/)){
+             } else if (node.action == sem_action_check){
                  if (!symbol_exists(node.sem_value, node.t)){
                      print("%s %v does not exist",sem_rule_to_string(node.sem_value),token_to_slice(node.t));
                      return true;
@@ -135,12 +134,11 @@ void debug_table(symbol_table *table){
         }
         if (sym->name.length){//TODO: hack
             print("%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
-            if (sym->child){
-                ind++;
-                print("Has %i children",sym->child->symbol_count);
-                debug_table(sym->child);
-                ind--;
-            }
+        }
+        if (sym->child){
+            ind++;
+            debug_table(sym->child);
+            ind--;
         }
     }
 }

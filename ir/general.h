@@ -75,8 +75,8 @@ typedef struct {
 codegen label_code_init();
 
 typedef struct {
-    Token type;
-    Token name;
+    string_slice type;
+    string_slice name;
     codegen chain;
 } param_code;
 
