@@ -4,6 +4,8 @@
 #include "emit_context.h"
 #include "string/slice.h"
 #include "ir/manual_gen.h"
+#include "semantic/sem_analysis.h"
+#include "c_syms.h"
 
 #ifdef CCODEGEN
 
@@ -18,11 +20,13 @@ codegen blk_code_transform(void *ptr, codegen this){
 
 codegen dec_code_transform(void *ptr, codegen this){
     dec_code *code = (dec_code*)ptr;
+    TRANSFORM(initial_value);
     return this;
 }
 
 codegen ass_code_transform(void *ptr, codegen this){
     ass_code *code = (ass_code*)ptr;
+    TRANSFORM(expression);
     return this;
 }
 
@@ -153,6 +157,32 @@ codegen var_code_transform(void *ptr, codegen this){
     var_code *code = (var_code*)ptr;
     TRANSFORM(var);
     TRANSFORM(expression);
+    if (code->operation.length){
+        if (*code->operation.data == '.' && code->expression.type == sem_rule_call){
+            call_code *function = code->expression.ptr;
+            function->args = make_argument(code->name.length ? make_literal_expression(code->name) : var_to_exp(code->var), function->args);
+            string_slice symname = ((var_code*)code->var.ptr)->name;
+            symbol_t *sym = find_symbol(sem_rule_dec, symname);
+            if (sym){
+                string s = type_name(sym, false, false);
+                function->name = slice_from_string(string_format("%S_%v", s, function->name));
+            }
+            return code->expression;
+        }
+        else if (*code->operation.data == '['){
+            codegen call = call_code_init();
+            call_code *function = call.ptr;
+            string_slice symname = code->name.length ? code->name : ((var_code*)code->var.ptr)->name;
+            symbol_t *sym = find_symbol(sem_rule_dec, symname);
+            if (sym){
+                string s = type_name(sym, false, false);
+                string cast = string_format("*(%S*)",type_name(sym, true, false));//TODO: the cast is hacked into the function name, is there a better way without explicit casts?
+                function->name = slice_from_string(string_format("%s%S_get",sym->resolved_subtype ? cast.data : "",s));
+            }
+            function->args = make_argument(code->name.length ? make_literal_expression(code->name) : var_to_exp(code->var), make_argument(code->expression,function->args));
+            return call;
+        }
+    }
     return this;
 }
 

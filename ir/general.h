@@ -48,7 +48,7 @@ typedef struct {
 codegen exp_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen args;
 } call_code;
 
@@ -114,10 +114,10 @@ typedef struct {
 codegen dowhile_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen var;
     codegen expression;
-    Token operation;
+    string_slice operation;
     enum { var_none, var_deref, var_addr } transform;
 } var_code;
 

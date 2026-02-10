@@ -4,6 +4,7 @@
 #include "emit_context.h"
 #include "alloc/allocate.h"
 #include "common.h"
+#include "c_syms.h"
 
 #ifdef CCODEGEN
 
@@ -50,19 +51,9 @@ void blk_code_emit_code(void* ptr){
 }
 
 void emit_type(symbol_t *sym, bool extra){
-    switch (sym->resolved_type) {
-    case semantic_types_literal: emit_const("char*"); break;
-    case semantic_types_int64: emit_const("int64_t"); break;
-    case semantic_types_int32: emit_const("int32_t"); break;
-    default:
-    case semantic_types_passthrough: emit_token(sym->type); break;
-    }
-    if (extra){
-        if (sym->reference_type){
-            emit_const("_t");
-            emit_const("*");
-        } 
-    }
+    string s = type_name(sym, false, extra);
+    emit_slice(slice_from_string(s));
+    string_free(s);
 }
 
 void dec_code_emit_code(void* ptr){
@@ -103,7 +94,7 @@ void call_code_emit_code(void *ptr){
     if (is_header == true) return;
     call_code *code = (call_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
-    emit_token(code->name);
+    emit_slice(code->name);
     emit_const("(");
     codegen_emit_code(code->args);
     emit_const(")");
@@ -340,8 +331,8 @@ void dowhile_code_emit_code(void* ptr){
 string_slice resolve_symbol_name(var_code *code){
     if (code->var.ptr){
       var_code *inner_code = (var_code*)code->var.ptr;  
-      return token_to_slice(inner_code->name);
-    } else return token_to_slice(code->name);
+      return inner_code->name;
+    } else return code->name;
 }
 
 bool emit_variable(var_code *code);
@@ -361,15 +352,12 @@ bool emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
     
     emit_const("_");
     
-    if (access_name.length)
-        emit_slice(access_name);
-    else 
-        emit_token(call->name);
+    emit_slice(access_name.length ? access_name : call->name);
     
     emit_const("(");
     if (code->var.ptr) emit_variable(code->var.ptr); 
     else { 
-        FIND_SYM(sem_rule_dec, code->name);
+        FIND_SLICE(sem_rule_dec, code->name);
         if (sym->table_type == sem_rule_struct){
             emit_const("instance->");
         }
@@ -384,63 +372,30 @@ bool emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
 }
 
 bool emit_variable(var_code *code){
-    if (code->operation.kind){
-        if (*code->operation.start == '.' && code->expression.type != sem_rule_call){
-            bool is_ref = false;
-            if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
-                FIND_SYM(sem_rule_dec, code->name);
-                is_ref = sym->reference_type;
-                if (code->transform == var_deref){
-                    emit_const("*");
-                    is_ref = false;
-                }
-                if (code->transform == var_addr){
-                    emit_const("&");
-                    is_ref = true;
-                }
-                if (sym->table_type == sem_rule_struct){
-                    emit_const("instance->");
-                }
-                emit_slice(sym->name);
-            }
-            emit_const(is_ref ? "->" : ".");
-            emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
-            codegen_emit_code(code->expression);
-            pop_and_restore_context(orig);
-            return is_ref;
+    bool is_ref = false;
+    if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
+        FIND_SLICE(sem_rule_dec, code->name);
+        is_ref = sym->reference_type;
+        if (code->transform == var_deref){
+            emit_const("*");
+            is_ref = false;
         }
-        else if (*code->operation.start == '['){
-            char *operation = "get";
-            return emit_var_type_resolution(code, (string_slice){.data = operation, .length = strlen(operation) }, true);
-        } else if (*code->operation.start == '.'){
-            return emit_var_type_resolution(code, (string_slice){}, false);
-        } else print("UNKNOWN OPERATION %v",token_to_slice(code->operation));
-    } else {
-        bool is_ref = false;
-        if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
-            FIND_SYM(sem_rule_dec, code->name);
-            is_ref = sym->reference_type;
-            if (code->transform == var_deref){
-                emit_const("*");
-                is_ref = false;
-            }
-            if (code->transform == var_addr){
-                emit_const("&");
-                is_ref = true;
-            }
-            if (sym->table_type == sem_rule_struct){
-                emit_const("instance->");
-            }
-            emit_slice(sym->name);
+        if (code->transform == var_addr){
+            emit_const("&");
+            is_ref = true;
         }
-        if (code->expression.ptr){
-            emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
-            codegen_emit_code(code->expression);
-            pop_and_restore_context(orig);
-        } 
-        return is_ref;
+        if (sym->table_type == sem_rule_struct){
+            emit_const("instance->");
+        }
+        emit_slice(sym->name);
     }
-    return false;
+    if (code->operation.length) emit_slice(code->operation);
+    if (code->expression.ptr){
+        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
+        codegen_emit_code(code->expression);
+        pop_and_restore_context(orig);
+    } 
+    return is_ref;
 }
 
 void var_code_emit_code(void* ptr){
@@ -589,9 +544,6 @@ void gen_int_stubs(codegen contents, string_slice name){
         gen_int_stubs(scope->chain,name);
     }
 }
-// void codegen_t_register_subrule(codegen_t gen, int type, codegen_t child){
-//     if (gen.register_subrule) gen.register_subrule(gen.ptr, type, child);
-// }
 
 void int_code_emit_code(void *ptr){
     int_code *code = (int_code*)ptr;

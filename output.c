@@ -18,7 +18,7 @@ int a(){
 	char* ly = "like";
 	int test = 0;
 	testarr = chunk_array_create(12, sizeof(int));
-	int x = *(int*)chunk_array_get(testarr);
+	int x = *(int*)chunk_array_get(testarr, 0);
 	chunk_array_push(testarr, 0);
 }
 
@@ -92,7 +92,7 @@ int main(){
 	int __return_val;
 	int y = a();
 	int x = 1 - (0 - 2);
-	int z = int_get(x);
+	int z = int_get(x, 0);
 	print("This is democracy manifest");
 	for (int i = 0; i < 10; i = i + 1){}
 	while (0){print();}

@@ -1,6 +1,30 @@
 #include "manual_gen.h"
 #include "general.h"
 
+codegen make_argument(codegen expression, codegen chain){
+    codegen arg = arg_code_init();
+    arg_code *code = arg.ptr;
+    code->exp = expression;
+    code->chain = chain;
+    return arg;
+}
+
+codegen make_literal_expression(string_slice slice){
+    codegen exp = exp_code_init();
+    exp_code *code = exp.ptr;
+    codegen var = var_code_init();
+    ((var_code*)var.ptr)->name = slice;
+    code->var = var;
+    return exp;
+}
+
+codegen var_to_exp(codegen var){
+    codegen exp = exp_code_init();
+    exp_code *code = exp.ptr;
+    code->var = var;
+    return exp;
+}
+
 codegen wrap_in_block(codegen statement, codegen chain, bool tail){
     codegen blk_ret_value = blk_code_init();
     blk_code *code = (blk_code*)blk_ret_value.ptr;
