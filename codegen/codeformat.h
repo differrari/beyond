@@ -4,26 +4,7 @@
 #include "data/format/tokenizer/tokenizer.h"
 #include "files/buffer.h"
 
-typedef struct {
-    buffer prologue;
-    int pindent;
-    buffer body;
-    int bindent;
-    buffer epilogue;
-    int eindent;
-} emit_block;
-
-typedef enum { block_section_prologue, block_section_body, block_section_epilogue } emit_block_section;
-
-extern emit_block current_eblock;
-
-emit_block save_and_push_block();
-emit_block save_and_push_existing(emit_block existing);
-emit_block pop_and_restore_emit_block(emit_block block);
-emit_block_section get_block_section();
-emit_block_section switch_block_section(emit_block_section section);
-void collapse_block(emit_block old_block);
-
+void reset_emit_buffer();
 void emit_const(char *lit);
 void emit(char* fmt, ...);
 void emit_token(Token t);

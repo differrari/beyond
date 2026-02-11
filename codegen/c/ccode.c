@@ -2,14 +2,12 @@
 #include "../codeformat.h"
 #include "semantic/sem_analysis.h"
 #include "emit_context.h"
-#include "alloc/allocate.h"
 #include "syscalls/syscalls.h"
 #include "c_syms.h"
 
 #ifdef CCODEGEN
 
 tern is_header = false;
-emit_block aux_fn_block;
 
 void generate_code(const char *name, codegen cg){
     
@@ -23,6 +21,8 @@ void generate_code(const char *name, codegen cg){
         emit("#pragma once\n\n",name);
         codegen_emit_code(cg);
         output_code(name,"h");
+        
+        reset_emit_buffer();
         
         is_header = false;
         emit("#include \"%s.h\"\n\n",name);
@@ -342,7 +342,6 @@ void inc_code_emit_code(void *ptr){
 
 void struct_code_emit_code(void *ptr){
     struct_code *code = (struct_code*)ptr;
-    emit_block original = save_and_push_block();
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = token_to_slice(code->parent) });
 
     if (is_header != false){
@@ -356,9 +355,7 @@ void struct_code_emit_code(void *ptr){
         emit(" } %v;",code->name);
     } else codegen_emit_code(code->contents);
     emit_newline();
-    emit_block new_b = pop_and_restore_emit_block(original);
     pop_and_restore_context(orig);
-    collapse_block(new_b);
 
     if (code->parent.kind){//CTRANS
         emit("%v %v_init()",token_to_slice(code->parent),code->name);
