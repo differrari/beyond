@@ -13,6 +13,7 @@ bool rulegen {
     source("codegen/codeformat.c");
     source("rule_generator/ruleparser.c");
     if (compile()){
+        gen_compile_commands("rule_generator/ruleparser.c");
         return run() == 0;
     }
     return 0;
@@ -42,13 +43,15 @@ compiler {
         add_linker_flag("-g", false);
         source_all(".c");
         if (compile()){
-            gen_compile_commands();
+            gen_compile_commands(0);
             run();  
         }
     }
 }
 
 int main {
+    defer emit_compile_commands();
+    rebuild_self();
     
     compiler();
     

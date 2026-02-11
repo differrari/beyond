@@ -10,6 +10,7 @@ bool rulegen(){
 	source("codegen/codeformat.c");
 	source("rule_generator/ruleparser.c");
 	if (compile()){
+		gen_compile_commands("rule_generator/ruleparser.c");
 		return run() == 0;
 	}
 	
@@ -36,7 +37,7 @@ void compiler(){
 		add_linker_flag("-g", false);
 		source_all(".c");
 		if (compile()){
-			gen_compile_commands();
+			gen_compile_commands(0);
 			run();
 		}
 		
@@ -45,6 +46,12 @@ void compiler(){
 }
 
 int main(){
+	int __return_val;
+	rebuild_self();
 	compiler();
-	return 0;
+	__return_val = 0;
+	goto defer;
+	defer:
+	emit_compile_commands();
+	return __return_val;
 }
