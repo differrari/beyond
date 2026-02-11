@@ -2,6 +2,10 @@
 
 
 
+char* heyo(){
+	return "Value";
+}
+
 bool credbuild(){
 	redb_mod module = new_module("cred");
 	set_name(&module, "credgen");
@@ -80,7 +84,7 @@ void testType_func(testType* instance, int rule, Token elem){
 }
 
 void testType_test(testType* instance){
-	print("Test succeeded");
+	print("Test succeeded %i", instance->prop1);
 }
 
 void testType_helper(testType* instance){

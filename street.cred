@@ -1,6 +1,10 @@
 @includeC("test.h")
 @includeC("ing.h")
 
+literal heyo(){
+    return "Value";
+}
+
 bool credbuild {
     redb_mod module = new_module("cred");
 	
@@ -60,7 +64,7 @@ struct testType: hello {
     }
     
     test {
-        print("Test succeeded");
+        print("Test succeeded %i",prop1);
     }
     
     helper {

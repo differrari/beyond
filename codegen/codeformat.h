@@ -1,8 +1,6 @@
 #pragma once
 
-#include "std/string_slice.h"
 #include "data/format/tokenizer/tokenizer.h"
-#include "files/buffer.h"
 
 void reset_emit_buffer();
 void emit_const(char *lit);

@@ -10,6 +10,11 @@
 
 #define TRANSFORM(name) if (code->name.ptr) code->name = codegen_transform(code->name, code->name)
 
+string_slice resolve_type(symbol_t *sym, bool subtype, string_slice fallback){
+    if (!sym) return fallback;
+    return slice_from_string(type_name(sym, subtype, true));
+}
+
 codegen blk_code_transform(void *ptr, codegen this){
     blk_code *code = (blk_code*)ptr;
     TRANSFORM(stat);
@@ -28,9 +33,7 @@ codegen blk_code_transform(void *ptr, codegen this){
 
 codegen dec_code_transform(void *ptr, codegen this){
     dec_code *code = (dec_code*)ptr;
-    symbol_t *sym = find_symbol(sem_rule_dec, code->name);
-    if (sym)
-        code->type = slice_from_string(type_name(sym, false, true));
+    code->type = resolve_type(find_symbol(sem_rule_dec, code->name), false, code->type);
     TRANSFORM(initial_value);
     return this;
 }
@@ -98,10 +101,7 @@ codegen label_code_transform(void *ptr, codegen this){
 
 codegen param_code_transform(void *ptr, codegen this){
     param_code *code = (param_code*)ptr;
-    symbol_t *sym = find_symbol(sem_rule_param, code->name);
-    if (sym){
-        code->type = slice_from_string(type_name(sym, false, true));
-    }
+    code->type = resolve_type(find_symbol(sem_rule_param, code->name), false, code->type);
     TRANSFORM(chain);
     return this;
 }
@@ -144,11 +144,12 @@ codegen func_code_transform(void *ptr, codegen this){
         code->signature = (codegen){};
     }
     
+    code->type = resolve_type(find_symbol(sem_rule_func, code->name),false,code->type);
     TRANSFORM(args);
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_func });
     TRANSFORM(body);
     if (ctx.defer_statements.ptr){
-        code->body = wrap_in_block(make_declaration("__return_val", token_to_slice(code->type), (codegen){}), code->body, false);
+        code->body = wrap_in_block(make_declaration("__return_val", code->type, (codegen){}), code->body, false);
         code->body = wrap_in_block(make_label("defer"), code->body, true);
         code->body = wrap_in_block(ctx.defer_statements, code->body, true);
         replace_returns(code->body);

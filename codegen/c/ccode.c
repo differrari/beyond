@@ -171,12 +171,8 @@ void param_code_emit_code(void *ptr){
 
 void func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
-    symbol_t *sym = find_symbol(sem_rule_func, code->name);//CTRANS
-    if (sym && code->type.kind){
-        emit_type(sym, true);
-        emit_const(" ");
-    } else if (code->type.pos){
-        emit_token(code->type);
+    if (code->type.length){
+        emit_slice(code->type);
         emit_const(" ");
     } else 
         emit_const("void ");
@@ -187,9 +183,7 @@ void func_code_emit_code(void *ptr){
     if (ctx.context_rule == sem_rule_interf){
         emit_const("(*");
     }
-    if (sym)
-        emit_slice(sym->name);
-    else emit_slice(code->name);
+    emit_slice(code->name);
     if (ctx.context_rule == sem_rule_interf){
         emit_const(")");
     }

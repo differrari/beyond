@@ -102,7 +102,6 @@ codegen param_to_arg(codegen param){
     codegen arg = arg_code_init();
     arg_code *code = arg.ptr;
     param_code *pcode = param.ptr;
-    print("PCODE %v",pcode->name);
     code->exp = make_literal_expression(pcode->name);
     if (pcode->chain.ptr) code->chain = param_to_arg(pcode->chain);
     return arg;
