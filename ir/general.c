@@ -252,7 +252,7 @@ CODEGEN_DEC(inc_code, sem_rule_inc)
 void struct_code_register_elem(void *ptr, int type, Token elem){
     struct_code *code = (struct_code*)ptr;
     if (type == sem_elem_parent) code->parent = elem;
-    if (type == sem_elem_name) code->name = elem;
+    if (type == sem_elem_name) code->name = token_to_slice(elem);
 }
 
 void struct_code_register_subrule(void *ptr, int type, codegen child){
@@ -285,12 +285,12 @@ void def_code_register_subrule(void *ptr, int type, codegen child){
 CODEGEN_DEC(def_code, sem_rule_def)
 
 void int_code_register_elem(void *ptr, int type, Token elem){
-    struct_code *code = (struct_code*)ptr;
-    if (type == sem_elem_name) code->name = elem;
+    int_code *code = (int_code*)ptr;
+    if (type == sem_elem_name) code->name = token_to_slice(elem);
 }
 
 void int_code_register_subrule(void *ptr, int type, codegen child){
-    struct_code *code = (struct_code*)ptr;
+    int_code *code = (int_code*)ptr;
     code->contents = child;
 }
 

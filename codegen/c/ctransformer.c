@@ -1,6 +1,5 @@
 #include "ir/general.h"
 #include "ir/arch_transformer.h"
-#include "syscalls/syscalls.h"
 #include "emit_context.h"
 #include "string/slice.h"
 #include "ir/manual_gen.h"
@@ -224,8 +223,25 @@ codegen inc_code_transform(void *ptr, codegen this){
 
 codegen struct_code_transform(void *ptr, codegen this){
     struct_code *code = (struct_code*)ptr;
-    TRANSFORM(contents);
-    return this;
+    blk_code *dec = code->contents.ptr;
+    codegen extracted = {};
+    codegen maintained = {};
+    while (dec){
+        if (dec->stat.ptr){
+            if (dec->stat.type == sem_rule_dec){
+                maintained = wrap_in_block(codegen_transform(dec->stat, dec->stat),maintained,true);
+            } else if (dec->stat.type == sem_rule_func){
+                func_code *function = dec->stat.ptr;
+                function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
+                //TODO: we're emitting functions that don't belong to the parent too, they should be extracted with argument modification
+                function->args = make_param(slice_from_string(string_format("%v*",code->name)),slice_from_literal("instance"), function->args);
+                extracted = wrap_in_block(dec->stat, extracted, true);
+            }
+        }
+        dec = dec->chain.ptr;
+    }
+    code->contents = maintained;
+    return wrap_in_block(this,extracted, false);
 }
 
 codegen ret_code_transform(void *ptr, codegen this){
@@ -243,8 +259,28 @@ codegen def_code_transform(void *ptr, codegen this){
 
 codegen int_code_transform(void *ptr, codegen this){
     int_code *code = (int_code*)ptr;
-    TRANSFORM(contents);
-    return this;
+    blk_code *dec = code->contents.ptr;
+    codegen extracted = {};
+    while (dec){
+        if (dec->stat.ptr){
+            if (dec->stat.type == sem_rule_dec){
+                dec->stat = codegen_transform(dec->stat, dec->stat);
+            } else if (dec->stat.type == sem_rule_func){
+                codegen funcptr = func_code_init();
+                func_code *stub = funcptr.ptr;
+                func_code *function = dec->stat.ptr;
+                stub->name = function->name;
+                function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
+                stub->args = make_param(slice_from_literal("void*"),slice_from_literal("instance"), function->args);
+                function->args = make_param(code->name,slice_from_literal("instance"), function->args);
+                function->body = wrap_in_block(make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name)), make_func_call(slice_from_string(string_format("instance.%v",stub->name)), param_to_arg(stub->args)), (codegen){}), (codegen){}, false); //TODO: when it has a return type, use return + a default outside of the if
+                extracted = wrap_in_block(dec->stat, extracted, true);
+                dec->stat = funcptr;
+            }
+        }
+        dec = dec->chain.ptr;
+    }
+    return wrap_in_block(this,extracted, false);
 }
 
 codegen enum_code_transform(void *ptr, codegen this){

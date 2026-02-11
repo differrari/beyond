@@ -1,5 +1,7 @@
 #include "output.h"
 
+
+
 bool credbuild(){
 	redb_mod module = new_module("cred");
 	set_name(&module, "credgen");
@@ -49,34 +51,23 @@ char* test_enum_to_string(test_enum val){
 	} 
 } 
 
-void hello_func(hello instance ,int rule, Token elem){
-	if (instance.func) instance.func(instance.ptr, rule, elem);
+
+void hello_func(hello instance, int rule, Token elem){
+	if (instance.func){
+		instance.func(instance, rule, elem);
+	}
+	
 }
 
 void hello_test(hello instance){
-	if (instance.test) instance.test(instance.ptr);
-}
-
-
-
-
-
-
-void testType_func(void *parent, int rule, Token elem){
-testType *instance = (testType*)parent;
-
-	int a = 0;
-}
-void testType_test(void *parent){
-testType *instance = (testType*)parent;
-
-	print("Test succeeded");
-}
-void testType_helper(void *parent){
-testType *instance = (testType*)parent;
-
+	if (instance.test){
+		instance.test(instance);
+	}
 	
 }
+
+
+
 hello testType_init(){
 	return (hello){
 		.ptr = zalloc(sizeof(testType)),
@@ -84,6 +75,18 @@ hello testType_init(){
 		.test = testType_test,
 	};
 }
+void testType_func(testType* instance, int rule, Token elem){
+	int a = 0;
+}
+
+void testType_test(testType* instance){
+	print("Test succeeded");
+}
+
+void testType_helper(testType* instance){
+	
+}
+
 int _temp_func_0(char* directory, char* name){
 	print("Inside lambda");
 }

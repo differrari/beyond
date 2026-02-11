@@ -1,5 +1,9 @@
 #pragma once
 
+#include "test.h"
+
+#include "ing.h"
+
 bool credbuild();
 int a();
 void draw(int x, int y, int color, int overwrite);
@@ -17,20 +21,19 @@ char* test_enum_to_string(test_enum val);
 typedef struct hello hello;
 typedef struct hello { 
 	void* ptr;
-	void (*func)(void *instance, int rule, Token elem);
-	void (*test)(void *instance);
+	void (*func)(void* instance, int rule, Token elem);
+	void (*test)(void* instance);
  } hello;
-void hello_func(hello instance ,int rule, Token elem);
 
+void hello_func(hello instance, int rule, Token elem);
 void hello_test(hello instance);
-
-typedef struct testType { 
-	
-	
-	int prop1;
+typedef struct testType { int prop1;
 	int prop2;
  } testType;
-void testType_func(void *parent, int rule, Token elem);void testType_test(void *parent);void testType_helper(void *parent);hello testType_init();
+hello testType_init();
 
+void testType_func(testType* instance, int rule, Token elem);
+void testType_test(testType* instance);
+void testType_helper(testType* instance);
 int _temp_func_0(char* directory, char* name);
 int main();

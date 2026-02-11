@@ -9,6 +9,15 @@ codegen make_argument(codegen expression, codegen chain){
     return arg;
 }
 
+codegen make_param(string_slice type, string_slice name, codegen chain){
+    codegen param = param_code_init();
+    param_code *code = param.ptr;
+    code->name = name;
+    code->type = type;
+    code->chain = chain;
+    return param;
+}
+
 codegen make_literal_expression(string_slice slice){
     codegen exp = exp_code_init();
     exp_code *code = exp.ptr;
@@ -68,4 +77,41 @@ codegen make_return(codegen expression){
     ret_code *retstat = (ret_code*)ret_value.ptr;
     retstat->expression = expression;
     return ret_value;
+}
+
+codegen make_if(codegen condition, codegen body, codegen chain){
+    codegen cond = cond_code_init();
+    cond_code *code = cond.ptr;
+    code->cond = condition;
+    code->scope = body;
+    code->chain = chain;
+    return cond;
+}
+
+codegen make_var_chain(codegen lh, codegen rh){
+    codegen var = var_code_init();
+    var_code *code = var.ptr;
+    code->var = lh;
+    code->expression = rh;
+    code->operation = slice_from_literal(".");
+    return var;
+}
+
+#include "syscalls/syscalls.h"
+codegen param_to_arg(codegen param){
+    codegen arg = arg_code_init();
+    arg_code *code = arg.ptr;
+    param_code *pcode = param.ptr;
+    print("PCODE %v",pcode->name);
+    code->exp = make_literal_expression(pcode->name);
+    if (pcode->chain.ptr) code->chain = param_to_arg(pcode->chain);
+    return arg;
+}
+
+codegen make_func_call(string_slice name, codegen args){
+    codegen func = call_code_init();
+    call_code *code = func.ptr;
+    code->name = name;
+    code->args = args;
+    return func;
 }

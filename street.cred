@@ -1,3 +1,6 @@
+@includeC("test.h")
+@includeC("ing.h")
+
 bool credbuild {
     redb_mod module = new_module("cred");
 	

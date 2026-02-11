@@ -2,6 +2,7 @@
 
 #include "string/string.h"
 #include "semantic/sem_analysis.h"
+#include "syscalls/syscalls.h"
 
 #define FIND_SYM(rule, symname) symbol_t *sym = find_symbol(rule, token_to_slice(symname));\
 if (!sym && rule == sem_rule_dec) sym = find_symbol(sem_rule_param, token_to_slice(symname));\

@@ -130,7 +130,7 @@ typedef struct {
 codegen inc_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen contents;
     Token parent;
 } struct_code;
@@ -150,7 +150,7 @@ typedef struct {
 codegen def_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen contents;
 } int_code;
 
