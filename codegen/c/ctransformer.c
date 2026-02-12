@@ -118,7 +118,7 @@ void replace_returns(codegen body){
         
         codegen assign_code = ass_code_init();
         ass_code *ass = assign_code.ptr;
-        ass->name = slice_from_literal("__return_val");
+        ass->var = make_literal_var(slice_from_literal("__return_val"));
         ass->expression = ret->expression;
         
         codegen b = wrap_in_block(goto_code, (codegen){}, false);
@@ -270,11 +270,16 @@ codegen int_code_transform(void *ptr, codegen this){
                 codegen funcptr = func_code_init();
                 func_code *stub = funcptr.ptr;
                 func_code *function = dec->stat.ptr;
+                stub->type = function->type;
                 stub->name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
                 stub->args = make_param(slice_from_literal("void*"),slice_from_literal("instance"), function->args);
+                codegen call = make_argument(make_literal_expression(slice_from_literal("instance.ptr")), param_to_arg(function->args));
                 function->args = make_param(code->name,slice_from_literal("instance"), function->args);
-                function->body = wrap_in_block(make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name)), make_func_call(slice_from_string(string_format("instance.%v",stub->name)), param_to_arg(stub->args)), (codegen){}), (codegen){}, false); //TODO: when it has a return type, use return + a default outside of the if
+                function->body = wrap_in_block(
+                    make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name)), 
+                        make_return(make_func_call(slice_from_string(string_format("instance.%v",stub->name)), call)), (codegen){}), 
+                    make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type)))), false); //TODO: proper default handling once we have a better type system
                 extracted = wrap_in_block(dec->stat, extracted, true);
                 dec->stat = funcptr;
             }

@@ -66,13 +66,9 @@ void dec_code_emit_code(void* ptr){
 void ass_code_emit_code(void *ptr){
     if (is_header == true) return;
     ass_code *code = (ass_code*)ptr;
-    FIND_SLICE(sem_rule_dec, code->name);
-    if (sym->table_type == sem_rule_struct){//CTRANS
-        emit_const("instance->");
-    }
-    emit_slice(sym->name);
-    emit_const(" = ");
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
+    codegen_emit_code(code->var);
+    emit_const(" = ");
     codegen_emit_code(code->expression);
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");

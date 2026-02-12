@@ -1,6 +1,6 @@
 #pragma once
 
-#include "test.h"
+#include "random.h"
 
 #include "ing.h"
 
@@ -22,11 +22,11 @@ char* test_enum_to_string(test_enum val);
 typedef struct hello hello;
 typedef struct hello { 
 	void* ptr;
-	void (*func)(void* instance, int rule, Token elem);
+	int (*func)(void* instance, int rule, Token elem);
 	void (*test)(void* instance);
  } hello;
 
-void hello_func(hello instance, int rule, Token elem);
+int hello_func(hello instance, int rule, Token elem);
 void hello_test(hello instance);
 typedef struct testType { int prop1;
 	int prop2;

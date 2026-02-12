@@ -56,18 +56,20 @@ char* test_enum_to_string(test_enum val){
 } 
 
 
-void hello_func(hello instance, int rule, Token elem){
+int hello_func(hello instance, int rule, Token elem){
 	if (instance.func){
-		instance.func(instance, rule, elem);
+		return instance.func(instance.ptr, rule, elem);
 	}
 	
+	return (int){};
 }
 
 void hello_test(hello instance){
 	if (instance.test){
-		instance.test(instance);
+		return instance.test(instance.ptr);
 	}
 	
+	return (){};
 }
 
 

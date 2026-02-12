@@ -27,6 +27,12 @@ codegen make_literal_expression(string_slice slice){
     return exp;
 }
 
+codegen make_literal_var(string_slice slice){
+    codegen var = var_code_init();
+    ((var_code*)var.ptr)->name = slice;
+    return var;
+}
+
 codegen var_to_exp(codegen var){
     codegen exp = exp_code_init();
     exp_code *code = exp.ptr;
@@ -97,8 +103,8 @@ codegen make_var_chain(codegen lh, codegen rh){
     return var;
 }
 
-#include "syscalls/syscalls.h"
 codegen param_to_arg(codegen param){
+    if (!param.ptr) return (codegen){};
     codegen arg = arg_code_init();
     arg_code *code = arg.ptr;
     param_code *pcode = param.ptr;

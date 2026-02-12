@@ -22,7 +22,7 @@ typedef struct {
 codegen dec_code_init();
 
 typedef struct {
-    string_slice name;
+    codegen var;
     codegen expression;
 } ass_code;
 

@@ -45,13 +45,15 @@ void dec_code_register_subrule(void* ptr, int type, codegen child){
 CODEGEN_DEC(dec_code, sem_rule_dec)
 
 void ass_code_register_elem(void* ptr, int type, Token elem){
-    ass_code *code = (ass_code*)ptr;
-    code->name = token_to_slice(elem);
+
 }
 
 void ass_code_register_subrule(void* ptr, int type, codegen child){
     ass_code *code = (ass_code*)ptr;
-    code->expression = child;
+    if (type == sem_rule_var)
+        code->var = child;
+    if (type == sem_rule_exp)
+        code->expression = child;
 }
 
 CODEGEN_DEC(ass_code, sem_rule_assign)

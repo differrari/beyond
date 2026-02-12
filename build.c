@@ -34,10 +34,11 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
-		add_linker_flag("-g", false);
+		debug();
 		source_all(".c");
 		if (compile()){
 			gen_compile_commands(0);
+			print("Done with compilation");
 			run();
 		}
 		
@@ -47,8 +48,12 @@ void compiler(){
 
 int main(){
 	int __return_val;
+	u64 start = get_time();
+	print("Start at %i", start);
 	rebuild_self();
 	compiler();
+	u64 end = get_time();
+	print("Compilation finished %lims", end - start);
 	__return_val = 0;
 	goto defer;
 	defer:

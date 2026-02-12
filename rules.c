@@ -95,7 +95,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, 0},
 	[rule_assignment] = {{
 		{{ 
-			SYMCHECK(IDENTIFIER,var), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
+			SYMRULE(variable,var), LITTOK(OPERATOR,"="), SYMRULE(expression,exp), 
 		 },3},
 	},1, sem_rule_assign, sem_action_none},
 	[rule_funccall] = {{

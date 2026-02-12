@@ -1,4 +1,4 @@
-@includeC("test.h")
+@includeC("random.h")
 @includeC("ing.h")
 
 literal heyo(){
@@ -53,7 +53,7 @@ enum test_enum {
 }
 
 interface hello {
-    void func(int rule, Token elem);
+    int func(int rule, Token elem);
     test;
 }
 
