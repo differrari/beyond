@@ -69,7 +69,6 @@ void hello_test(hello instance){
 		return instance.test(instance.ptr);
 	}
 	
-	return (){};
 }
 
 

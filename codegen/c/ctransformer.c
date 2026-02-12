@@ -276,7 +276,7 @@ codegen int_code_transform(void *ptr, codegen this){
                 stub->args = make_param(slice_from_literal("void*"),slice_from_literal("instance"), function->args);
                 codegen call = make_argument(make_literal_expression(slice_from_literal("instance.ptr")), param_to_arg(function->args));
                 function->args = make_param(code->name,slice_from_literal("instance"), function->args);
-                codegen def = slice_lit_match(function->type, "void", true) ? (codegen){} : make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type))));
+                codegen def = !function->type.length || slice_lit_match(function->type, "void", true) ? (codegen){} : make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type))));
                 function->body = 
                     wrap_in_block(
                         make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name)), 
