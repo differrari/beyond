@@ -9,6 +9,7 @@
 #include "alloc/allocate.h"
 #include "ir/arch_transformer.h"
 #include "codegen/code_generator.h"
+#include "debug/profiler.h"
 
 typedef struct {
     uint32_t file;
@@ -86,7 +87,11 @@ int main(int argc, char *argv[]){
         .scanner_pos = scan.pos,
     };
     
+    profiler_init();
+    
     parse_result parse_res = parse(buf.buffer, &ts, &parser);
+    
+    print("Parsing took %llims",profiler_delta());
     
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, buf.buffer);
@@ -94,14 +99,21 @@ int main(int argc, char *argv[]){
         return -1;
     } 
     if (!analyze_semantics(parse_res.ast_stack, parse_res.ast_count)) return -1;
+    print("Semantic analysis took %llims",profiler_delta());
     
     codegen ir = gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
     if (!ir.ptr) return -1;
     
+    print("IR Gen took %llims",profiler_delta());
+    
     ir = perform_transformations(ir);
     if (!ir.ptr) return -1;
+    
+    print("Transformation took %llims",profiler_delta());
         
     generate_code(outname, ir);
+    
+    print("Generation took %llims",profiler_delta());
     
     return 0;
 }

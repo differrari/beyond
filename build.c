@@ -38,7 +38,6 @@ void compiler(){
 		source_all(".c");
 		if (compile()){
 			gen_compile_commands(0);
-			print("Done with compilation");
 			run();
 		}
 		
