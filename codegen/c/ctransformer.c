@@ -233,6 +233,7 @@ codegen struct_code_transform(void *ptr, codegen this){
                 maintained = wrap_in_block(codegen_transform(dec->stat, dec->stat),maintained,true);
             } else if (dec->stat.type == sem_rule_func){
                 func_code *function = dec->stat.ptr;
+                function->body = codegen_transform(function->body, function->body);
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
                 //TODO: we're emitting functions that don't belong to the parent too, they should be extracted with argument modification
                 function->args = make_param(slice_from_string(string_format("%v*",code->name)),slice_from_literal("instance"), function->args);
