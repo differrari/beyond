@@ -18,3 +18,6 @@ codegen param_to_arg(codegen param);
 codegen make_func_call(string_slice name, codegen args);
 codegen lambda_to_func(codegen lambda, string_slice name);
 codegen var_to_exp(codegen var);
+codegen make_function(string_slice type, string_slice name, codegen params, codegen body);
+codegen make_struct_init(string_slice type, codegen prop);
+codegen make_prop_init(string_slice type, codegen exp, codegen chain);

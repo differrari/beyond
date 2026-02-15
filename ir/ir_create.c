@@ -1,4 +1,3 @@
-#include "codegen.h"
 #include "ir/general.h"
 #include "rules.h"
 
@@ -29,6 +28,8 @@ codegen begin_rule(sem_rule type){
         case sem_rule_else: return else_code_init();
         case sem_rule_switch: return switch_code_init();
         case sem_rule_cases: return case_code_init();
+        case sem_rule_struct_init: return struct_init_code_init();
+        case sem_rule_prop_init: return prop_init_code_init();
         case sem_rule_syn:
         case sem_rule_parent:
         case sem_rule_val: 

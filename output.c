@@ -73,13 +73,6 @@ void hello_test(hello instance){
 
 
 
-hello testType_init(){
-	return (hello){
-		.ptr = zalloc(sizeof(testType)),
-		.func = testType_func,
-		.test = testType_test,
-	};
-}
 void testType_func(testType* instance, int rule, Token elem){
 	int a = 0;
 }
@@ -90,6 +83,14 @@ void testType_test(testType* instance){
 
 void testType_helper(testType* instance){
 	
+}
+
+hello testType_init(){
+	return (hello){
+		.ptr = zalloc(sizeof(testType)),
+		.test = testType_test,
+		.func = testType_func,
+	};
 }
 
 int _temp_func_0(char* directory, char* name){

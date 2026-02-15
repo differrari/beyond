@@ -32,7 +32,9 @@ enum sem_rule {
     deref,
     addr,
     switch,
-    cases
+    cases,
+    struct_init, 
+    prop_init,
 }
 
 enum sem_elem { 

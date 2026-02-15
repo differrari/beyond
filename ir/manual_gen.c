@@ -120,3 +120,30 @@ codegen make_func_call(string_slice name, codegen args){
     code->args = args;
     return func;
 }
+
+codegen make_function(string_slice type, string_slice name, codegen params, codegen body){
+    codegen fun = func_code_init();
+    func_code *code = fun.ptr;
+    code->name = name;
+    code->body = body;
+    code->args = params;
+    code->type = type;
+    return fun;
+}
+
+codegen make_struct_init(string_slice type, codegen prop){
+    codegen ini = struct_init_code_init();
+    struct_init_code *code = ini.ptr;
+    code->name = type;
+    code->content = prop;
+    return ini;
+}
+
+codegen make_prop_init(string_slice name, codegen exp, codegen chain){
+    codegen ini = prop_init_code_init();
+    prop_init_code *code = ini.ptr;
+    code->name = name;
+    code->expression = exp;
+    code->chain = chain;
+    return ini;
+}

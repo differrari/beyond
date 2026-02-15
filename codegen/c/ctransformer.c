@@ -227,6 +227,7 @@ codegen struct_code_transform(void *ptr, codegen this){
     blk_code *dec = code->contents.ptr;
     codegen extracted = {};
     codegen maintained = {};
+    codegen props = {};
     while (dec){
         if (dec->stat.ptr){
             if (dec->stat.type == sem_rule_dec){
@@ -234,15 +235,38 @@ codegen struct_code_transform(void *ptr, codegen this){
             } else if (dec->stat.type == sem_rule_func){
                 func_code *function = dec->stat.ptr;
                 function->body = codegen_transform(function->body, function->body);
+                string_slice parent_name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
                 //TODO: we're emitting functions that don't belong to the parent too, they should be extracted with argument modification
                 function->args = make_param(slice_from_string(string_format("%v*",code->name)),slice_from_literal("instance"), function->args);
                 extracted = wrap_in_block(dec->stat, extracted, true);
+                if (code->parent.length){
+                    symbol_t *parent_sym = find_symbol(sem_rule_interf, token_to_slice(code->parent));
+                    if (!parent_sym || !parent_sym->child){
+                        print("Error: interface %v not found. Should've done better semantic analysis. smh",token_to_slice(code->parent));
+                        return this;
+                    }
+                    symbol_table *table = parent_sym->child;
+                    for (int i = 0; i < table->symbol_count; i++){
+                        symbol_t *sym = &table->symbol_table[i];
+                        if (slices_equal(sym->name, parent_name, false) && sym->sym_type == sem_rule_func){
+                            props = make_prop_init(parent_name, make_literal_expression(function->name), props);
+                            break;
+                        }
+                    }
+                }
             }
         }
         dec = dec->chain.ptr;
     }
     code->contents = maintained;
+    if (code->parent.length){
+        props = make_prop_init(slice_from_literal("ptr"), make_func_call(slice_from_literal("zalloc"), make_func_call(slice_from_literal("sizeof"), make_literal_expression(code->name))), props);
+        extracted = wrap_in_block(
+            make_function(token_to_slice(code->parent), slice_from_string(string_format("%v_init",code->name)), (codegen){}, 
+                make_return(make_struct_init(token_to_slice(code->parent), props))
+            ), extracted, true);
+    }
     return wrap_in_block(this,extracted, false);
 }
 
@@ -328,6 +352,14 @@ codegen case_code_transform(void *ptr, codegen this){
 
 codegen perform_transformations(codegen root){
     return codegen_transform(root,root);
+}
+
+codegen prop_init_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen struct_init_code_transform(void *ptr, codegen this){
+    return this;
 }
 
 #endif

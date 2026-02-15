@@ -1,4 +1,5 @@
 #include "general.h"
+#include "semantic/semantic_rules.h"
 #include "alloc/allocate.h"
 
 #define CODEGEN_DEC(name,t) \
@@ -366,3 +367,23 @@ void case_code_register_subrule(void* ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(case_code, sem_rule_cases)
+
+void prop_init_code_register_elem(void* ptr, int type, Token elem){
+
+}
+
+void prop_init_code_register_subrule(void* ptr, int type, codegen child){
+
+}
+
+CODEGEN_DEC(prop_init_code, sem_rule_prop_init)
+
+void struct_init_code_register_elem(void* ptr, int type, Token elem){
+
+}
+
+void struct_init_code_register_subrule(void* ptr, int type, codegen child){
+
+}
+
+CODEGEN_DEC(struct_init_code, sem_rule_struct_init)

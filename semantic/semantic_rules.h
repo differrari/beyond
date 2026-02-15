@@ -35,6 +35,8 @@ typedef enum {
 	sem_rule_addr,
 	sem_rule_switch,
 	sem_rule_cases,
+	sem_rule_struct_init,
+	sem_rule_prop_init,
 } sem_rule;
 
 char* sem_rule_to_string(sem_rule val);

@@ -31,10 +31,9 @@ void hello_test(hello instance);
 typedef struct testType { int prop1;
 	int prop2;
  } testType;
-hello testType_init();
-
 void testType_func(testType* instance, int rule, Token elem);
 void testType_test(testType* instance);
 void testType_helper(testType* instance);
+hello testType_init();
 int _temp_func_0(char* directory, char* name);
 int main();

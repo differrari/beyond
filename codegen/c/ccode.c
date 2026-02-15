@@ -344,44 +344,7 @@ void struct_code_emit_code(void *ptr){
         emit_newline();
         emit(" } %v;",code->name);
     } else codegen_emit_code(code->contents);
-    emit_newline();
     pop_and_restore_context(orig);
-
-    if (code->parent.kind){//CTRANS
-        emit("%v %v_init()",token_to_slice(code->parent),code->name);
-        if (is_header == true){
-            emit_const(";");
-            emit_newline();
-        } 
-        else {
-            emit_const("{");
-            increase_indent();
-            emit_newline();
-            emit("return (%v){",token_to_slice(code->parent));
-            increase_indent();
-            emit_newline();
-            emit(".ptr = zalloc(sizeof(%v)),",code->name);
-            symbol_t *parent_sym = find_symbol(sem_rule_interf, token_to_slice(code->parent));
-            if (!parent_sym || !parent_sym->child){
-                print("Error: interface %v not found. Should've done better semantic analysis. smh",token_to_slice(code->parent));
-                return;
-            }
-            symbol_table *table = parent_sym->child;
-            for (int i = 0; i < table->symbol_count; i++){
-                symbol_t *sym = &table->symbol_table[i];
-                if (sym->name.length && sym->sym_type == sem_rule_func){
-                    emit_newline();
-                    emit(".%v = %v_%v,",sym->name,code->name,sym->name);
-                }
-            }
-            decrease_indent();
-            emit_newline();
-            emit_const("};");
-            decrease_indent();
-            emit_newline();
-            emit_const("}");
-        }
-    }
 }
 
 void ret_code_emit_code(void *ptr){
@@ -556,6 +519,27 @@ void case_code_emit_code(void *ptr){
         emit_newline();
         codegen_emit_code(code->chain);
     }
+}
+
+void prop_init_code_emit_code(void *ptr){
+    prop_init_code *code = ptr;
+    emit(".%v = ",code->name);
+    codegen_emit_code(code->expression);
+    emit_const(",");
+    if (!code->chain.ptr) return;
+    emit_newline();
+    codegen_emit_code(code->chain);
+}
+
+void struct_init_code_emit_code(void *ptr){
+    struct_init_code *code = ptr;
+    emit("(%v){",code->name);
+        increase_indent();  
+        emit_newline();
+        codegen_emit_code(code->content);
+        decrease_indent();  
+        emit_newline();
+    emit_const("}");
 }
 
 #endif

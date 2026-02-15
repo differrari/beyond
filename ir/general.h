@@ -190,3 +190,18 @@ typedef struct {
 } case_code;
 
 codegen case_code_init();
+
+typedef struct {
+    string_slice name;
+    codegen expression;
+    codegen chain;
+} prop_init_code;
+
+codegen prop_init_code_init();
+
+typedef struct {
+    string_slice name;
+    codegen content;
+} struct_init_code;
+
+codegen struct_init_code_init();
