@@ -1,8 +1,5 @@
 #include "codegen/codegen.h"
 
-
-
-
 void codegen_register_elem(codegen instance, int type, Token elem){
 	if (instance.register_elem){
 		return instance.register_elem(instance.ptr, type, elem);

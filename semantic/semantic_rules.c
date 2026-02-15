@@ -1,7 +1,5 @@
 #include "semantic/semantic_rules.h"
 
-
-
 char* sem_rule_to_string(sem_rule val){
 	switch (val) {
 		case sem_rule_none: return "none";
@@ -43,8 +41,6 @@ char* sem_rule_to_string(sem_rule val){
 	} 
 } 
 
-
-
 char* sem_elem_to_string(sem_elem val){
 	switch (val) {
 		case sem_elem_none: return "none";
@@ -57,8 +53,6 @@ char* sem_elem_to_string(sem_elem val){
 	} 
 } 
 
-
-
 char* sem_action_to_string(sem_action val){
 	switch (val) {
 		case sem_action_none: return "none";
@@ -66,8 +60,6 @@ char* sem_action_to_string(sem_action val){
 		case sem_action_check: return "check";
 	} 
 } 
-
-
 
 char* semantic_types_to_string(semantic_types val){
 	switch (val) {

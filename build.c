@@ -1,7 +1,5 @@
 #include "redbuild.h"
-
 #include "syscalls/syscalls.h"
-
 bool rulegen(){
 	new_module("rulegen");
 	set_name("rulegen");

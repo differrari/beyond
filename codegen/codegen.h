@@ -1,9 +1,7 @@
 #pragma once
 
 #include "data/format/tokenizer/tokenizer.h"
-
 #include "rules.h"
-
 typedef struct codegen codegen;
 typedef struct codegen { 
 	void* ptr;

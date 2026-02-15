@@ -38,7 +38,6 @@ typedef enum {
 	sem_rule_struct_init,
 	sem_rule_prop_init,
 } sem_rule;
-
 char* sem_rule_to_string(sem_rule val);
 
 typedef enum {
@@ -50,7 +49,6 @@ typedef enum {
 	sem_elem_ref,
 	sem_elem_count,
 } sem_elem;
-
 char* sem_elem_to_string(sem_elem val);
 
 typedef enum {
@@ -58,7 +56,6 @@ typedef enum {
 	sem_action_declare,
 	sem_action_check,
 } sem_action;
-
 char* sem_action_to_string(sem_action val);
 
 typedef enum {
@@ -68,5 +65,4 @@ typedef enum {
 	semantic_types_int32,
 	semantic_types_passthrough,
 } semantic_types;
-
 char* semantic_types_to_string(semantic_types val);
