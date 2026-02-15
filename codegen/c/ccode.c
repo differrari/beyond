@@ -95,11 +95,9 @@ void cond_code_emit_code(void *ptr){
     codegen_emit_code(code->cond);
     pop_and_restore_context(orig);
     emit_const("){");
-    increase_indent();
-    emit_newline();
-    codegen_emit_code(code->scope);
-    decrease_indent();
-    emit_newline();
+    increase_indent(true);
+        codegen_emit_code(code->scope);
+    decrease_indent(true);
     emit_const("}");
     if (code->chain.ptr) codegen_emit_code(code->chain);
     else emit_newline();
@@ -190,11 +188,9 @@ void func_code_emit_code(void *ptr){
     } else {
         emit_const("){");
         emit_context orig = save_and_push_context((emit_context){ .context_prefix = code->name, .ignore_semicolon = false });
-        increase_indent();
-        emit_newline();
-        codegen_emit_code(code->body);
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            codegen_emit_code(code->body);
+        decrease_indent(true);
         emit_const("}");
         emit_newline();
         pop_and_restore_context(orig);
@@ -214,9 +210,9 @@ void for_code_emit_code(void* ptr){
     emit_const(")");
     pop_and_restore_context(orig);
     emit_const("{");
-    increase_indent();
-    if (code->body.ptr) codegen_emit_code(code->body);
-    decrease_indent();
+    increase_indent(true);
+        if (code->body.ptr) codegen_emit_code(code->body);
+    decrease_indent(true);
     emit_const("}");
 }
 
@@ -226,9 +222,9 @@ void while_code_emit_code(void* ptr){
     emit_const("while (");
     codegen_emit_code(code->condition);
     emit_const("){");
-    increase_indent();
-    if (code->body.ptr) codegen_emit_code(code->body);
-    decrease_indent();
+    increase_indent(true);
+        if (code->body.ptr) codegen_emit_code(code->body);
+    decrease_indent(true);
     emit_const("}");
 }
 
@@ -236,12 +232,11 @@ void dowhile_code_emit_code(void* ptr){
     if (is_header == true) return;
     dowhile_code *code = (dowhile_code*)ptr;
     emit_const("do {");
-    increase_indent();
-    if (code->body.ptr) codegen_emit_code(code->body);
-    decrease_indent();
-    emit_const("}");
-    emit_const("while (");
-    codegen_emit_code(code->condition);
+    increase_indent(true);
+        if (code->body.ptr) codegen_emit_code(code->body);
+    decrease_indent(true);
+    emit_const("} while (");
+        codegen_emit_code(code->condition);
     emit_const(");");
 }
 
@@ -252,51 +247,14 @@ string_slice resolve_symbol_name(var_code *code){
     } else return code->name;
 }
 
-bool emit_variable(var_code *code);
-
-bool emit_var_type_resolution(var_code *code, string_slice access_name, bool ret_type){
-    call_code *call = (call_code*)code->expression.ptr;
-    
-    string_slice name_slice = resolve_symbol_name(code);
-    
-    FIND_SLICE(sem_rule_dec, name_slice);
-    
-    if (ret_type && sym->subtype.kind){
-        emit("*(%v*)",token_to_slice(sym->subtype));//TODO: should know if this cast is needed based on the subtype and the function's return type
-    }
-    
-    emit_type(sym,false);
-    
-    emit_const("_");
-    
-    emit_slice(access_name.length ? access_name : call->name);
-    
-    emit_const("(");
-    if (code->var.ptr) emit_variable(code->var.ptr); 
-    else { 
+void emit_variable(var_code *code){//CTRANS
+    if (code->var.ptr) emit_variable(code->var.ptr); else { 
         FIND_SLICE(sem_rule_dec, code->name);
-        emit_slice(sym->name);
-    }
-    if (call->args.ptr){
-        emit_const(", ");
-        codegen_emit_code(call->args);
-    }
-    emit_const(")");
-    return sym->reference_type;
-}
-
-bool emit_variable(var_code *code){//CTRANS
-    bool is_ref = false;
-    if (code->var.ptr) is_ref = emit_variable(code->var.ptr); else { 
-        FIND_SLICE(sem_rule_dec, code->name);
-        is_ref = sym->reference_type;
         if (code->transform == var_deref){
             emit_const("*");
-            is_ref = false;
         }
         if (code->transform == var_addr){
             emit_const("&");
-            is_ref = true;
         }
         emit_slice(sym->name);
     }
@@ -306,7 +264,6 @@ bool emit_variable(var_code *code){//CTRANS
         codegen_emit_code(code->expression);
         pop_and_restore_context(orig);
     } 
-    return is_ref;
 }
 
 void var_code_emit_code(void* ptr){
@@ -321,7 +278,6 @@ void inc_code_emit_code(void *ptr){
     inc_code *code = (inc_code*)ptr;
     emit_const("#include ");
     emit_token(code->value);
-    emit_newline();
 }
 
 void struct_code_emit_code(void *ptr){
@@ -332,10 +288,9 @@ void struct_code_emit_code(void *ptr){
         emit_const("typedef struct ");
         emit_slice(code->name);
         emit_const(" { ");
-        increase_indent();
-        codegen_emit_code(code->contents);
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            codegen_emit_code(code->contents);
+        decrease_indent(true);
         emit(" } %v;",code->name);
     } else codegen_emit_code(code->contents);
     pop_and_restore_context(orig);
@@ -377,13 +332,9 @@ void int_code_emit_code(void *ptr){
         emit_const("typedef struct ");
         emit_slice(code->name);
         emit_const(" { ");
-        increase_indent();
-        emit_newline();
-        emit_const("void* ptr;");
-        emit_newline();
-        codegen_emit_code(code->contents);
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            codegen_emit_code(code->contents);
+        decrease_indent(true);
         emit(" } %v;",code->name);
         emit_newline();
     }
@@ -395,19 +346,16 @@ void enum_code_emit_code(void *ptr){
     //TODO: turn into array and use const char*
     if (is_header != false){
         emit_const("typedef enum {");
-        increase_indent();
-        emit_newline();
-        emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = token_to_slice(code->name) });
-        codegen_emit_code(code->contents);
-        pop_and_restore_context(orig);
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = token_to_slice(code->name) });
+            codegen_emit_code(code->contents);
+            pop_and_restore_context(orig);
+        decrease_indent(true);
         emit_const("} ");
         emit_token(code->name);
         emit_const(";");
+        emit_newline();
     }
-    
-    emit_newlines(2);
     
     emit_const("char* ");
     emit_token(code->name);
@@ -419,19 +367,15 @@ void enum_code_emit_code(void *ptr){
         emit_newline();
     } else {
         emit_const("{");
-        increase_indent();
-        emit_newline();
-        emit_const("switch (val) {");
-        increase_indent();
-        emit_newline();
-        emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
-        codegen_emit_code(code->contents);
-        pop_and_restore_context(orig);
-        decrease_indent();
-        emit_newline();
-        emit_const("} ");
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            emit_const("switch (val) {");
+            increase_indent(true);
+                emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
+                codegen_emit_code(code->contents);
+                pop_and_restore_context(orig);
+            decrease_indent(true);
+            emit_const("} ");
+        decrease_indent(true);
         emit_const("} ");
         emit_newline();
     }
@@ -479,11 +423,9 @@ void else_code_emit_code(void *ptr){
         codegen_emit_code(code->block);
     } else {
         emit_const("{");
-        increase_indent();
-        emit_newline();
-        codegen_emit_code(code->block);
-        decrease_indent();
-        emit_newline();
+        increase_indent(true);
+            codegen_emit_code(code->block);
+        decrease_indent(true);
         emit_const("}");
     }
 }
@@ -493,11 +435,9 @@ void switch_code_emit_code(void *ptr){
     emit_const("switch (");
     codegen_emit_code(code->condition);
     emit_const("){");
-    increase_indent();
-    emit_newline();
-    codegen_emit_code(code->cases);
-    decrease_indent();
-    emit_newline();
+    increase_indent(true);
+        codegen_emit_code(code->cases);
+    decrease_indent(true);
     emit_const("}");
 }
 
@@ -528,11 +468,9 @@ void prop_init_code_emit_code(void *ptr){
 void struct_init_code_emit_code(void *ptr){
     struct_init_code *code = ptr;
     emit("(%v){",code->name);
-        increase_indent();  
-        emit_newline();
-        codegen_emit_code(code->content);
-        decrease_indent();  
-        emit_newline();
+        increase_indent(true);
+            codegen_emit_code(code->content);
+        decrease_indent(true);
     emit_const("}");
 }
 

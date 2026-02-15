@@ -45,8 +45,6 @@ void print(){
 }
 
 int t = u + i;
-
-
 char* test_enum_to_string(test_enum val){
 	switch (val) {
 		case test_enum_one: return "one";
@@ -103,11 +101,17 @@ int main(){
 	int x = 1 - (0 - 2);
 	int z = int_get(x, 0);
 	print("This is democracy manifest");
-	for (int i = 0; i < 10; i = i + 1){}
-	while (0){print();}
+	for (int i = 0; i < 10; i = i + 1){
+		
+	}
+	while (0){
+		print();
+	}
 	__return_val = 0;
 	goto defer;
-	do {print();}while (0);
+	do {
+		print();
+	} while (0);
 	draw(x, y, 0xFF00FF00, 0);
 	x = x + 1;
 	x = int_run(y);

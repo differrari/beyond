@@ -323,6 +323,7 @@ codegen int_code_transform(void *ptr, codegen this){
         }
         dec = dec->chain.ptr;
     }
+    code->contents = wrap_in_block(make_declaration("ptr", slice_from_literal("void*"), (codegen){}), code->contents, false);
     return wrap_in_block(this,extracted, false);
 }
 

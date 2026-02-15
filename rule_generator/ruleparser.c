@@ -65,8 +65,7 @@ int emit_sequence(clinkedlist_t *list){
     for (int i = (1 << num_optionals)-1; i >= 0; i--){
         emit_newline();
         emit("{{ ");
-        increase_indent();
-        emit_newline();
+        increase_indent(true);
         int opts = 0;
         int count = 0;
         for (clinkedlist_node_t* node = list->head; node; node = node->next){
@@ -88,8 +87,7 @@ int emit_sequence(clinkedlist_t *list){
                     emit("%s(%v), ",s->type,token_to_slice(s->t));
             }
         }
-        decrease_indent();
-        emit_newline();
+        decrease_indent(true);
         emit(" },%i},",count);
     }
     return (1 << num_optionals++)-1;
@@ -193,13 +191,12 @@ void emit_rules(){
         if (!e) continue;
         emit_newline();
         emit("[rule_%v] = {{",e->name);
-        increase_indent();
+        increase_indent(false);
         int subrule_count = clinkedlist_count(e->list);
         for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
             subrule_count += emit_sequence(o->data);
         }
-        decrease_indent();
-        emit_newline();
+        decrease_indent(true);
         if (e->tag.length)
             emit("},%i, sem_rule_%v, sem_action_%s},",subrule_count,token_to_slice(e->tag),e->declaration ? "declare" : "none");
         else 
@@ -211,16 +208,14 @@ void emit_rule_prints(){
     emit_newline();
     emit_newline();
     emit("char* rule_names[num_grammar_rules] = {");
-    increase_indent();
-    emit_newline();
+    increase_indent(true);
     for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         emit("\t[rule_%v] = \"%v\",",e->name,e->name);
         emit_newline();
     }
-    decrease_indent();
-    emit_newline();
+    decrease_indent(true);
     emit("};");
 }
 
@@ -285,10 +280,9 @@ int main(int argc, char *argv[]){
     emit_rule_enum();
     emit_newlines(2);
     emit_const("grammar_rule language_rules[num_grammar_rules] = {");
-    increase_indent();
+    increase_indent(false);
     emit_rules();
-    decrease_indent();
-    emit_newline();
+    decrease_indent(true);
     emit_const("};");
     
     emit_rule_prints();

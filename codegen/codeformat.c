@@ -63,14 +63,16 @@ void emit_newlines(int amount){
     }
 }
 
-void increase_indent(){
+void increase_indent(bool newline){
     if (!code_buf.buffer) reset_emit_buffer();
     current_indent++;
+    if (newline) emit_newline();
 }
 
-void decrease_indent(){
+void decrease_indent(bool newline){
     if (!code_buf.buffer) reset_emit_buffer();
     current_indent--;
+    if (newline) emit_newline();
 }
 
 void output_code(const char *path, const char *extension){

@@ -10,7 +10,7 @@ void emit_slice(string_slice slice);
 void emit_newline();
 void emit_newlines(int amount);
 void emit_space();
-void increase_indent();
-void decrease_indent();
+void increase_indent(bool newline);
+void decrease_indent(bool newline);
 
 void output_code(const char *path, const char *extension);

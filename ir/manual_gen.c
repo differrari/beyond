@@ -72,7 +72,7 @@ codegen make_label(literal name){
 codegen make_declaration(literal name, string_slice type, codegen initial){
     codegen def_ret_value = dec_code_init();
     dec_code *declaration = (dec_code*)def_ret_value.ptr;
-    declaration->name = slice_from_literal("__return_val");
+    declaration->name = slice_from_literal(name);
     declaration->type = type;
     declaration->initial_value = initial;
     return def_ret_value;

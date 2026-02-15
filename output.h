@@ -1,9 +1,7 @@
 #pragma once
 
 #include "random.h"
-
 #include "ing.h"
-
 char* heyo();
 bool credbuild();
 int a();
@@ -16,7 +14,6 @@ typedef enum {
 	test_enum_two,
 	test_enum_three,
 } test_enum;
-
 char* test_enum_to_string(test_enum val);
 
 typedef struct hello hello;
@@ -28,7 +25,8 @@ typedef struct hello {
 
 int hello_func(hello instance, int rule, Token elem);
 void hello_test(hello instance);
-typedef struct testType { int prop1;
+typedef struct testType { 
+	int prop1;
 	int prop2;
  } testType;
 void testType_func(testType* instance, int rule, Token elem);
