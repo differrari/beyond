@@ -66,7 +66,6 @@ void hello_test(hello instance){
 	
 }
 
-
 void testType_func(testType* instance, int rule, Token elem){
 	int a = 0;
 }
