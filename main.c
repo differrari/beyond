@@ -103,14 +103,14 @@ int main(int argc, char *argv[]){
         return -1;
     } 
     
-    symbol_table *existing_symbols = deserialize_table("test.sym");
+    // symbol_table *existing_symbols = deserialize_table("test.sym");
     
     symbol_table *symbols = analyze_semantics(parse_res.ast_stack, parse_res.ast_count);
     
     if (!symbols) return -1;
     u64 sd = profiler_delta();
     
-    serialize_table(symbols, sym_out);
+    // serialize_table(symbols, sym_out);
     
     u64 sg = profiler_delta();
     
