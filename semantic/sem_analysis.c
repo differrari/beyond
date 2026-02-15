@@ -124,26 +124,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
 
 int ind = 0;
 
-void debug_table(symbol_table *table){
-    print("TABLE %s",sem_rule_to_string(table->table_type));
-    for (int i = 0; i < table->symbol_count; i++){
-        symbol_t *sym = &table->symbol_table[i];
-        if (!sym){
-            print("INVALID SYMBOL %i",i);
-            return;
-        }
-        if (sym->name.length){//TODO: hack
-            print("%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i",indent_by(ind),sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
-        }
-        if (sym->child){
-            ind++;
-            debug_table(sym->child);
-            ind--;
-        }
-    }
-}
-
-bool analyze_semantics(ast_node *stack, uint32_t count){
+symbol_table* analyze_semantics(ast_node *stack, uint32_t count){
     ssn = (stack_navigator){};
     ssn.ast_stack = stack;
     ssn.stack_count = count;
@@ -155,9 +136,8 @@ bool analyze_semantics(ast_node *stack, uint32_t count){
     global = new_table();
     bool result = analyze_rule(new_rule,new_opt,global);
     if (!result) return false;
-    // debug_table(global);
     print("Semantic analysis done");
-    return true;
+    return global;
 }
 
 uint64_t genid = 0;

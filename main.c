@@ -10,6 +10,7 @@
 #include "ir/arch_transformer.h"
 #include "codegen/code_generator.h"
 #include "debug/profiler.h"
+#include "semantic/symbol_serialize.h"
 
 typedef struct {
     uint32_t file;
@@ -32,6 +33,7 @@ ln_report parse_ln(uint32_t pos, char *content){
 }
 
 const char* outname = "output";
+const char* sym_out = "symbols.sym";
 static buffer buf;
 
 bool parse_arguments(int argc, char *argv[]){
@@ -97,11 +99,20 @@ int main(int argc, char *argv[]){
     
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, buf.buffer);
-        print("Expected %s, found %v in %s (l%i:%i in file %i)",token_name(parse_res.fail_info.expected.value),token_to_slice(parse_res.fail_info.found),rule_names[parse_res.fail_info.rule],ln.line_number,ln.column,ln.file);
+        print("Expected %s, found %v (%i) in %s (l%i:%i in file %i)",token_name(parse_res.fail_info.expected.value),token_to_slice(parse_res.fail_info.found),parse_res.fail_info.found.kind,rule_names[parse_res.fail_info.rule],ln.line_number,ln.column,ln.file);
         return -1;
     } 
-    if (!analyze_semantics(parse_res.ast_stack, parse_res.ast_count)) return -1;
+    
+    symbol_table *existing_symbols = deserialize_table("test.sym");
+    
+    symbol_table *symbols = analyze_semantics(parse_res.ast_stack, parse_res.ast_count);
+    
+    if (!symbols) return -1;
     u64 sd = profiler_delta();
+    
+    serialize_table(symbols, sym_out);
+    
+    u64 sg = profiler_delta();
     
     codegen ir = gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
     if (!ir.ptr) return -1;
@@ -117,10 +128,11 @@ int main(int argc, char *argv[]){
     
     u64 gd = profiler_delta();
     
-    print("Compilation finished. Total time %llims",sud + pd + sd + id + td + gd);
+    print("Compilation finished. Total time %llims",sud + pd + sd + sg + id + td + gd);
     print("Setup took %llims",sud);
     print("Parsing took %llims",pd);
     print("Semantic analysis took %llims",sd);
+    print("Symbol generation took %llims",sg);
     print("IR Gen took %llims",id);
     print("Transformation took %llims",td);
     print("Generation took %llims",gd);

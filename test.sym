@@ -1,0 +1,78 @@
+TABLE none
+SYMBOL = func TYPE = literal SUBTYPE none NAME = heyo REF = 0
+TABLE func
+END TABLE func
+SYMBOL = func TYPE = bool SUBTYPE none NAME = credbuild REF = 0
+TABLE func
+SYMBOL = dec TYPE = redb_mod SUBTYPE none NAME = module REF = 0
+END TABLE func
+SYMBOL = func TYPE = int SUBTYPE none NAME = a REF = 0
+TABLE func
+SYMBOL = dec TYPE = chunk_array SUBTYPE int NAME = testarr REF = 1
+SYMBOL = dec TYPE = literal SUBTYPE none NAME = ly REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = test REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = x REF = 0
+END TABLE func
+SYMBOL = func TYPE = void SUBTYPE none NAME = draw REF = 0
+TABLE func
+SYMBOL = param TYPE = int SUBTYPE none NAME = x REF = 0
+SYMBOL = param TYPE = int SUBTYPE none NAME = y REF = 0
+SYMBOL = param TYPE = int SUBTYPE none NAME = color REF = 0
+SYMBOL = param TYPE = int SUBTYPE none NAME = overwrite REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = b REF = 0
+END TABLE func
+SYMBOL = func TYPE = none SUBTYPE none NAME = c REF = 0
+TABLE func
+SYMBOL = param TYPE = int SUBTYPE none NAME = x REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = l REF = 0
+END TABLE func
+SYMBOL = func TYPE = void SUBTYPE none NAME = print REF = 0
+TABLE func
+END TABLE func
+SYMBOL = dec TYPE = int SUBTYPE none NAME = t REF = 0
+SYMBOL = enum TYPE = none SUBTYPE none NAME = test_enum REF = 0
+TABLE enum
+SYMBOL = enum_case TYPE = none SUBTYPE none NAME = one REF = 0
+SYMBOL = enum_case TYPE = none SUBTYPE none NAME = two REF = 0
+SYMBOL = enum_case TYPE = none SUBTYPE none NAME = three REF = 0
+END TABLE enum
+SYMBOL = interf TYPE = none SUBTYPE none NAME = hello REF = 0
+TABLE interf
+SYMBOL = func TYPE = int SUBTYPE none NAME = func REF = 0
+TABLE func
+SYMBOL = param TYPE = int SUBTYPE none NAME = rule REF = 0
+SYMBOL = param TYPE = Token SUBTYPE none NAME = elem REF = 0
+END TABLE func
+SYMBOL = func TYPE = none SUBTYPE none NAME = test REF = 0
+TABLE func
+END TABLE func
+END TABLE interf
+SYMBOL = struct TYPE = none SUBTYPE none NAME = testType REF = 0
+TABLE struct
+SYMBOL = func TYPE = none SUBTYPE none NAME = func REF = 0
+TABLE func
+SYMBOL = param TYPE = int SUBTYPE none NAME = rule REF = 0
+SYMBOL = param TYPE = Token SUBTYPE none NAME = elem REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = a REF = 0
+END TABLE func
+SYMBOL = func TYPE = none SUBTYPE none NAME = test REF = 0
+TABLE func
+END TABLE func
+SYMBOL = func TYPE = none SUBTYPE none NAME = helper REF = 0
+TABLE func
+END TABLE func
+SYMBOL = dec TYPE = int SUBTYPE none NAME = prop1 REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = prop2 REF = 0
+END TABLE struct
+SYMBOL = func TYPE = int SUBTYPE none NAME = main REF = 0
+TABLE func
+SYMBOL = dec TYPE = int SUBTYPE none NAME = y REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = x REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = z REF = 0
+SYMBOL = dec TYPE = int SUBTYPE none NAME = i REF = 0
+TABLE func
+SYMBOL = param TYPE = literal SUBTYPE none NAME = directory REF = 0
+SYMBOL = param TYPE = literal SUBTYPE none NAME = name REF = 0
+END TABLE func
+END TABLE func
+END TABLE none
