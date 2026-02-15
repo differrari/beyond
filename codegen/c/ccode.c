@@ -37,7 +37,7 @@ bool blk_code_emit_code(void* ptr){
         if (emitted) emit_newline(); 
         codegen_emit_code(code->chain); 
     }
-    return emitted || code->chain.ptr;
+    return emitted;
 }
 
 void emit_type(symbol_t *sym, bool extra){
@@ -48,7 +48,7 @@ void emit_type(symbol_t *sym, bool extra){
 
 bool dec_code_emit_code(void* ptr){
     dec_code *code = (dec_code*)ptr;
-    if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
+    if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return false;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
     emit_slice(code->type);
