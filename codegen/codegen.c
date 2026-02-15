@@ -17,11 +17,12 @@ void codegen_register_subrule(codegen instance, int type, codegen child){
 	
 }
 
-void codegen_emit_code(codegen instance){
+bool codegen_emit_code(codegen instance){
 	if (instance.emit_code){
 		return instance.emit_code(instance.ptr);
 	}
 	
+	return (bool){};
 }
 
 codegen codegen_transform(codegen instance, codegen this){

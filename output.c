@@ -1,7 +1,5 @@
 #include "output.h"
 
-
-
 char* heyo(){
 	return "Value";
 }
@@ -53,7 +51,6 @@ char* test_enum_to_string(test_enum val){
 	} 
 } 
 
-
 int hello_func(hello instance, int rule, Token elem){
 	if (instance.func){
 		return instance.func(instance.ptr, rule, elem);
@@ -68,7 +65,6 @@ void hello_test(hello instance){
 	}
 	
 }
-
 
 
 void testType_func(testType* instance, int rule, Token elem){

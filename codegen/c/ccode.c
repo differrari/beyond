@@ -2,7 +2,6 @@
 #include "../codeformat.h"
 #include "semantic/sem_analysis.h"
 #include "emit_context.h"
-#include "syscalls/syscalls.h"
 #include "c_syms.h"
 
 #ifdef CCODEGEN
@@ -31,13 +30,14 @@ void generate_code(const char *name, codegen cg){
     }
 }
 
-void blk_code_emit_code(void* ptr){
+bool blk_code_emit_code(void* ptr){
     blk_code *code = (blk_code*)ptr;
-    codegen_emit_code(code->stat);
+    bool emitted = codegen_emit_code(code->stat);
     if (code->chain.ptr){ 
-        if (code->stat.type) emit_newline(); 
+        if (emitted) emit_newline(); 
         codegen_emit_code(code->chain); 
     }
+    return emitted || code->chain.ptr;
 }
 
 void emit_type(symbol_t *sym, bool extra){
@@ -46,7 +46,7 @@ void emit_type(symbol_t *sym, bool extra){
     string_free(s);
 }
 
-void dec_code_emit_code(void* ptr){
+bool dec_code_emit_code(void* ptr){
     dec_code *code = (dec_code*)ptr;
     if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
@@ -61,10 +61,11 @@ void dec_code_emit_code(void* ptr){
         pop_and_restore_context(orig);
     }
     if (!ctx.ignore_semicolon) emit_const(";");
+    return true;
 }
 
-void ass_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool ass_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     ass_code *code = (ass_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
     codegen_emit_code(code->var);
@@ -72,10 +73,11 @@ void ass_code_emit_code(void *ptr){
     codegen_emit_code(code->expression);
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
+    return true;
 }
 
-void call_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool call_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     call_code *code = (call_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
     emit_slice(code->name);
@@ -84,10 +86,11 @@ void call_code_emit_code(void *ptr){
     emit_const(")");
     pop_and_restore_context(orig);
     if (!ctx.ignore_semicolon) emit_const(";");
+    return true;
 }
 
-void cond_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool cond_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     cond_code *code = (cond_code*)ptr;
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
     emit_const("if (");
@@ -101,26 +104,29 @@ void cond_code_emit_code(void *ptr){
     emit_const("}");
     if (code->chain.ptr) codegen_emit_code(code->chain);
     else emit_newline();
+    return true;
 }
 
-void jmp_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool jmp_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     jmp_code *code = (jmp_code*)ptr;
     emit_const("goto ");
     emit_slice(code->jump);
     emit_const(";");
+    return true;
 }
 
-void label_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool label_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     label_code *code = (label_code*)ptr;
     emit_const("\r");
     emit_slice(code->name);
     emit_const(":");
+    return true;
 }
 
-void exp_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool exp_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     exp_code *code = (exp_code*)ptr;
     if (code->paren)
         emit_const("(");
@@ -140,19 +146,21 @@ void exp_code_emit_code(void *ptr){
     if (code->paren)
         emit_const(")");
     pop_and_restore_context(orig);
+    return true;
 }
 
-void arg_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool arg_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     arg_code *code = (arg_code*)ptr;
     codegen_emit_code(code->exp);
     if (code->chain.ptr){
         emit_const(", ");
         codegen_emit_code(code->chain);
     }
+    return true;
 }
 
-void param_code_emit_code(void *ptr){
+bool param_code_emit_code(void *ptr){
     param_code *code = (param_code*)ptr;
     emit_slice(code->type);
     emit_space();
@@ -161,9 +169,10 @@ void param_code_emit_code(void *ptr){
         emit_const(", ");
         codegen_emit_code(code->chain);
     }
+    return true;
 }
 
-void func_code_emit_code(void *ptr){
+bool func_code_emit_code(void *ptr){
     func_code *code = (func_code*)ptr;
     if (code->type.length){
         emit_slice(code->type);
@@ -195,10 +204,11 @@ void func_code_emit_code(void *ptr){
         emit_newline();
         pop_and_restore_context(orig);
     }
+    return true;
 }
 
-void for_code_emit_code(void* ptr){
-    if (is_header == true) return;
+bool for_code_emit_code(void* ptr){
+    if (is_header == true) return false;
     for_code *code = (for_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     emit_const("for (");
@@ -214,10 +224,11 @@ void for_code_emit_code(void* ptr){
         if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent(true);
     emit_const("}");
+    return true;
 }
 
-void while_code_emit_code(void* ptr){
-    if (is_header == true) return;
+bool while_code_emit_code(void* ptr){
+    if (is_header == true) return false;
     while_code *code = (while_code*)ptr;
     emit_const("while (");
     codegen_emit_code(code->condition);
@@ -226,10 +237,11 @@ void while_code_emit_code(void* ptr){
         if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent(true);
     emit_const("}");
+    return true;
 }
 
-void dowhile_code_emit_code(void* ptr){
-    if (is_header == true) return;
+bool dowhile_code_emit_code(void* ptr){
+    if (is_header == true) return false;
     dowhile_code *code = (dowhile_code*)ptr;
     emit_const("do {");
     increase_indent(true);
@@ -238,13 +250,7 @@ void dowhile_code_emit_code(void* ptr){
     emit_const("} while (");
         codegen_emit_code(code->condition);
     emit_const(");");
-}
-
-string_slice resolve_symbol_name(var_code *code){
-    if (code->var.ptr){
-      var_code *inner_code = (var_code*)code->var.ptr;  
-      return inner_code->name;
-    } else return code->name;
+    return true;
 }
 
 void emit_variable(var_code *code){//CTRANS
@@ -266,21 +272,23 @@ void emit_variable(var_code *code){//CTRANS
     } 
 }
 
-void var_code_emit_code(void* ptr){
-    if (is_header == true) return;
+bool var_code_emit_code(void* ptr){
+    if (is_header == true) return false;
     var_code *code = (var_code*)ptr;
     emit_variable(code);
     if (!ctx.ignore_semicolon) emit_const(";");
+    return true;
 }
 
-void inc_code_emit_code(void *ptr){
-    if (is_header == false) return;
+bool inc_code_emit_code(void *ptr){
+    if (is_header == false) return false;
     inc_code *code = (inc_code*)ptr;
     emit_const("#include ");
     emit_token(code->value);
+    return true;
 }
 
-void struct_code_emit_code(void *ptr){
+bool struct_code_emit_code(void *ptr){
     struct_code *code = (struct_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = token_to_slice(code->parent) });
 
@@ -294,10 +302,11 @@ void struct_code_emit_code(void *ptr){
         emit(" } %v;",code->name);
     } else codegen_emit_code(code->contents);
     pop_and_restore_context(orig);
+    return true;
 }
 
-void ret_code_emit_code(void *ptr){
-    if (is_header == true) return;
+bool ret_code_emit_code(void *ptr){
+    if (is_header == true) return false;
     ret_code *code = (ret_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
     emit_const("return");
@@ -307,19 +316,14 @@ void ret_code_emit_code(void *ptr){
     }
     pop_and_restore_context(orig);
     emit_const(";");
+    return true;
 }
 
-void def_code_emit_code(void *ptr){
-    return;
+bool def_code_emit_code(void *ptr){
+    return true;
 }
 
-void gen_invoke_param(codegen contents){
-    param_code *code = (param_code*)contents.ptr;
-    if (code->name.length) emit(", %v",code->name);
-    if (code->chain.ptr) gen_invoke_param(code->chain);
-}
-
-void int_code_emit_code(void *ptr){
+bool int_code_emit_code(void *ptr){
     int_code *code = (int_code*)ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = code->name });
     if (is_header != false){
@@ -339,9 +343,10 @@ void int_code_emit_code(void *ptr){
         emit_newline();
     }
     pop_and_restore_context(orig);
+    return is_header != false;
 }
 
-void enum_code_emit_code(void *ptr){
+bool enum_code_emit_code(void *ptr){
     enum_code *code = (enum_code*)ptr;
     //TODO: turn into array and use const char*
     if (is_header != false){
@@ -379,9 +384,10 @@ void enum_code_emit_code(void *ptr){
         emit_const("} ");
         emit_newline();
     }
+    return true;
 }
 
-void enum_case_code_emit_code(void *ptr){
+bool enum_case_code_emit_code(void *ptr){
     enum_case_code *code = (enum_case_code*)ptr;
     
     switch (ctx.convenience){
@@ -413,10 +419,10 @@ void enum_case_code_emit_code(void *ptr){
         emit_newline();
         codegen_emit_code(code->chain);
     }
-    
+    return true;
 }
 
-void else_code_emit_code(void *ptr){
+bool else_code_emit_code(void *ptr){
     else_code *code = (else_code*)ptr;
     emit_const(" else ");
     if (code->block.type == sem_rule_cond){
@@ -428,9 +434,10 @@ void else_code_emit_code(void *ptr){
         decrease_indent(true);
         emit_const("}");
     }
+    return true;
 }
 
-void switch_code_emit_code(void *ptr){
+bool switch_code_emit_code(void *ptr){
     switch_code *code = (switch_code*)ptr;
     emit_const("switch (");
     codegen_emit_code(code->condition);
@@ -439,9 +446,10 @@ void switch_code_emit_code(void *ptr){
         codegen_emit_code(code->cases);
     decrease_indent(true);
     emit_const("}");
+    return true;
 }
 
-void case_code_emit_code(void *ptr){
+bool case_code_emit_code(void *ptr){
     case_code *code = (case_code*)ptr;
     
     emit_const("case ");
@@ -453,25 +461,28 @@ void case_code_emit_code(void *ptr){
         emit_newline();
         codegen_emit_code(code->chain);
     }
+    return true;
 }
 
-void prop_init_code_emit_code(void *ptr){
+bool prop_init_code_emit_code(void *ptr){
     prop_init_code *code = ptr;
     emit(".%v = ",code->name);
     codegen_emit_code(code->expression);
     emit_const(",");
-    if (!code->chain.ptr) return;
+    if (!code->chain.ptr) return true;
     emit_newline();
     codegen_emit_code(code->chain);
+    return true;
 }
 
-void struct_init_code_emit_code(void *ptr){
+bool struct_init_code_emit_code(void *ptr){
     struct_init_code *code = ptr;
     emit("(%v){",code->name);
         increase_indent(true);
             codegen_emit_code(code->content);
         decrease_indent(true);
     emit_const("}");
+    return true;
 }
 
 #endif

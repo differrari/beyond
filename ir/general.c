@@ -3,7 +3,7 @@
 #include "alloc/allocate.h"
 
 #define CODEGEN_DEC(name,t) \
-extern void name##_emit_code(void*ptr);\
+extern bool name##_emit_code(void*ptr);\
 extern codegen name##_transform(void*ptr, codegen this);\
 codegen name##_init(){\
     return (codegen){\
