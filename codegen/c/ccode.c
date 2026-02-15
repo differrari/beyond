@@ -275,9 +275,6 @@ bool emit_var_type_resolution(var_code *code, string_slice access_name, bool ret
     if (code->var.ptr) emit_variable(code->var.ptr); 
     else { 
         FIND_SLICE(sem_rule_dec, code->name);
-        if (sym->table_type == sem_rule_struct){
-            emit_const("instance->");
-        }
         emit_slice(sym->name);
     }
     if (call->args.ptr){
@@ -300,9 +297,6 @@ bool emit_variable(var_code *code){//CTRANS
         if (code->transform == var_addr){
             emit_const("&");
             is_ref = true;
-        }
-        if (sym->table_type == sem_rule_struct){
-            emit_const("instance->");
         }
         emit_slice(sym->name);
     }

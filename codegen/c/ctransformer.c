@@ -186,14 +186,22 @@ codegen dowhile_code_transform(void *ptr, codegen this){
 
 codegen var_code_transform(void *ptr, codegen this){
     var_code *code = (var_code*)ptr;
+    string_slice orig_var_name = code->var.ptr ? ((var_code*)code->var.ptr)->name : (string_slice){};
     TRANSFORM(var);
     TRANSFORM(expression);
+    string_slice orig_name = code->name.length ? code->name : (string_slice){};
+    if (code->name.length){
+        symbol_t *sym = find_symbol(sem_rule_dec, code->name);
+        if (sym && sym->table_type == sem_rule_struct){
+            code->var = make_var_chain(make_literal_var(slice_from_literal("instance")), make_literal_var(code->name), true);
+            code->name = (string_slice){};
+        }
+    }
     if (code->operation.length){
         if (*code->operation.data == '.' && code->expression.type == sem_rule_call){
             call_code *function = code->expression.ptr;
             function->args = make_argument(code->name.length ? make_literal_expression(code->name) : var_to_exp(code->var), function->args);
-            string_slice symname = ((var_code*)code->var.ptr)->name;
-            symbol_t *sym = find_symbol(sem_rule_dec, symname);
+            symbol_t *sym = find_symbol(sem_rule_dec, orig_var_name);
             if (sym){
                 string s = type_name(sym, false, false);
                 function->name = slice_from_string(string_format("%S_%v", s, function->name));
@@ -203,7 +211,7 @@ codegen var_code_transform(void *ptr, codegen this){
         else if (*code->operation.data == '['){
             codegen call = call_code_init();
             call_code *function = call.ptr;
-            string_slice symname = code->name.length ? code->name : ((var_code*)code->var.ptr)->name;
+            string_slice symname = orig_name.length ? orig_name : orig_var_name;
             symbol_t *sym = find_symbol(sem_rule_dec, symname);
             if (sym){
                 string s = type_name(sym, false, false);
@@ -228,6 +236,7 @@ codegen struct_code_transform(void *ptr, codegen this){
     codegen extracted = {};
     codegen maintained = {};
     codegen props = {};
+    emit_context ctx = save_and_push_context((emit_context){.context_rule = sem_rule_struct });
     while (dec){
         if (dec->stat.ptr){
             if (dec->stat.type == sem_rule_dec){
@@ -304,7 +313,7 @@ codegen int_code_transform(void *ptr, codegen this){
                 codegen def = !function->type.length || slice_lit_match(function->type, "void", true) ? (codegen){} : make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type))));
                 function->body = 
                     wrap_in_block(
-                        make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name)), 
+                        make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name),false), 
                             make_return(make_func_call(slice_from_string(string_format("instance.%v",stub->name)), call)), 
                         (codegen){}), 
                     def, false); //TODO: proper default handling once we have a better type system

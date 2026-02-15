@@ -94,12 +94,12 @@ codegen make_if(codegen condition, codegen body, codegen chain){
     return cond;
 }
 
-codegen make_var_chain(codegen lh, codegen rh){
+codegen make_var_chain(codegen lh, codegen rh, bool reference){
     codegen var = var_code_init();
     var_code *code = var.ptr;
     code->var = lh;
     code->expression = rh;
-    code->operation = slice_from_literal(".");
+    code->operation = slice_from_literal(reference ? "->" : ".");
     return var;
 }
 
