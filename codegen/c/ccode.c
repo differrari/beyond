@@ -79,6 +79,14 @@ bool ass_code_emit_code(void *ptr){
 bool call_code_emit_code(void *ptr){
     if (is_header == true) return false;
     call_code *code = (call_code*)ptr;
+    if (code->transform == var_deref){
+        emit_const("*");
+    }
+    if (code->transform == var_addr){
+        emit_const("&");
+    }
+    if (code->cast.ptr)
+        codegen_emit_code(code->cast);
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
     emit_slice(code->name);
     emit_const("(");
@@ -253,16 +261,21 @@ bool dowhile_code_emit_code(void* ptr){
     return true;
 }
 
-void emit_variable(var_code *code){//CTRANS
-    if (code->var.ptr) emit_variable(code->var.ptr); else { 
-        FIND_SLICE(sem_rule_dec, code->name);
+bool var_code_emit_code(void* ptr){
+    if (is_header == true) return false;
+    var_code *code = (var_code*)ptr;
+    if (code->var.ptr) codegen_emit_code(code->var); 
+    else { 
+        
         if (code->transform == var_deref){
             emit_const("*");
         }
         if (code->transform == var_addr){
             emit_const("&");
         }
-        emit_slice(sym->name);
+        if (code->cast.ptr)
+            codegen_emit_code(code->cast);
+        emit_slice(code->name);
     }
     if (code->operation.length) emit_slice(code->operation);
     if (code->expression.ptr){
@@ -270,12 +283,6 @@ void emit_variable(var_code *code){//CTRANS
         codegen_emit_code(code->expression);
         pop_and_restore_context(orig);
     } 
-}
-
-bool var_code_emit_code(void* ptr){
-    if (is_header == true) return false;
-    var_code *code = (var_code*)ptr;
-    emit_variable(code);
     if (!ctx.ignore_semicolon) emit_const(";");
     return true;
 }
@@ -482,6 +489,13 @@ bool struct_init_code_emit_code(void *ptr){
             codegen_emit_code(code->content);
         decrease_indent(true);
     emit_const("}");
+    return true;
+}
+
+bool cast_code_emit_code(void *ptr){
+    if (is_header == true) return false;
+    cast_code *code = ptr;
+    emit("(%v%s)",code->cast,code->reference ? "*" : "");
     return true;
 }
 

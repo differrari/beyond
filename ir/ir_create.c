@@ -1,5 +1,5 @@
 #include "ir/general.h"
-#include "rules.h"
+#include "semantic/semantic_rules.h"
 
 codegen begin_rule(sem_rule type){
     switch (type){
@@ -30,6 +30,7 @@ codegen begin_rule(sem_rule type){
         case sem_rule_cases: return case_code_init();
         case sem_rule_struct_init: return struct_init_code_init();
         case sem_rule_prop_init: return prop_init_code_init();
+        case sem_rule_cast: return cast_code_init();
         case sem_rule_syn:
         case sem_rule_parent:
         case sem_rule_val: 

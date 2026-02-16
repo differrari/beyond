@@ -21,3 +21,4 @@ codegen var_to_exp(codegen var);
 codegen make_function(string_slice type, string_slice name, codegen params, codegen body);
 codegen make_struct_init(string_slice type, codegen prop);
 codegen make_prop_init(string_slice type, codegen exp, codegen chain);
+codegen make_cast(string_slice type, bool reference);

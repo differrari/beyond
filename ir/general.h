@@ -6,6 +6,8 @@
 #define CCODEGEN
 // #define DEBUG_CODEGEN
 
+typedef enum { var_none, var_deref, var_addr } ref_transform;
+
 typedef struct {
     codegen stat;
     codegen chain;
@@ -50,6 +52,8 @@ codegen exp_code_init();
 typedef struct {
     string_slice name;
     codegen args;
+    codegen cast;
+    ref_transform transform;
 } call_code;
 
 codegen call_code_init();
@@ -118,7 +122,8 @@ typedef struct {
     codegen var;
     codegen expression;
     string_slice operation;
-    enum { var_none, var_deref, var_addr } transform;
+    codegen cast;
+    ref_transform transform;
 } var_code;
 
 codegen var_code_init();
@@ -205,3 +210,10 @@ typedef struct {
 } struct_init_code;
 
 codegen struct_init_code_init();
+
+typedef struct {
+    string_slice cast;
+    bool reference;
+} cast_code;
+
+codegen cast_code_init();

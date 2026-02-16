@@ -103,12 +103,30 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, sem_rule_assign, sem_action_none},
 	[rule_funccall] = {{
 		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN), 
+		 },6},
+		{{ 
+			SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN), 
+		 },5},
+		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN), 
+		 },5},
+		{{ 
 			SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), SYMRULE(argument,args), TOKEN(RPAREN), 
+		 },4},
+		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN), 
+		 },5},
+		{{ 
+			SYMTOK(OPERATOR,addr,check,sem_rule,"&"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN), 
+		 },4},
+		{{ 
+			SYMTOK(OPERATOR,deref,check,sem_rule,"*"), SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN), 
 		 },4},
 		{{ 
 			SYMCHECK(IDENTIFIER,func), TOKEN(LPAREN), TOKEN(RPAREN), 
 		 },3},
-	},2, sem_rule_call, sem_action_none},
+	},8, sem_rule_call, sem_action_none},
 	[rule_funcdec] = {{
 		{{ 
 			SYMDEC(IDENTIFIER,type), SYMDEC(IDENTIFIER,name), SYMRULE(funcarguments,param), TOKEN(LBRACE), SYMRULE(block,scope), TOKEN(RBRACE), 

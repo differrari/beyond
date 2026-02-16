@@ -215,8 +215,11 @@ codegen var_code_transform(void *ptr, codegen this){
             symbol_t *sym = find_symbol(sem_rule_dec, symname);
             if (sym){
                 string s = type_name(sym, false, false);
-                string cast = string_format("*(%S*)",type_name(sym, true, false));//TODO: the cast is hacked into the function name, is there a better way without explicit casts?
-                function->name = slice_from_string(string_format("%s%S_get",sym->resolved_subtype ? cast.data : "",s));
+                if (sym->resolved_subtype){
+                    function->transform = var_deref;
+                    function->cast = make_cast(slice_from_string(type_name(sym, true, false)), true);
+                }
+                function->name = slice_from_string(string_format("%S_get",s));
             }
             function->args = make_argument(code->name.length ? make_literal_expression(code->name) : var_to_exp(code->var), make_argument(code->expression,function->args));
             return call;
@@ -246,7 +249,6 @@ codegen struct_code_transform(void *ptr, codegen this){
                 function->body = codegen_transform(function->body, function->body);
                 string_slice parent_name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
-                //TODO: we're emitting functions that don't belong to the parent too, they should be extracted with argument modification
                 function->args = make_param(slice_from_string(string_format("%v*",code->name)),slice_from_literal("instance"), function->args);
                 extracted = wrap_in_block(dec->stat, extracted, true);
                 if (code->parent.length){
@@ -369,6 +371,10 @@ codegen prop_init_code_transform(void *ptr, codegen this){
 }
 
 codegen struct_init_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen cast_code_transform(void *ptr, codegen this){
     return this;
 }
 

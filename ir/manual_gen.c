@@ -147,3 +147,11 @@ codegen make_prop_init(string_slice name, codegen exp, codegen chain){
     code->chain = chain;
     return ini;
 }
+
+codegen make_cast(string_slice type, bool reference){
+    codegen cast = cast_code_init();
+    cast_code *code = cast.ptr;
+    code->cast = type;
+    code->reference = reference;
+    return cast;
+}

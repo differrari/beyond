@@ -35,6 +35,7 @@ enum sem_rule {
     cases,
     struct_init, 
     prop_init,
+    cast,
 }
 
 enum sem_elem { 

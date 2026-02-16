@@ -61,7 +61,11 @@ CODEGEN_DEC(ass_code, sem_rule_assign)
 
 void call_code_register_elem(void* ptr, int type, Token elem){
     call_code *code = (call_code*)ptr;
-    code->name = token_to_slice(elem);
+    switch (type) {
+        case sem_rule_deref: code->transform = var_deref; break;
+        case sem_rule_addr: code->transform = var_addr; break;
+        case sem_rule_func: code->name = token_to_slice(elem); break;
+    }
 }
 
 void call_code_register_subrule(void* ptr, int type, codegen child){
@@ -387,3 +391,13 @@ void struct_init_code_register_subrule(void* ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(struct_init_code, sem_rule_struct_init)
+
+void cast_code_register_elem(void* ptr, int type, Token elem){
+
+}
+
+void cast_code_register_subrule(void* ptr, int type, codegen child){
+
+}
+
+CODEGEN_DEC(cast_code, sem_rule_cast);
