@@ -334,7 +334,7 @@ codegen enum_code_transform(void *ptr, codegen this){
     TRANSFORM(contents);
     
     emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
-    codegen to_str = codegen_transform(code->contents, code->contents);
+    codegen to_str = make_declaration(string_format("%v_strings[]",token_to_slice(code->name)).data, slice_from_literal("char*"), make_array(codegen_transform(code->contents, code->contents)));
     pop_and_restore_context(orig);
     
     orig = save_and_push_context((emit_context){ .convenience = convenience_type_from_string, .context_prefix = token_to_slice(code->name) });
@@ -342,7 +342,7 @@ codegen enum_code_transform(void *ptr, codegen this){
     pop_and_restore_context(orig);
     
     return wrap_in_block(this, 
-        wrap_in_block(make_function(slice_from_literal("char*"), slice_from_string(string_format("%v_to_string",token_to_slice(code->name))), make_param(token_to_slice(code->name), slice_from_literal("val"), (codegen){}), to_str),
+        wrap_in_block(to_str,
            make_function(token_to_slice(code->name), slice_from_string(string_format("%v_from_string",token_to_slice(code->name))), make_param(slice_from_literal("char *"), slice_from_literal("val"), (codegen){}), from_str),
           false), 
         false);
@@ -351,10 +351,7 @@ codegen enum_code_transform(void *ptr, codegen this){
 codegen enum_case_code_transform(void *ptr, codegen this){
     enum_case_code *code = (enum_case_code*)ptr;
     if (ctx.convenience == convenience_type_to_string){
-        codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain, code->chain)) : (codegen){};
-        codegen i = make_if(make_math(make_literal_var(slice_from_literal("val")), slice_from_literal("=="), make_literal_expression(slice_from_string(string_format("%v_%v",ctx.context_prefix,token_to_slice(code->name))))), 
-            make_return(make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name))))), chain);
-        return i;
+        return make_indexed_array_entry(token_to_slice(code->name), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain, code->chain));
     } if (ctx.convenience == convenience_type_from_string){
         codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain, code->chain)) : (codegen){};
         codegen i = make_if(

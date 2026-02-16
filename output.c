@@ -44,17 +44,11 @@ void print(){
 
 int t = u + i;
 
-char* test_enum_to_string(test_enum val){
-	if (val == test_enum_one){
-		return "one";
-	} else if (val == test_enum_two){
-		return "two";
-	} else if (val == test_enum_three){
-		return "three";
-	}
-	
-}
-
+char* test_enum_strings[] = {
+	[one] = "one",
+	[two] = "two",
+	[three] = "three",
+};
 test_enum test_enum_from_string(char * val){
 	if (!strcmp("one", val)){
 		return test_enum_one;

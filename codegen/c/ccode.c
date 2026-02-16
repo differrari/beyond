@@ -457,17 +457,26 @@ bool cast_code_emit_code(void *ptr){
 bool array_init_code_emit_code(void *ptr){
     array_init_code *code = ptr;
     emit_const("{");
+    increase_indent(true);
     codegen_emit_code(code->entries);
+    decrease_indent(true);
     emit_const("}");
     return true;
 }
 
 bool array_entry_code_emit_code(void *ptr){
     array_entry_code *code = ptr;
+    bool newl = false;
     if (code->index.length){
+        newl = true;
         emit("[%v] = ",code->index);
     }
     codegen_emit_code(code->exp);
+    emit_const(",");
+    if (code->chain.ptr){
+        if (newl) emit_newline();
+        codegen_emit_code(code->chain);
+    }
     return true;
 }
 
