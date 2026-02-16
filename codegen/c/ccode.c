@@ -145,8 +145,8 @@ bool exp_code_emit_code(void *ptr){
     else emit_slice(code->val);
     if (code->exp.ptr){
         if (code->val.length || code->var.ptr) emit_space();
-        if (code->operand.kind){
-            emit_token(code->operand);
+        if (code->operand.length){
+            emit_slice(code->operand);
             emit_space();
         }
         codegen_emit_code(code->exp);
@@ -355,7 +355,6 @@ bool int_code_emit_code(void *ptr){
 
 bool enum_code_emit_code(void *ptr){
     enum_code *code = (enum_code*)ptr;
-    //TODO: turn into array and use const char*
     if (is_header != false){
         emit_const("typedef enum {");
         increase_indent(true);
@@ -368,60 +367,16 @@ bool enum_code_emit_code(void *ptr){
         emit_const(";");
         emit_newline();
     }
-    
-    emit_const("char* ");
-    emit_token(code->name);
-    emit_const("_to_string(");//CTRANS
-    emit_token(code->name);
-    emit_const(" val)");
-    if (is_header == true){
-        emit_const(";");
-        emit_newline();
-    } else {
-        emit_const("{");
-        increase_indent(true);
-            emit_const("switch (val) {");
-            increase_indent(true);
-                emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
-                codegen_emit_code(code->contents);
-                pop_and_restore_context(orig);
-            decrease_indent(true);
-            emit_const("} ");
-        decrease_indent(true);
-        emit_const("} ");
-        emit_newline();
-    }
     return true;
 }
 
 bool enum_case_code_emit_code(void *ptr){
     enum_case_code *code = (enum_case_code*)ptr;
     
-    switch (ctx.convenience){
-        case convenience_type_to_string:
-            if (is_header == true) break;
-            emit_const("case ");
-            emit_slice(ctx.context_prefix);
-            emit_const("_");
-            emit_token(code->name);
-            emit_const(": return \"");
-            emit_token(code->name);
-            emit_const("\";");
-        break;
-        case convenience_type_from_string:
-            //TODO
-        break;
-        case convenience_type_to_int: break;
-        case convenience_type_from_int:
-            //TODO
-        break;
-        default: 
-            emit_slice(ctx.context_prefix);
-            emit_const("_");
-            emit_token(code->name);
-            emit_const(",");
-        break;
-    }
+    emit_slice(ctx.context_prefix);
+    emit_const("_");
+    emit_token(code->name);
+    emit_const(",");
     if (code->chain.ptr) {
         emit_newline();
         codegen_emit_code(code->chain);
@@ -496,6 +451,23 @@ bool cast_code_emit_code(void *ptr){
     if (is_header == true) return false;
     cast_code *code = ptr;
     emit("(%v%s)",code->cast,code->reference ? "*" : "");
+    return true;
+}
+
+bool array_init_code_emit_code(void *ptr){
+    array_init_code *code = ptr;
+    emit_const("{");
+    codegen_emit_code(code->entries);
+    emit_const("}");
+    return true;
+}
+
+bool array_entry_code_emit_code(void *ptr){
+    array_entry_code *code = ptr;
+    if (code->index.length){
+        emit("[%v] = ",code->index);
+    }
+    codegen_emit_code(code->exp);
     return true;
 }
 

@@ -40,7 +40,7 @@ codegen arg_code_init();
 typedef struct {
     string_slice val;
     codegen var;
-    Token operand;
+    string_slice operand;
     codegen exp;
     codegen lambda;
     bool paren;
@@ -217,3 +217,17 @@ typedef struct {
 } cast_code;
 
 codegen cast_code_init();
+
+typedef struct {
+    codegen entries;
+} array_init_code;
+
+codegen array_init_code_init();
+
+typedef struct {
+    string_slice index;
+    codegen chain;  
+    codegen exp;
+} array_entry_code;
+
+codegen array_entry_code_init();

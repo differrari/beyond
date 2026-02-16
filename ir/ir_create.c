@@ -31,6 +31,8 @@ codegen begin_rule(sem_rule type){
         case sem_rule_struct_init: return struct_init_code_init();
         case sem_rule_prop_init: return prop_init_code_init();
         case sem_rule_cast: return cast_code_init();
+        case sem_rule_array_init: return array_init_code_init();
+        case sem_rule_array_entry: return array_entry_code_init();
         case sem_rule_syn:
         case sem_rule_parent:
         case sem_rule_val: 

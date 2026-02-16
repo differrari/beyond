@@ -36,6 +36,8 @@ enum sem_rule {
     struct_init, 
     prop_init,
     cast,
+    array_init,
+    array_entry,
 }
 
 enum sem_elem { 

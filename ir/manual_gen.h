@@ -12,6 +12,7 @@ codegen make_param(string_slice type, string_slice name, codegen chain);
 codegen make_literal_expression(string_slice slice);
 codegen make_literal_var(string_slice slice);
 codegen make_if(codegen condition, codegen body, codegen chain);
+codegen make_else(codegen els);
 codegen make_var_chain(codegen lh, codegen rh, bool reference);
 codegen make_return(codegen exp);
 codegen param_to_arg(codegen param);
@@ -22,3 +23,10 @@ codegen make_function(string_slice type, string_slice name, codegen params, code
 codegen make_struct_init(string_slice type, codegen prop);
 codegen make_prop_init(string_slice type, codegen exp, codegen chain);
 codegen make_cast(string_slice type, bool reference);
+codegen make_array(codegen value);
+codegen make_indexed_array_entry(string_slice index, codegen exp, codegen chain);
+codegen make_math(codegen lhs, string_slice op, codegen rhs);
+
+static inline codegen make_array_entry(codegen exp, codegen chain){
+    return make_indexed_array_entry((string_slice){}, exp, chain);
+}

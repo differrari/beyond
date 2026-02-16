@@ -44,12 +44,15 @@ void print(){
 
 int t = u + i;
 char* test_enum_to_string(test_enum val){
-	switch (val) {
-		case test_enum_one: return "one";
-		case test_enum_two: return "two";
-		case test_enum_three: return "three";
-	} 
-} 
+	if (val == test_enum_one){
+		return "one";
+	} else if (val == test_enum_two){
+		return "two";
+	} else if (val == test_enum_three){
+		return "three";
+	}
+	
+}
 
 int hello_func(hello instance, int rule, Token elem){
 	if (instance.func){
@@ -124,7 +127,8 @@ int main(){
 	
 	print();
 	traverse_directory(s.data, true, _temp_func_0);
-	defer:
+	
+defer:
 	cleanup();
 	x = 0;
 	return __return_val;

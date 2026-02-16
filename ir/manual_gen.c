@@ -62,6 +62,15 @@ codegen make_const_exp(string_slice exp){
     return exp_codegen;
 }
 
+codegen make_math(codegen lhs, string_slice op, codegen rhs){
+    codegen exp_codegen = exp_code_init();
+    exp_code *code = exp_codegen.ptr;
+    code->var = lhs;
+    code->operand = op;
+    code->exp = rhs;
+    return exp_codegen;
+}
+
 codegen make_label(literal name){
     codegen def_label = label_code_init();
     label_code *label = (label_code*)def_label.ptr;
@@ -92,6 +101,13 @@ codegen make_if(codegen condition, codegen body, codegen chain){
     code->scope = body;
     code->chain = chain;
     return cond;
+}
+
+codegen make_else(codegen els){
+    codegen el = else_code_init();
+    else_code *code = el.ptr;
+    code->block = els;
+    return el;
 }
 
 codegen make_var_chain(codegen lh, codegen rh, bool reference){
@@ -154,4 +170,20 @@ codegen make_cast(string_slice type, bool reference){
     code->cast = type;
     code->reference = reference;
     return cast;
+}
+
+codegen make_array(codegen value){
+    codegen ret = array_init_code_init();
+    array_init_code *code = ret.ptr;
+    code->entries = value;
+    return ret;
+}
+
+codegen make_indexed_array_entry(string_slice index, codegen exp, codegen chain){
+    codegen ret = array_entry_code_init();
+    array_entry_code *code = ret.ptr;
+    code->exp = exp;
+    code->index = index;
+    code->chain = chain;
+    return ret;
 }

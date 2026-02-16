@@ -120,7 +120,7 @@ void exp_code_register_elem(void* ptr, int type, Token elem){
         code->paren = true;
     else if (type == sem_rule_op && slice_lit_match(token_to_slice(elem), "not", false))
         code->invert = true;
-    else code->operand = elem;
+    else code->operand = token_to_slice(elem);
 }
 
 void exp_code_register_subrule(void* ptr, int type, codegen child){
@@ -401,3 +401,23 @@ void cast_code_register_subrule(void* ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(cast_code, sem_rule_cast);
+
+void array_init_code_register_elem(void *ptr, int type, Token elem){
+    
+}
+
+void array_init_code_register_subrule(void *ptr, int type, codegen child){
+    
+}
+
+CODEGEN_DEC(array_init_code, sem_rule_array_init);
+
+void array_entry_code_register_elem(void *ptr, int type, Token elem){
+    
+}
+
+void array_entry_code_register_subrule(void *ptr, int type, codegen child){
+    
+}
+
+CODEGEN_DEC(array_entry_code, sem_rule_array_entry);

@@ -14,8 +14,8 @@ typedef enum {
 	test_enum_two,
 	test_enum_three,
 } test_enum;
-char* test_enum_to_string(test_enum val);
 
+char* test_enum_to_string(test_enum val);
 typedef struct hello hello;
 typedef struct hello { 
 	void* ptr;

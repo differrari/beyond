@@ -39,6 +39,8 @@ char* sem_rule_to_string(sem_rule val){
 		case sem_rule_struct_init: return "struct_init";
 		case sem_rule_prop_init: return "prop_init";
 		case sem_rule_cast: return "cast";
+		case sem_rule_array_init: return "array_init";
+		case sem_rule_array_entry: return "array_entry";
 	} 
 } 
 
