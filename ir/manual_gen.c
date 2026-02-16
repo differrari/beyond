@@ -55,6 +55,13 @@ codegen wrap_in_block(codegen statement, codegen chain, bool tail){
     return blk_ret_value;
 }
 
+codegen wrap_in_expression(codegen statement){
+    codegen exp = exp_code_init();
+    exp_code *code = exp.ptr;
+    code->exp = statement;
+    return exp;
+}
+
 codegen make_const_exp(string_slice exp){
     codegen exp_codegen = exp_code_init();
     exp_code *code = exp_codegen.ptr;
@@ -108,6 +115,12 @@ codegen make_else(codegen els){
     else_code *code = el.ptr;
     code->block = els;
     return el;
+}
+
+codegen invert_exp(codegen exp){
+    exp_code *orig = exp.ptr;
+    orig->invert = !orig->invert;
+    return exp;
 }
 
 codegen make_var_chain(codegen lh, codegen rh, bool reference){

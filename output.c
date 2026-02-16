@@ -43,6 +43,7 @@ void print(){
 }
 
 int t = u + i;
+
 char* test_enum_to_string(test_enum val){
 	if (val == test_enum_one){
 		return "one";
@@ -50,6 +51,17 @@ char* test_enum_to_string(test_enum val){
 		return "two";
 	} else if (val == test_enum_three){
 		return "three";
+	}
+	
+}
+
+test_enum test_enum_from_string(char * val){
+	if (!strcmp("one", val)){
+		return test_enum_one;
+	} else if (!strcmp("two", val)){
+		return test_enum_two;
+	} else if (!strcmp("three", val)){
+		return test_enum_three;
 	}
 	
 }
@@ -127,8 +139,7 @@ int main(){
 	
 	print();
 	traverse_directory(s.data, true, _temp_func_0);
-	
-defer:
+	defer:
 	cleanup();
 	x = 0;
 	return __return_val;
