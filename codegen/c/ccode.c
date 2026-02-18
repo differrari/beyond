@@ -1,10 +1,10 @@
+#ifdef CCODEGEN
+
 #include "ir/general.h"
 #include "../codeformat.h"
 #include "semantic/sem_analysis.h"
 #include "emit_context.h"
 #include "c_syms.h"
-
-#ifdef CCODEGEN
 
 tern is_header = false;
 

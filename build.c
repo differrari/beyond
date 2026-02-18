@@ -32,6 +32,8 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
+		add_precomp_flag("CTRANS");
+		add_precomp_flag("GRAPHCODEGEN");
 		debug();
 		source_all(".c");
 		if (compile()){

@@ -1,3 +1,5 @@
+#ifdef CTRANS
+
 #include "ir/general.h"
 #include "ir/arch_transformer.h"
 #include "emit_context.h"
@@ -5,8 +7,6 @@
 #include "ir/manual_gen.h"
 #include "semantic/sem_analysis.h"
 #include "c_syms.h"
-
-#ifdef CCODEGEN
 
 #define TRANSFORM(name) if (code->name.ptr) code->name = codegen_transform(code->name, code->name)
 
@@ -316,7 +316,7 @@ codegen int_code_transform(void *ptr, codegen this){
                 function->body = 
                     wrap_in_block(
                         make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name),false), 
-                            make_return(make_func_call(slice_from_string(string_format("instance.%v",stub->name)), call)), 
+                            make_return(make_var_chain(make_literal_expression(slice_from_literal("instance")),make_func_call(stub->name, call), false)), 
                         (codegen){}), 
                     def, false); //TODO: proper default handling once we have a better type system
                 extracted = wrap_in_block(dec->stat, extracted, true);

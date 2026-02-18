@@ -3,9 +3,6 @@
 #include "codegen/codegen.h"
 #include "string/slice.h"
 
-#define CCODEGEN
-// #define DEBUG_CODEGEN
-
 typedef enum { var_none, var_deref, var_addr } ref_transform;
 
 typedef struct {

@@ -10,7 +10,6 @@
 #include "ir/arch_transformer.h"
 #include "codegen/code_generator.h"
 #include "debug/profiler.h"
-#include "semantic/symbol_serialize.h"
 
 typedef struct {
     uint32_t file;

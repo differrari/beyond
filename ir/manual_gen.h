@@ -16,7 +16,6 @@ codegen make_if(codegen condition, codegen body, codegen chain);
 codegen invert_exp(codegen exp);
 codegen make_else(codegen els);
 codegen make_var_chain(codegen lh, codegen rh, bool reference);
-codegen make_return(codegen exp);
 codegen param_to_arg(codegen param);
 codegen make_func_call(string_slice name, codegen args);
 codegen lambda_to_func(codegen lambda, string_slice name);
