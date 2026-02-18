@@ -440,9 +440,11 @@ bool prop_init_code_emit_code(void *ptr){
 bool struct_init_code_emit_code(void *ptr){
     struct_init_code *code = ptr;
     emit("(%v){",code->name);
+    if (code->content.ptr){
         increase_indent(true);
             codegen_emit_code(code->content);
         decrease_indent(true);
+    }
     emit_const("}");
     return true;
 }

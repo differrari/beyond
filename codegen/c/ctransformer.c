@@ -1,4 +1,3 @@
-#define CTRANS
 #ifdef CTRANS
 
 #include "ir/general.h"
@@ -32,8 +31,16 @@ codegen blk_code_transform(void *ptr, codegen this){
 
 codegen dec_code_transform(void *ptr, codegen this){
     dec_code *code = (dec_code*)ptr;
-    code->type = resolve_type(find_symbol(sem_rule_dec, code->name), false, code->type);
-    TRANSFORM(initial_value);
+    symbol_t *sym = find_symbol(sem_rule_dec, code->name);
+    code->type = resolve_type(sym, false, code->type);
+    if (code->initial_value.ptr){
+        TRANSFORM(initial_value);
+    } else {
+        if (sym->reference_type)
+            code->initial_value = make_literal_expression(slice_from_literal("0"));
+        else 
+            code->initial_value = make_struct_init(code->type, (codegen){});
+    }
     return this;
 }
 

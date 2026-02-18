@@ -1,6 +1,7 @@
 #include "output.h"
 
 char* heyo(){
+	int a = (int){};
 	return "Value";
 }
 
@@ -18,7 +19,7 @@ bool credbuild(){
 }
 
 int a(){
-	chunk_array_t* testarr;
+	chunk_array_t* testarr = 0;
 	char* ly = "like";
 	int test = 0;
 	testarr = chunk_array_create(12, sizeof(int));
@@ -31,7 +32,7 @@ void draw(int x, int y, int color, int overwrite){
 }
 
 void c(int x){
-	int l;
+	int l = (int){};
 	if (x){
 		return 0;
 	}

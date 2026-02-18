@@ -2,6 +2,7 @@
 @includeC("ing.h")
 
 literal heyo(){
+    int a;
     return "Value";
 }
 
