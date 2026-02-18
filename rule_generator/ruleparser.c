@@ -6,7 +6,7 @@
 #include "codegen/codeformat.h"
 #include "files/helpers.h"
 #include "alloc/allocate.h"
-#include "ir/general.h"
+#include "ir/arch_transformer.h"
 #include "ir/manual_gen.h"
 
 #define MAX_BUF 0x10000
@@ -310,6 +310,7 @@ int main(int argc, char *argv[]){
     
     reset_emit_buffer();
     
+    current_code = perform_transformations(current_code);
     generate_code("grammar", current_code);
     
     return 0;

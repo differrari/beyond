@@ -8,8 +8,6 @@
 #include "semantic/sem_analysis.h"
 #include "c_syms.h"
 
-#define TRANSFORM(name) if (code->name.ptr) code->name = codegen_transform(code->name, code->name)
-
 string_slice resolve_type(symbol_t *sym, bool subtype, string_slice fallback){
     if (!sym) return fallback;
     return slice_from_string(type_name(sym, subtype, true));
@@ -409,14 +407,6 @@ codegen array_init_code_transform(void *ptr, codegen this){
 }
 
 codegen array_entry_code_transform(void *ptr, codegen this){
-    return this;
-}
-
-codegen rule_sequence_code_transform(void *ptr, codegen this){
-    return this;
-}
-
-codegen rule_entry_code_transform(void *ptr, codegen this){
     return this;
 }
 

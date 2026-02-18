@@ -1,11 +1,19 @@
-#ifdef NOTRANSFORM
-
 #include "ir/general.h"
 #include "ir/arch_transformer.h"
+
+#if defined(NOTRANSFORM) || (defined(NOCODETRANSFORM) && defined(NORULETRANSFORM))
+codegen perform_transformations(codegen root){
+    return root;
+}
 
 codegen blk_code_transform(void *ptr, codegen this){
     return this;
 }
+
+#endif
+
+#if defined(NOTRANSFORM) || defined(NOCODETRANSFORM)
+
 
 codegen dec_code_transform(void *ptr, codegen this){
     return this;
@@ -103,10 +111,6 @@ codegen case_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen perform_transformations(codegen root){
-    return root;
-}
-
 codegen prop_init_code_transform(void *ptr, codegen this){
     return this;
 }
@@ -126,6 +130,10 @@ codegen array_init_code_transform(void *ptr, codegen this){
 codegen array_entry_code_transform(void *ptr, codegen this){
     return this;
 }
+
+#endif
+
+#if defined(NOTRANSFORM) || defined(NORULETRANSFORM)
 
 codegen rule_sequence_code_transform(void *ptr, codegen this){
     return this;
