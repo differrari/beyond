@@ -66,8 +66,6 @@ bool parse_arguments(int argc, char *argv[]){
     return true;
 }
 
-int *********************************************************a;
-
 int main(int argc, char *argv[]){
     
     profiler_init();
