@@ -412,4 +412,12 @@ codegen array_entry_code_transform(void *ptr, codegen this){
     return this;
 }
 
+codegen rule_sequence_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen rule_entry_code_transform(void *ptr, codegen this){
+    return this;
+}
+
 #endif

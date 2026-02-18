@@ -5,7 +5,14 @@ bool rulegen(){
 	set_name("rulegen");
 	set_target(target_native);
 	set_package_type(package_bin);
+	source("ir/manual_gen.c");
 	source("codegen/codeformat.c");
+	add_precomp_flag("NOTRANSFORM");
+	add_precomp_flag("RULECODEGEN");
+	source("codegen/identity_transform.c");
+	source("codegen/codegen.c");
+	source("ir/general.c");
+	source("rule_generator/rulecodegen.c");
 	source("rule_generator/ruleparser.c");
 	if (compile()){
 		gen_compile_commands("rule_generator/ruleparser.c");
@@ -32,8 +39,8 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
+		add_precomp_flag("CCODEGEN");
 		add_precomp_flag("CTRANS");
-		add_precomp_flag("GRAPHCODEGEN");
 		debug();
 		source_all(".c");
 		if (compile()){

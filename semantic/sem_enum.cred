@@ -38,6 +38,8 @@ enum sem_rule {
     cast,
     array_init,
     array_entry,
+    rule_sequence,
+    rule_entry,
 }
 
 enum sem_elem { 

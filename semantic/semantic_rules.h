@@ -40,6 +40,8 @@ typedef enum {
 	sem_rule_cast,
 	sem_rule_array_init,
 	sem_rule_array_entry,
+	sem_rule_rule_sequence,
+	sem_rule_rule_entry,
 } sem_rule;
 char* sem_rule_to_string(sem_rule val);
 

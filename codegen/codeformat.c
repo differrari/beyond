@@ -9,8 +9,8 @@
 
 char *indent = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
-buffer code_buf;
-int current_indent = 0;
+static buffer code_buf;
+static int current_indent = 0;
 
 void reset_emit_buffer(){
     if (code_buf.buffer) buffer_destroy(&code_buf);

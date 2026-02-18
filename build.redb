@@ -10,7 +10,14 @@ bool rulegen {
     set_target(target_native);
     set_package_type(package_bin);
     
+    source("ir/manual_gen.c");
     source("codegen/codeformat.c");
+    add_precomp_flag("NOTRANSFORM");
+    add_precomp_flag("RULECODEGEN");
+    source("codegen/identity_transform.c");
+    source("codegen/codegen.c");
+    source("ir/general.c");
+    source("rule_generator/rulecodegen.c");
     source("rule_generator/ruleparser.c");
     if (compile()){
         gen_compile_commands("rule_generator/ruleparser.c");

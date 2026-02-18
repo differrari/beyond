@@ -228,3 +228,25 @@ typedef struct {
 } array_entry_code;
 
 codegen array_entry_code_init();
+
+typedef struct {
+    string_slice name;
+    string_slice tag;
+    string_slice value;
+    bool optional;
+    string_slice type;
+    bool declare;
+    codegen chain;
+} rule_sequence_code;
+
+codegen rule_sequence_code_init();
+
+typedef struct {
+    string_slice name;
+    codegen list;  
+    string_slice tag;
+    bool declaration;
+    codegen chain;
+} rule_entry_code;
+
+codegen rule_entry_code_init();

@@ -421,3 +421,23 @@ void array_entry_code_register_subrule(void *ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(array_entry_code, sem_rule_array_entry);
+
+void rule_sequence_code_register_elem(void *ptr, int type, Token elem){
+    
+}
+
+void rule_sequence_code_register_subrule(void *ptr, int type, codegen child){
+    
+}
+
+CODEGEN_DEC(rule_sequence_code, sem_rule_rule_sequence);
+
+void rule_entry_code_register_elem(void *ptr, int type, Token elem){
+    
+}
+
+void rule_entry_code_register_subrule(void *ptr, int type, codegen child){
+    
+}
+
+CODEGEN_DEC(rule_entry_code, sem_rule_rule_entry);

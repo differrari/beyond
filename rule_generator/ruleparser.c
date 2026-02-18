@@ -6,11 +6,15 @@
 #include "codegen/codeformat.h"
 #include "files/helpers.h"
 #include "alloc/allocate.h"
+#include "ir/general.h"
+#include "ir/manual_gen.h"
 
 #define MAX_BUF 0x10000
 
 static char code_buf[MAX_BUF];
-uintptr_t cursor;
+uintptr_t cursor = 0;
+
+codegen current_code = {};
 
 bool is_capitalized(string_slice sv){
     bool caps = true;
@@ -93,6 +97,9 @@ int emit_sequence(clinkedlist_t *list){
     return (1 << num_optionals++)-1;
 }
 
+codegen rule_options = {};
+codegen rule_seq = {};
+
 clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
     clinkedlist_t *rulelist = clinkedlist_create();
     Token t = {};
@@ -100,6 +107,8 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
             if (seq->length){
+                rule_options = wrap_in_block(rule_seq, rule_options, true);
+                rule_seq = (codegen){};
                 clinkedlist_push(rulelist,seq);
                 seq = clinkedlist_create();
             }
@@ -168,9 +177,12 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
                 seqrule->optional = true;
                 ts_next(ts, &opt);
             }
+            rule_seq = make_rule_sequence(token_to_slice(seqrule->t), token_to_slice(seqrule->value), slice_from_literal(seqrule->type), token_to_slice(seqrule->tag), seqrule->optional, rule_seq);
             clinkedlist_push(seq, seqrule);
         }
     }
+    rule_options = wrap_in_block(rule_seq, rule_options, true);
+    rule_seq = (codegen){};
     clinkedlist_push(rulelist,seq);
     return rulelist;
 }
@@ -218,6 +230,8 @@ void emit_rule_prints(){
     decrease_indent(true);
     emit("};");
 }
+
+extern void generate_code(const char *name, codegen cg);
 
 int main(int argc, char *argv[]){
     char *content = read_full_file("rules.config",0);
@@ -269,12 +283,15 @@ int main(int argc, char *argv[]){
             entry->list = parse_rule(t, &ts);
             entry->declaration = is_dec;
             if (tag.length) entry->tag = tag;
+            current_code = make_rule(token_to_slice(t), token_to_slice(tag), is_dec, rule_options, current_code);
+            rule_options = (codegen){};
             clinkedlist_push(allrules, entry);
         } else {
             print("Unrecognized grammar token %v",token_to_slice(t));
             return -1;
         }
     }
+    
     emit_const("#include \"rules.h\"");
     emit_newline();
     emit_rule_enum();
@@ -290,6 +307,10 @@ int main(int argc, char *argv[]){
     if (strlen(code_buf) < MAX_BUF-1) code_buf[strlen(code_buf)] = '\0';
     
     output_code("rules","c");
+    
+    reset_emit_buffer();
+    
+    generate_code("grammar", current_code);
     
     return 0;
 }

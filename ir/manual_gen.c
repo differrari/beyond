@@ -200,3 +200,36 @@ codegen make_indexed_array_entry(string_slice index, codegen exp, codegen chain)
     code->chain = chain;
     return ret;
 }
+
+codegen make_rule(string_slice name, string_slice tag, bool declaration, codegen options, codegen existing){
+    codegen rule = rule_entry_code_init();
+    rule_entry_code *code = rule.ptr;
+    code->name = name;
+    code->tag = tag;
+    code->declaration = declaration;
+    code->list = options;
+    if (existing.ptr) {
+        rule_entry_code *old = existing.ptr;
+        while (old->chain.ptr) old = old->chain.ptr;
+        old->chain = rule;
+        return existing;
+    }
+    return rule;
+}
+
+codegen make_rule_sequence(string_slice name, string_slice value, string_slice type, string_slice tag, bool optional, codegen existing){
+    codegen rule = rule_sequence_code_init();
+    rule_sequence_code *code = rule.ptr;
+    code->name = name;
+    code->value = value;
+    code->type = type;
+    code->tag = tag;
+    code->optional = optional;
+    if (existing.ptr) {
+        rule_sequence_code *old = existing.ptr;
+        while (old->chain.ptr) old = old->chain.ptr;
+        old->chain = rule;
+        return existing;
+    }
+    return rule;
+}
