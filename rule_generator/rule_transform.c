@@ -12,7 +12,9 @@ codegen perform_transformations(codegen root){
     root = codegen_transform(root,root);
     rule_entry_code *code = root.ptr;
     while (code->chain.ptr) code = code->chain.ptr;
-    code->chain = additional_rules;
+    if (additional_rules.ptr) code->chain = additional_rules;
+    while (code->chain.ptr) code = code->chain.ptr;
+    code->chain = literals;
     return root;
 }
 
@@ -22,6 +24,11 @@ bool is_token(string_slice slice){
     return true;
 }
 
+bool is_string_lit_alphanum(string_slice slice){
+    for (int i = 1; i < slice.length - 1; i++)
+        if (!is_alnum(slice.data[i])) return false;
+    return true;
+}
 
 codegen blk_code_transform(void *ptr, codegen this){
     blk_code *code = ptr;
@@ -30,8 +37,8 @@ codegen blk_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen get_inserted_rule(string_slice name){
-    codegen rule = additional_rules;
+codegen get_inserted_rule(codegen list, string_slice name){
+    codegen rule = list;
     do {
         rule_entry_code *code = rule.ptr;
         if (!code) return (codegen){};
@@ -59,23 +66,27 @@ codegen get_inserted_option(codegen options, string_slice name){
     return (codegen){};
 }
 
-void insert_new_rule(string_slice name, string_slice tag, bool declaration, string_slice opt_value){
-    codegen rule = get_inserted_rule(name);
+codegen insert_new_rule(codegen list, string_slice name, string_slice tag, bool declaration, string_slice opt_value){
+    codegen rule = get_inserted_rule(list, name);
     codegen seq = make_rule_sequence(opt_value, (string_slice){}, (string_slice){}, (string_slice){}, false, (codegen){});
-    if (!rule.ptr) additional_rules = make_rule(name, tag, declaration, wrap_in_block(seq,(codegen){},false), additional_rules);
+    if (!rule.ptr) list = make_rule(name, tag, declaration, wrap_in_block(seq,(codegen){},false), list);
     else {
         rule_entry_code *code = rule.ptr;
         codegen list = get_inserted_option(code->list, opt_value);
         if (!list.ptr) code->list = wrap_in_block(seq, code->list, true);
     }
+    return list;
 }
 
 codegen rule_sequence_code_transform(void *ptr, codegen this){
     rule_sequence_code *code = this.ptr;
     if (code->tag.length && *code->tag.data != '"' && is_token(code->name)){
-        insert_new_rule(code->tag, (string_slice){}, false, code->name);
+        additional_rules = insert_new_rule(additional_rules, code->tag, (string_slice){}, false, code->name);
         code->name = code->tag;
-    }
+    } else if (code->tag.length && *code->tag.data == '"' && is_string_lit_alphanum(code->tag))
+        literals = insert_new_rule(literals, slice_from_literal("literals"), (string_slice){}, false, code->tag);
+    else if (code->name.length && *code->name.data == '"' && is_string_lit_alphanum(code->name))
+        literals = insert_new_rule(literals, slice_from_literal("literals"), (string_slice){}, false, code->name);
     TRANSFORM(chain);
     return this;
 }

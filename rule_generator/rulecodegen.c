@@ -4,14 +4,19 @@
 #include "codegen/codeformat.h"
 
 void generate_code(const char *name, codegen cg){
+    emit_const("import hardcoded_rules from './hardcoded.js';");
+    emit_newlines(2);
     emit_const("export default grammar({");
     increase_indent(true);
     emit_const("name: \"cred\",");
     emit_newline();
+    emit_const("extras: ($) => [\n\t\t// NEWLINE,\n\t\t/\\s/,\n\t\t$.comment,\n\t],");
     emit_const("rules: {");
     increase_indent(true);
     codegen_emit_code(cg);
     decrease_indent(false);
+    emit_const("...hardcoded_rules");
+    emit_newline();
     emit_const("}");
     decrease_indent(true);
     emit_const("});");
