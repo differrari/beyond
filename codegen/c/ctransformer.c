@@ -1,3 +1,4 @@
+#define CTRANS
 #ifdef CTRANS
 
 #include "ir/general.h"
@@ -104,7 +105,8 @@ codegen param_code_transform(void *ptr, codegen this){
     return this;
 }
 
-void replace_returns(codegen body){
+void replace_returns(codegen body, bool has_return){
+    if (body.type != sem_rule_scope) return;
     blk_code *code = body.ptr;
     
     if (code->stat.type == sem_rule_ret){
@@ -114,19 +116,26 @@ void replace_returns(codegen body){
         jmp_code *go = goto_code.ptr;
         go->jump = slice_from_literal("defer");
         
-        codegen assign_code = ass_code_init();
-        ass_code *ass = assign_code.ptr;
-        ass->var = make_literal_var(slice_from_literal("__return_val"));
-        ass->expression = ret->expression;
-        
         codegen b = wrap_in_block(goto_code, (codegen){}, false);
-        b = wrap_in_block(assign_code, b, false);
+        
+        if (has_return){
+            codegen assign_code = ass_code_init();
+            ass_code *ass = assign_code.ptr;
+            ass->var = make_literal_var(slice_from_literal("__return_val"));
+            ass->expression = ret->expression;
+            b = wrap_in_block(assign_code, b, false);
+        }
         
         code->stat = b;
         
+    } else if (code->stat.ptr) {
+        codegen subblock = codegen_get_subscope(code->stat);
+        if (subblock.ptr){
+            replace_returns(subblock, has_return);
+        }
     }
     
-    if (code->chain.ptr) replace_returns(code->chain);
+    if (code->chain.ptr) replace_returns(code->chain, has_return);
     
 }
 
@@ -147,11 +156,12 @@ codegen func_code_transform(void *ptr, codegen this){
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_func });
     TRANSFORM(body);
     if (ctx.defer_statements.ptr){
-        code->body = wrap_in_block(make_declaration("__return_val", code->type, (codegen){}), code->body, false);
+        bool has_return = code->type.length && !slice_lit_match(code->type, "void", false);
+        if (has_return) code->body = wrap_in_block(make_declaration("__return_val", code->type, (codegen){}), code->body, false);
         code->body = wrap_in_block(make_label("defer"), code->body, true);
         code->body = wrap_in_block(ctx.defer_statements, code->body, true);
-        replace_returns(code->body);
-        code->body = wrap_in_block(make_return(make_const_exp(slice_from_literal("__return_val"))), code->body, true);
+        replace_returns(code->body, has_return);
+        if (has_return) code->body = wrap_in_block(make_return(make_const_exp(slice_from_literal("__return_val"))), code->body, true);
     }
     orig.lambdas = ctx.lambdas;
     pop_and_restore_context(orig);

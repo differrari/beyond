@@ -29,3 +29,11 @@ codegen codegen_transform(codegen instance, codegen this){
 	
 	return (codegen){};
 }
+
+codegen codegen_get_subscope(codegen instance){
+	if (instance.get_subscope){
+		return instance.get_subscope(instance.ptr);
+	}
+	
+	return (codegen){};
+}

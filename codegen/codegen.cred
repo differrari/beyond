@@ -7,4 +7,5 @@ interface codegen {
     void register_subrule(int type, codegen child);
     bool emit_code();
     codegen transform(codegen this);
+    codegen get_subscope();
 }
