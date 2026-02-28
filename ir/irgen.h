@@ -3,4 +3,4 @@
 #include "parser/ast.h"
 #include "codegen/codegen.h"
 
-codegen gen_code(ast_node *stack, uint32_t count, const char *out_name);
+codegen gen_code(chunk_array_t *stack, const char *out_name);

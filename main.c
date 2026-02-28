@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
     
     // symbol_table *existing_symbols = deserialize_table("test.sym");
     
-    symbol_table *symbols = analyze_semantics(parse_res.ast_stack, parse_res.ast_count);
+    symbol_table *symbols = analyze_semantics(parse_res.ast_stack);
     
     if (!symbols) return -1;
     u64 sd = profiler_delta();
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
     
     u64 sg = profiler_delta();
     
-    codegen ir = gen_code(parse_res.ast_stack, parse_res.ast_count, outname);
+    codegen ir = gen_code(parse_res.ast_stack, outname);
     if (!ir.ptr) return -1;
     
     u64 id = profiler_delta();

@@ -113,7 +113,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
                  if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
              } else if (node.action == sem_action_check){
                  if (!symbol_exists(node.sem_value, node.t)){
-                     print("%s %v does not exist",sem_rule_to_string(node.sem_value),token_to_slice(node.t));
+                     print("%s %v does not exist",sem_rule_strings[node.sem_value],token_to_slice(node.t));
                      return true;
                  }
              }
@@ -124,10 +124,9 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
 
 int ind = 0;
 
-symbol_table* analyze_semantics(ast_node *stack, uint32_t count){
+symbol_table* analyze_semantics(chunk_array_t *stack){
     ssn = (stack_navigator){};
-    ssn.ast_stack = stack;
-    ssn.stack_count = count;
+    ssn.stack = stack;
     // output_debug_rule(current_rule);
     ast_node node = {};
     int new_rule;

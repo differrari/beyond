@@ -24,7 +24,8 @@ void generate_code(const char *name, codegen cg){
         reset_emit_buffer();
         
         is_header = false;
-        emit("#include \"%s.h\"\n\n",name);
+        emit("#include \"%s.h\"\n",name);
+        emit_const("#include \"string/string.h\"\n\n");
         codegen_emit_code(cg);
         output_code(name,"c");
     }

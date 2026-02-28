@@ -1,13 +1,10 @@
 #include "common.h"
 #include "parser.h"
 
-#define MAX_TREE_COUNT 1024
-
-ast_node tree_stack[MAX_TREE_COUNT];
-uint32_t tree_count = 0;
-
 parser_sm parser_stack[MAX_DEPTH];
 int parser_depth;
+
+chunk_array_t *tree_stack;
 
 // #define PRINT_PARSE
 #ifdef PRINT_PARSE
@@ -22,11 +19,8 @@ int parser_depth;
 
 bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem element){
     if (!element.sem_value) return true;
-    if (tree_count >= MAX_TREE_COUNT-1){
-        print("Too much code");
-        return false;
-    }
-    tree_stack[tree_count++] = (ast_node){
+    if (!tree_stack) tree_stack = init_ast();
+    push_node(tree_stack,(ast_node){
         .t = t,
         .rule = rule,
         .option = option,
@@ -34,23 +28,20 @@ bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem el
         .sequence = sequence,
         .sem_value = element.sem_value,
         .action = element.action
-    };
+    });
     return true;
 }
 
 bool push_ast_rule(int rule, int option, int sequence){
-    if (tree_count >= MAX_TREE_COUNT-1){
-        print("Too much code");
-        return false;
-    }
-    tree_stack[tree_count++] = (ast_node){
+    if (!tree_stack) tree_stack = init_ast();
+    push_node(tree_stack, (ast_node){
         .t = {},
         .rule = rule,
         .option = option,
         .depth = parser_depth,
         .sequence = sequence,
         .sem_value = language_rules[rule].semrule,
-    };
+    });
     return true;
 }
 
@@ -69,7 +60,7 @@ bool parser_advance_to_token(parser_sm *parser, Token t){
         // parser_debug("Push state with pos %i",tok_pos);
         parser_stack[parser_depth++] = *parser;
         parser->scanner_pos = tok_pos;
-        parser->tree_pos = tree_count;
+        parser->tree_pos = tree_count(tree_stack);
         parser->current_rule = current_parser_rule(parser).value;
         parser->sequence = 0;
         parser->option = 0;
@@ -91,7 +82,7 @@ bool pop_parser_stack(parser_sm *parser, bool backtrack){
         if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
-        tree_count = parser->tree_pos;
+        tree_reset(tree_stack, parser->tree_pos);
     }
     parser_depth--;
     return true;
@@ -114,7 +105,7 @@ bool parser_advance_option_sm(parser_sm *parser){
         } 
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
-        tree_count = parser->tree_pos;
+        tree_reset(tree_stack, parser->tree_pos);
         if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return false;
         return true;
     }
@@ -167,5 +158,5 @@ parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
         return (parse_result){ .result = false, .fail_info = furthest_fail };
     }
     
-    return (parse_result){ .result = true, .ast_stack = tree_stack, .ast_count = tree_count };
+    return (parse_result){ .result = true, .ast_stack = tree_stack };
 }

@@ -1,4 +1,5 @@
 #include "output.h"
+#include "string/string.h"
 
 char* heyo(){
 	int a = (int){};
@@ -46,9 +47,9 @@ void print(){
 int t = u + i;
 
 char* test_enum_strings[] = {
-	[one] = "one",
-	[two] = "two",
-	[three] = "three",
+	[test_enum_one] = "one",
+	[test_enum_two] = "two",
+	[test_enum_three] = "three",
 };
 test_enum test_enum_from_string(char * val){
 	if (!strcmp("one", val)){

@@ -20,8 +20,7 @@ typedef struct {
 
 typedef struct {
     bool result;
-    ast_node* ast_stack;
-    uint32_t ast_count;
+    chunk_array_t *ast_stack;
     tok_fail fail_info;
 } parse_result;
 

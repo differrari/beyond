@@ -1,4 +1,5 @@
 #include "codegen/codegen.h"
+#include "string/string.h"
 
 void codegen_register_elem(codegen instance, int type, Token elem){
 	if (instance.register_elem){

@@ -6,7 +6,7 @@
 static buffer buf;
 
 void write_serial_table(symbol_table *table, int indent){
-    buffer_write(&buf,"TABLE %s\n",sem_rule_to_string(table->table_type));
+    buffer_write(&buf,"TABLE %s\n",sem_rule_strings[table->table_type]);
     for (int i = 0; i < table->symbol_count; i++){
         symbol_t *sym = &table->symbol_table[i];
         if (!sym){
@@ -14,13 +14,13 @@ void write_serial_table(symbol_table *table, int indent){
             return;
         }
         if (sym->name.length){//TODO: hack
-            buffer_write(&buf,"SYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i\n",sem_rule_to_string(sym->sym_type),sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
+            buffer_write(&buf,"SYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i\n",sem_rule_strings[sym->sym_type],sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
         }
         if (sym->child){
             write_serial_table(sym->child,indent+1);
         }
     }
-    buffer_write(&buf,"END TABLE %s\n",sem_rule_to_string(table->table_type));
+    buffer_write(&buf,"END TABLE %s\n",sem_rule_strings[table->table_type]);
 }
 
 void serialize_table(symbol_table *table, const char *path){

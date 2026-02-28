@@ -351,6 +351,7 @@ codegen enum_code_transform(void *ptr, codegen this){
     emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
     codegen to_str = make_declaration(string_format("%v_strings[]",token_to_slice(code->name)).data, slice_from_literal("char*"), make_array(codegen_transform(code->contents, code->contents)));
     pop_and_restore_context(orig);
+    //TODO: includes string.h
     
     orig = save_and_push_context((emit_context){ .convenience = convenience_type_from_string, .context_prefix = token_to_slice(code->name) });
     codegen from_str = codegen_transform(code->contents, code->contents);
@@ -366,7 +367,7 @@ codegen enum_code_transform(void *ptr, codegen this){
 codegen enum_case_code_transform(void *ptr, codegen this){
     enum_case_code *code = (enum_case_code*)ptr;
     if (ctx.convenience == convenience_type_to_string){
-        return make_indexed_array_entry(token_to_slice(code->name), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain, code->chain));
+        return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, token_to_slice(code->name))), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain, code->chain));
     } if (ctx.convenience == convenience_type_from_string){
         codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain, code->chain)) : (codegen){};
         codegen i = make_if(

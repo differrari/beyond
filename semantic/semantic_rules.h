@@ -43,8 +43,9 @@ typedef enum {
 	sem_rule_rule_sequence,
 	sem_rule_rule_entry,
 } sem_rule;
-char* sem_rule_to_string(sem_rule val);
 
+extern char* sem_rule_strings[];
+sem_rule sem_rule_from_string(char * val);
 typedef enum {
 	sem_elem_none,
 	sem_elem_type,
@@ -54,15 +55,17 @@ typedef enum {
 	sem_elem_ref,
 	sem_elem_count,
 } sem_elem;
-char* sem_elem_to_string(sem_elem val);
 
+extern char* sem_elem_strings[];
+sem_elem sem_elem_from_string(char * val);
 typedef enum {
 	sem_action_none,
 	sem_action_declare,
 	sem_action_check,
 } sem_action;
-char* sem_action_to_string(sem_action val);
 
+extern char* sem_action_strings[];
+sem_action sem_action_from_string(char * val);
 typedef enum {
 	semantic_types_none,
 	semantic_types_literal,
@@ -70,4 +73,6 @@ typedef enum {
 	semantic_types_int32,
 	semantic_types_passthrough,
 } semantic_types;
-char* semantic_types_to_string(semantic_types val);
+
+extern char* semantic_types_strings[];
+semantic_types semantic_types_from_string(char * val);

@@ -23,6 +23,6 @@ typedef struct symbol_t {
 } symbol_t;
 
 symbol_table* new_table();
-symbol_table* analyze_semantics(ast_node *stack, uint32_t count);
+symbol_table* analyze_semantics(chunk_array_t *stack);
 symbol_t * find_symbol(sem_rule type, string_slice name);
 string_slice make_temp_name(sem_rule type);
