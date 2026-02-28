@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "common.h"
+#include "syscalls/syscalls.h"
 
 void push_node(chunk_array_t *stack, ast_node node){
     chunk_array_push(stack, &node);

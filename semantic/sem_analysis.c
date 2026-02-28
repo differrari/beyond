@@ -1,6 +1,8 @@
 #include "sem_analysis.h"
-#include "common.h"
+#include "rules.h"
 #include "alloc/allocate.h"
+#include "syscalls/syscalls.h"
+#include "parser/ast.h"
 
 stack_navigator ssn;
 

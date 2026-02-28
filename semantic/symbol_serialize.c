@@ -1,6 +1,6 @@
 #include "symbol_serialize.h"
 #include "files/buffer.h"
-#include "common.h"
+#include "syscalls/syscalls.h"
 #include "files/helpers.h"
 
 static buffer buf;

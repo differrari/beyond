@@ -1,6 +1,9 @@
 #pragma once
 
-#include "parser/ast.h"
+#include "types.h"
+#include "data/format/tokenizer/tokenizer.h"
+#include "semantic/semantic_rules.h"
+#include "data/struct/chunk_array.h"
 
 struct symbol_t;
 

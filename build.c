@@ -1,8 +1,6 @@
 #include "redbuild.h"
-
 #include "syscalls/syscalls.h"
-
-bool bootstrap = false;
+bool bootstrap = true;
 bool rulegen(){
 	new_module("rulegen");
 	set_name("rulegen");
@@ -64,18 +62,16 @@ void compiler(){
 }
 
 int main(){
-int _return_val = 0;
-
+	int __return_val;
 	u64 start = get_time();
 	print("Start at %i", start);
-	
 	rebuild_self();
 	compiler();
 	u64 end = get_time();
 	print("Compilation finished %lims", end - start);
-	_return_val = 0;
-	goto main_defer;
-main_defer:
-emit_compile_commands();
-return _return_val;
+	__return_val = 0;
+	goto defer;
+	defer:
+	emit_compile_commands();
+	return __return_val;
 }

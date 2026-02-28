@@ -1,5 +1,6 @@
 #include "common.h"
 #include "parser.h"
+#include "ast.h"
 
 parser_sm parser_stack[MAX_DEPTH];
 int parser_depth;

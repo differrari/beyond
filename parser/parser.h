@@ -1,7 +1,8 @@
 #pragma once
 
 #include "data/format/helpers/token_stream.h"
-#include "ast.h"
+#include "rules.h"
+#include "data/struct/chunk_array.h"
 
 typedef struct {
     int current_rule;
