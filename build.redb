@@ -1,6 +1,8 @@
 @includeC("redbuild.h")
 @includeC("syscalls/syscalls.h")
 
+bool bootstrap = true;
+
 //FEATURE: @invoke. Allows invoking certain functions from cmd line arguments. In code generation, write code to parse argv and match against function name, then invoke function
 bool rulegen {
     new_module("rulegen");
@@ -30,6 +32,7 @@ bool rulegen {
 
 bool genc {
     if (rulegen()){
+        if (bootstrap){ return true; }
         return quick_cred("semantic/sem_enum.cred","semantic/semantic_rules") &&
         quick_cred("codegen/codegen.cred","codegen/codegen") &&
         true;

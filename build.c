@@ -1,5 +1,8 @@
 #include "redbuild.h"
+
 #include "syscalls/syscalls.h"
+
+bool bootstrap = false;
 bool rulegen(){
 	new_module("rulegen");
 	set_name("rulegen");
@@ -26,6 +29,10 @@ bool rulegen(){
 
 bool genc(){
 	if (rulegen()){
+		if (bootstrap){
+			return true;
+		}
+		
 		return quick_cred("semantic/sem_enum.cred", "semantic/semantic_rules") && quick_cred("codegen/codegen.cred", "codegen/codegen") && true;
 	}
 	
@@ -57,16 +64,18 @@ void compiler(){
 }
 
 int main(){
-	int __return_val;
+int _return_val = 0;
+
 	u64 start = get_time();
 	print("Start at %i", start);
+	
 	rebuild_self();
 	compiler();
 	u64 end = get_time();
 	print("Compilation finished %lims", end - start);
-	__return_val = 0;
-	goto defer;
-	defer:
-	emit_compile_commands();
-	return __return_val;
+	_return_val = 0;
+	goto main_defer;
+main_defer:
+emit_compile_commands();
+return _return_val;
 }
