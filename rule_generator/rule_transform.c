@@ -3,7 +3,6 @@
 #include "ir/general.h"
 #include "ir/arch_transformer.h"
 #include "ir/manual_gen.h"
-#include "syscalls/syscalls.h"
 
 codegen additional_rules = {};
 codegen literals = {};

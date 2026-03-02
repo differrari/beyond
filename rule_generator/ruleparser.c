@@ -85,11 +85,25 @@ int emit_sequence(linked_list_t *list){
                 count++;
                 if (s->tag.kind){
                     if (s->value.kind){
-                        emit("%s(%v,%v,%s,%s,%v,false), ",s->type,token_to_slice(s->t),token_to_slice(s->tag),s->declare ? "declare" : "check",s->declare ? "sem_elem" : "sem_rule", token_to_slice(s->value));
-                    } else emit("%s(%v,%v,false), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                        emit("%s(%v,%v,%s,%s,%v,%s), ",
+                            s->type,
+                                token_to_slice(s->t),
+                                token_to_slice(s->tag),
+                                s->declare ? "declare" : "check",
+                                s->declare ? "sem_elem" : "sem_rule", 
+                                token_to_slice(s->value),
+                                s->optional ? "true" : "false");
+                    } else emit("%s(%v,%v,%s), ",
+                        s->type,
+                            token_to_slice(s->t),
+                            token_to_slice(s->tag),
+                            s->optional ? "true" : "false");
                 }
                 else 
-                    emit("%s(%v,false), ",s->type,token_to_slice(s->t));
+                    emit("%s(%v,%s), ",
+                        s->type,
+                            token_to_slice(s->t),
+                            s->optional ? "true" : "false");
             }
         }
         decrease_indent(true);
