@@ -34,20 +34,21 @@ typedef struct {
     bool optional;
     char *type;
     bool declare;
+    bool is_rule;
 } rule_sequence;
 
 typedef struct {
     string_slice name;
-    clinkedlist_t *list;  
+    linked_list_t *list;  
     Token tag;
     bool declaration;
 } rule_entry;
 
-clinkedlist_t *allrules;
+linked_list_t *allrules;
 
 int rule_to_index(string_slice name){
     int i = 0;
-    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+    for (linked_list_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         if (slices_equal(e->name, name, true)) return i;
@@ -56,12 +57,12 @@ int rule_to_index(string_slice name){
     return -1;
 }
 
-int emit_sequence(clinkedlist_t *list){
+int emit_sequence(linked_list_t *list){
     if (!list->length) return 0;
     int num_optionals = 0;
     uint64_t opt_mask = 0;
     int count = 0;
-    for (clinkedlist_node_t* node = list->head; node; node = node->next){
+    for (linked_list_node_t* node = list->head; node; node = node->next){
         rule_sequence *s = node->data;
         if (s && s->optional){ opt_mask |= (1 << num_optionals++); }
         count++;
@@ -72,7 +73,7 @@ int emit_sequence(clinkedlist_t *list){
         increase_indent(true);
         int opts = 0;
         int count = 0;
-        for (clinkedlist_node_t* node = list->head; node; node = node->next){
+        for (linked_list_node_t* node = list->head; node; node = node->next){
             rule_sequence *s = node->data;
             bool should_emit = true;
             if (s && s->optional) {
@@ -84,11 +85,11 @@ int emit_sequence(clinkedlist_t *list){
                 count++;
                 if (s->tag.kind){
                     if (s->value.kind){
-                        emit("%s(%v,%v,%s,%s,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag),s->declare ? "declare" : "check",s->declare ? "sem_elem" : "sem_rule", token_to_slice(s->value));
-                    } else emit("%s(%v,%v), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
+                        emit("%s(%v,%v,%s,%s,%v,false), ",s->type,token_to_slice(s->t),token_to_slice(s->tag),s->declare ? "declare" : "check",s->declare ? "sem_elem" : "sem_rule", token_to_slice(s->value));
+                    } else emit("%s(%v,%v,false), ",s->type,token_to_slice(s->t),token_to_slice(s->tag));
                 }
                 else 
-                    emit("%s(%v), ",s->type,token_to_slice(s->t));
+                    emit("%s(%v,false), ",s->type,token_to_slice(s->t));
             }
         }
         decrease_indent(true);
@@ -100,17 +101,17 @@ int emit_sequence(clinkedlist_t *list){
 codegen rule_options = {};
 codegen rule_seq = {};
 
-clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
-    clinkedlist_t *rulelist = clinkedlist_create();
+linked_list_t * parse_rule(Token rule, TokenStream *ts){
+    linked_list_t *rulelist = linked_list_create();
     Token t = {};
-    clinkedlist_t *seq = clinkedlist_create();
+    linked_list_t *seq = linked_list_create();
     while (ts_next(ts, &t) && t.kind){
         if (t.kind == TOK_OPERATOR && *t.start == '|') {
             if (seq->length){
                 rule_options = wrap_in_block(rule_seq, rule_options, true);
                 rule_seq = (codegen){};
-                clinkedlist_push(rulelist,seq);
-                seq = clinkedlist_create();
+                linked_list_push(rulelist,seq);
+                seq = linked_list_create();
             }
         } else if (t.kind == TOK_NEWLINE) break;
         else {
@@ -178,18 +179,18 @@ clinkedlist_t * parse_rule(Token rule, TokenStream *ts){
                 ts_next(ts, &opt);
             }
             rule_seq = make_rule_sequence(token_to_slice(seqrule->t), token_to_slice(seqrule->value), slice_from_literal(seqrule->type), token_to_slice(seqrule->tag), seqrule->optional, rule_seq);
-            clinkedlist_push(seq, seqrule);
+            linked_list_push(seq, seqrule);
         }
     }
     rule_options = wrap_in_block(rule_seq, rule_options, true);
     rule_seq = (codegen){};
-    clinkedlist_push(rulelist,seq);
+    linked_list_push(rulelist,seq);
     return rulelist;
 }
 
 void emit_rule_enum(){
     emit_const("typedef enum { ");
-    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+    for (linked_list_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         emit("rule_%v,",e->name);
@@ -198,14 +199,14 @@ void emit_rule_enum(){
 }
 
 void emit_rules(){
-    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+    for (linked_list_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         emit_newline();
         emit("[rule_%v] = {{",e->name);
         increase_indent(false);
-        int subrule_count = clinkedlist_count(e->list);
-        for (clinkedlist_node_t *o = e->list->head; o; o = o->next){
+        int subrule_count = linked_list_count(e->list);
+        for (linked_list_node_t *o = e->list->head; o; o = o->next){
             subrule_count += emit_sequence(o->data);
         }
         decrease_indent(true);
@@ -221,7 +222,7 @@ void emit_rule_prints(){
     emit_newline();
     emit("char* rule_names[num_grammar_rules] = {");
     increase_indent(true);
-    for (clinkedlist_node_t *node = allrules->head; node; node = node->next){
+    for (linked_list_node_t *node = allrules->head; node; node = node->next){
         rule_entry *e = node->data;
         if (!e) continue;
         emit("\t[rule_%v] = \"%v\",",e->name,e->name);
@@ -243,7 +244,7 @@ int main(int argc, char *argv[]){
     TokenStream ts;
     ts_init(&ts, &tk);
     
-    allrules = clinkedlist_create();
+    allrules = linked_list_create();
     
     Token t;
     while (ts_next(&ts, &t) && t.kind) {
@@ -285,7 +286,7 @@ int main(int argc, char *argv[]){
             if (tag.length) entry->tag = tag;
             current_code = make_rule(token_to_slice(t), token_to_slice(tag), is_dec, rule_options, current_code);
             rule_options = (codegen){};
-            clinkedlist_push(allrules, entry);
+            linked_list_push(allrules, entry);
         } else {
             print("Unrecognized grammar token %v",token_to_slice(t));
             return -1;
