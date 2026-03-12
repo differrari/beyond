@@ -6,6 +6,7 @@
 
 typedef struct {
     Token t;
+    bool terminator;
     int rule;
     int option;
     int depth;
@@ -18,6 +19,8 @@ typedef struct {
     uintptr_t stack_cursor;
     chunk_array_t *stack;
 } stack_navigator;
+
+void debug_ast(chunk_array_t *stack);
 
 void push_node(chunk_array_t *stack, ast_node node);
 

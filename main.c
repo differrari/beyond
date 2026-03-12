@@ -10,6 +10,7 @@
 #include "ir/arch_transformer.h"
 #include "codegen/code_generator.h"
 #include "debug/profiler.h"
+#include "semantic/symbol_serialize.h"
 
 typedef struct {
     uint32_t file;
@@ -100,14 +101,22 @@ int main(int argc, char *argv[]){
         return -1;
     } 
     
+    print("Syntactic analysis finished %ims",pd);
+    
     // symbol_table *existing_symbols = deserialize_table("test.sym");
     
+    debug_ast(parse_res.ast_stack);
+    
     symbol_table *symbols = analyze_semantics(parse_res.ast_stack);
+    
     
     if (!symbols) return -1;
     u64 sd = profiler_delta();
     
-    // serialize_table(symbols, sym_out);
+    print("Semantic analysis finished %ims",sd);
+    
+    serialize_table(symbols, sym_out);
+    // return 0;
     
     u64 sg = profiler_delta();
     
@@ -115,6 +124,10 @@ int main(int argc, char *argv[]){
     if (!ir.ptr) return -1;
     
     u64 id = profiler_delta();
+    
+    print("IR generation finished %ims",id);
+    
+    // return 0;
     
     ir = perform_transformations(ir);
     if (!ir.ptr) return -1;

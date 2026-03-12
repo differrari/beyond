@@ -30,7 +30,7 @@ var output_name: string = {
 comp {
     fail_if(!strlen(compiler), "ERROR: Specify a compiler");
     
-    clinkedlist
+    linked_list
         .for_each(sys_deps, process_dep)
         .for_each(preproc_flags_list, process_preproc_flags)
         .for_each(comp_flags_list, process_comp_flags)
@@ -38,14 +38,14 @@ comp {
     memset(buff, 0, BUF_SIZE);
     
     if output_type == package_lib {
-        clinkedlist_for_each(comp_files, lib_compile_individual);
+        linked_list_for_each(comp_files, lib_compile_individual);
         memset(buff, 0, BUF_SIZE);
-        clinkedlist_for_each(comp_files, process_out_files);
+        linked_list_for_each(comp_files, process_out_files);
         string_format_buf(buff, BUF_SIZE, "ar rcs %s %s",output.data,ofiles.data);
         print("%{buff}");
         system(buff);
     } else {
-        clinkedlist_for_each(comp_files, process_comp_files);
+        linked_list_for_each(comp_files, process_comp_files);
         string_format_buf(buff, BUF_SIZE, "%s %s %s %s %s %s %s -o %s", compiler, preproc_flags.data ? preproc_flags.data : "", comp_flags.data ? comp_flags.data : "", link_flags.data ? link_flags.data : "", includes.data ? includes.data : "",sources.data ? sources.data : "",link_libs.data ? link_libs.data : "", output.data);
         print("%s",buff);
         system(buff);

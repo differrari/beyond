@@ -3,13 +3,27 @@
 #include "alloc/allocate.h"
 #include "syscalls/syscalls.h"
 #include "parser/ast.h"
+#include "memory/memory.h"
 
 stack_navigator ssn;
 
 symbol_table* new_table(){
-    symbol_table *table = (symbol_table*)zalloc(sizeof(symbol_table) + (sizeof(symbol_t) * 256));//TODO: won't be enough
-    table->symbol_table = (symbol_t*)((uintptr_t)table + sizeof(symbol_table));
+    symbol_table *table = (symbol_table*)zalloc(sizeof(symbol_table));//TODO: won't be enough
+    table->symbol_limit = 256;
+    table->symbol_table = (symbol_t*)zalloc(sizeof(symbol_t)*table->symbol_limit);
     return table;
+}
+
+void grow_table(symbol_table *table){
+    table->symbol_limit *= 2;
+    table->symbol_table = reallocate(table->symbol_table, sizeof(symbol_t)*table->symbol_limit);
+}
+
+void insert_symbol(symbol_table *table, symbol_t sym){
+    if (table->symbol_count >= table->symbol_limit){
+        grow_table(table);
+    }
+    memcpy(&table->symbol_table[table->symbol_count++],&sym,sizeof(symbol_t));
 }
 
 bool symbol_exists(sem_rule type, Token t){
@@ -69,10 +83,11 @@ void analyze_subtype(Token t, symbol_t *sym){
 }
 
 bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
-    symbol_t *sym = &table->symbol_table[table->symbol_count++];
+    
+    symbol_t sym = {};
     
     if (language_rules[current_rule].action == sem_action_declare){
-        sym->sym_type = language_rules[current_rule].semrule; 
+        sym.sym_type = language_rules[current_rule].semrule; 
     }
     
     symbol_table *current_table = table;
@@ -81,46 +96,84 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
         language_rules[current_rule].semrule == sem_rule_struct || 
         language_rules[current_rule].semrule == sem_rule_interf ||
         language_rules[current_rule].semrule == sem_rule_enum){
+            print("Creating a new table for %s",sem_rule_strings[language_rules[current_rule].semrule]);
             current_table = new_table();
             current_table->table_type = language_rules[current_rule].semrule;
-            sym->child = current_table;
+            sym.child = current_table;
         }
     
+    bool terminator = false;
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
-        if (elem.rule){
-            int new_rule;
-            int new_opt;
-            tern res = switch_rule(&ssn, &new_rule, &new_opt);
-            if (res != true){
-                if (!res) print("Rule not found %i", elem.value);
-                return res;
+        if (!elem.sem_value) continue;
+        print("Now checking %s inside %s",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule]);
+        ast_node node;
+        if (!pop_stack(&ssn, &node)){
+            print("End of tree");
+            break;
+        }
+        if (node.terminator){
+            if (node.rule == current_rule){
+                print("Terminator for %s",rule_names[node.rule]);
+                terminator = true;
+                break;
+            } else {
+                print("Unrelated terminator for %s",rule_names[node.rule]);
+                ssn.stack_cursor--;
+                continue;
             }
-            if (!analyze_rule(new_rule, new_opt, current_table)) return false;
-        } else if (elem.sem_value){
-             ast_node node;
-             pop_stack(&ssn, &node);
-             if (node.action == sem_action_declare) {
-                 if (sym && node.sem_value == sem_elem_type){
-                     sym->type = node.t;
-                     analyze_type(node.t,sym);
-                 } 
-                 if (sym && node.sem_value == sem_elem_subtype){
-                     sym->subtype = node.t;
-                     analyze_subtype(node.t,sym);
-                 } 
-                 if (sym && node.sem_value == sem_elem_ref){
-                     sym->reference_type = true;
+        }
+        if (elem.rule){
+            if (node.rule != elem.value && elem.optional){
+                print("Optional rule %s@%i opt %i skipped since %s@%i was found instead",rule_names[elem.value],s,curr_option,rule_names[node.rule],node.sequence);
+                ssn.stack_cursor--;
+                continue;
+            }
+            if (!analyze_rule(node.rule, node.option, current_table)) return false;
+        } else {
+             print("Found tokn %v %i vs %i %i vs %i",token_to_slice(node.t),node.sequence,s);
+             if (node.t.kind != elem.value || node.sequence != s){
+                 if (elem.optional){
+                     print("Optional %s inside %s skipped since we found %s instead",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule],sem_rule_strings[node.sem_value]);
+                     ssn.stack_cursor--;
+                     continue;
                  }
-                 if (sym && node.sem_value == sem_elem_name) sym->name = token_to_slice(node.t);
+                 print("Wrong token found. Expected %i, found %i on %i (%v). Has rule %s", elem.value, node.t.kind, node.rule, token_to_slice(node.t),rule_names[node.rule]);
+                 return false;
+             }
+             if (node.action == sem_action_declare) {
+                 if (node.sem_value == sem_elem_type){
+                     sym.type = node.t;
+                     analyze_type(node.t,&sym);
+                 } 
+                 if (node.sem_value == sem_elem_subtype){
+                     sym.subtype = node.t;
+                     analyze_subtype(node.t,&sym);
+                 } 
+                 if (node.sem_value == sem_elem_ref){
+                     sym.reference_type = true;
+                 }
+                 if (node.sem_value == sem_elem_name) sym.name = token_to_slice(node.t);
              } else if (node.action == sem_action_check){
                  if (!symbol_exists(node.sem_value, node.t)){
                      print("%s %v does not exist",sem_rule_strings[node.sem_value],token_to_slice(node.t));
-                     return true;
+                     continue;//TODO: Should be an error, but we don't care right now
                  }
              }
         }
     }
+    insert_symbol(table, sym);
+    if (!terminator){
+        ast_node node;
+        if (pop_stack(&ssn, &node)){
+            if (!node.terminator || node.rule != current_rule){
+                print("Found wrong terminator");
+                ssn.stack_cursor--;
+            }
+        }
+        
+    }
+    print("End of check for %s",rule_names[current_rule]);
     return true;
 }
 
@@ -137,7 +190,6 @@ symbol_table* analyze_semantics(chunk_array_t *stack){
     global = new_table();
     bool result = analyze_rule(new_rule,new_opt,global);
     if (!result) return false;
-    print("Semantic analysis done");
     return global;
 }
 

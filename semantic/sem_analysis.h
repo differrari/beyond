@@ -9,7 +9,8 @@ struct symbol_t;
 
 typedef struct {
     struct symbol_t *symbol_table;
-    uint16_t symbol_count; 
+    u16 symbol_count; 
+    u16 symbol_limit;
     int table_type;
 } symbol_table;
 

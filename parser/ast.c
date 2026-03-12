@@ -1,7 +1,13 @@
 #include "ast.h"
 #include "syscalls/syscalls.h"
+#include "rules.h"
+#include "common.h"
 
 void push_node(chunk_array_t *stack, ast_node node){
+    if (node.t.kind)
+        print("%sToken %s to depth %i",indent_by(node.depth),token_name(node.t.kind),node.depth);
+    else
+        print("%sNode %s to depth %i",indent_by(node.depth),rule_names[node.rule],node.depth);
     chunk_array_push(stack, &node);
 }
 
@@ -31,6 +37,18 @@ chunk_array_t* init_ast(){
 
 size_t tree_count(chunk_array_t *stack){
     return chunk_array_count(stack);
+}
+
+void debug_ast(chunk_array_t *stack){
+    for (int i = 0; i < chunk_array_count(stack); i++){
+        ast_node *node = (ast_node*)chunk_array_get(stack, i);
+        if (node->terminator)
+            print("%sTerminator to %s",indent_by(node->depth),rule_names[node->rule]);
+        else if (node->t.kind)
+            print("%sToken %s to depth %i",indent_by(node->depth),token_name(node->t.kind),node->depth);
+        else
+            print("%sNode %s to depth %i",indent_by(node->depth),rule_names[node->rule],node->depth);
+    }
 }
 
 void tree_reset(chunk_array_t *tree, size_t to){

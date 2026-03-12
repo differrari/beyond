@@ -96,7 +96,7 @@ int main {
     do {
         print();
     } while(0);
-        draw(x, y, 0xFF00FF00, overwrite: 0);
+        draw(x, y, 0xFF00FF00, 0);
         x = x + 1;
         x = y.run();
         if (x < 100) {  } else { print("Done with x"); }
@@ -104,7 +104,7 @@ int main {
     if y < 100 { } else if (y == 100) { print("Exactly 100 y"); }
     print();
     
-    traverse_directory(s.data, recursive: true, int (literal directory, literal name){
+    traverse_directory(s.data, true, int (literal directory, literal name){
         print("Inside lambda");
     });
 }

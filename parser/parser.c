@@ -7,7 +7,7 @@ int parser_depth;
 
 chunk_array_t *tree_stack;
 
-// #define PRINT_PARSE
+#define PRINT_PARSE
 #ifdef PRINT_PARSE
 #define parser_debug(...) print(__VA_ARGS__)
 #else
@@ -46,6 +46,18 @@ bool push_ast_rule(int rule, int option, int sequence){
     return true;
 }
 
+bool push_ast_terminator(int rule,int option){
+    if (!tree_stack) tree_stack = init_ast();
+    push_node(tree_stack, (ast_node){
+        .t = {},
+        .rule = rule,
+        .option = option,
+        .terminator = true,
+        .depth = parser_depth,
+    });
+    return true;
+}
+
 size_t furthest_pos = 0;
 uint32_t tok_pos = 0;
 tok_fail furthest_fail = {};
@@ -71,28 +83,50 @@ bool parser_advance_to_token(parser_sm *parser, Token t){
     return true;
 }
 
-bool pop_parser_stack(parser_sm *parser, bool backtrack){
+bool parser_optional(parser_sm *parser){
+    return language_rules[parser->current_rule].options[parser->option].rules[parser->sequence].optional;
+}
+
+void parser_backtrack(parser_sm *parser){
+    parser_debug("%sBacktrack to %i",curr_indent, parser->scanner_pos);
+    if (parser->scan->pos > furthest_pos) {
+        furthest_fail = latest_fail;
+        furthest_pos = tok_pos;
+    } 
+    parser->scan->pos = parser->scanner_pos;
+    tok_pos = parser->scanner_pos;
+    tree_reset(tree_stack, parser->tree_pos);
+}
+
+tern pop_parser_stack(parser_sm *parser, bool backtrack){
     if (parser_depth == 0){
         // parser_debug("Cannot pop root state");
         return false;
     }
+    parser_sm *popped = &parser_stack[parser_depth-1];
+    if (parser_optional(popped) && backtrack) parser_backtrack(parser);
     // parser_debug("Pop state");
-    *parser = parser_stack[parser_depth-1];
-    if (backtrack){
-        parser_debug("%sSubrule failed, backtrack to %i",curr_indent, parser->scanner_pos);
-        if (parser->scan->pos > furthest_pos) furthest_pos = tok_pos;
-        parser->scan->pos = parser->scanner_pos;
-        tok_pos = parser->scanner_pos;
-        tree_reset(tree_stack, parser->tree_pos);
+    *parser = *popped;
+    if (!parser_optional(parser)){
+        if (backtrack){
+            parser_debug("%sSubrule failed, backtrack to %i",curr_indent, parser->scanner_pos);
+            parser_backtrack(parser);
+        }
     }
     parser_depth--;
     return true;
 }
 
+bool parser_advance_sequence(parser_sm *parser);
+
 bool parser_advance_option_sm(parser_sm *parser){
     if (parser->option + 1 == language_rules[parser->current_rule].num_elements){
         parser_debug("%sRule %s failed",curr_indent,rule_names[parser->current_rule]);
         if (!pop_parser_stack(parser, true)) return false;
+        if (parser_optional(parser)){
+            print("%sOptional subrule failed for %s. Skipping",curr_indent,rule_names[parser->current_rule]);
+            return parser_advance_sequence(parser);
+        }
         return parser_advance_option_sm(parser);
     } else {
         parser_debug("%sRule %s option %i failed",curr_indent,rule_names[parser->current_rule], parser->option);
@@ -100,13 +134,7 @@ bool parser_advance_option_sm(parser_sm *parser){
         parser->sequence = 0;
         parser_debug("%soption failed, backtrack to %i",curr_indent, parser->scanner_pos);
         parser_debug("%s%s [o:%i]",curr_indent,rule_names[parser->current_rule], parser->option);
-        if (parser->scan->pos > furthest_pos) {
-            furthest_fail = latest_fail;
-            furthest_pos = tok_pos;
-        } 
-        parser->scan->pos = parser->scanner_pos;
-        tok_pos = parser->scanner_pos;
-        tree_reset(tree_stack, parser->tree_pos);
+        parser_backtrack(parser);
         if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return false;
         return true;
     }
@@ -114,7 +142,8 @@ bool parser_advance_option_sm(parser_sm *parser){
 
 bool parser_advance_sequence(parser_sm *parser){
     if (parser->sequence + 1 == language_rules[parser->current_rule].options[parser->option].num_elements){
-        // parser_debug("Successfully parsed rule %i with option %i",parser->current_rule, parser->option);
+        parser_debug("%sSuccessfully parsed rule %i with option %i",curr_indent, parser->current_rule, parser->option);
+        push_ast_terminator(parser->current_rule,parser->option);
         if (!pop_parser_stack(parser, false)) return true;
         return parser_advance_sequence(parser);
     }
@@ -127,11 +156,16 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
     // parser_debug("Evaluating token at %i",t.pos);
     grammar_elem element = current_parser_rule(parser);
     if (t.kind == element.value && (!element.lit || slice_lit_match(token_to_slice(t), element.lit, false))){
-        parser_debug("%s[%i] Parsed token %v [%s@%i]",curr_indent, parser->sequence, make_string_slice(content, t.pos, t.length), token_name(t.kind), parser->scan->pos);
+        parser_debug("%s[%i] Parsed token %v [%s@%i]",curr_indent, parser->sequence, token_to_slice(t), token_name(t.kind), parser->scan->pos);
         tok_pos = parser->scan->pos;
         if (!push_ast_token(t, parser->current_rule, parser->option, parser->sequence, element)) return false;
         return parser_advance_sequence(parser);
     } else {
+        if (parser_optional(parser)){
+            parser_debug("%s[%i] Failed to match optional token %s, skipping",curr_indent, parser->sequence, token_name(element.value));
+            parser_advance_sequence(parser);
+            return parse_token(content, t, parser);
+        }
         if (parser->scan->pos > furthest_pos) {
             latest_fail.expected = element;
             latest_fail.found = t;
