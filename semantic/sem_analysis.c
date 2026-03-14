@@ -96,7 +96,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
         language_rules[current_rule].semrule == sem_rule_struct || 
         language_rules[current_rule].semrule == sem_rule_interf ||
         language_rules[current_rule].semrule == sem_rule_enum){
-            print("Creating a new table for %s",sem_rule_strings[language_rules[current_rule].semrule]);
+            // print("Creating a new table for %s",sem_rule_strings[language_rules[current_rule].semrule]);
             current_table = new_table();
             current_table->table_type = language_rules[current_rule].semrule;
             sym.child = current_table;
@@ -105,40 +105,43 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
     bool terminator = false;
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
-        if (!elem.sem_value) continue;
-        print("Now checking %s inside %s",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule]);
+        // print("Now checking %s inside %s",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule]);
         ast_node node;
         if (!pop_stack(&ssn, &node)){
-            print("End of tree");
+            // print("End of tree");
             break;
         }
         if (node.terminator){
             if (node.rule == current_rule){
-                print("Terminator for %s",rule_names[node.rule]);
+                // print("Terminator for %s",rule_names[node.rule]);
                 terminator = true;
                 break;
             } else {
-                print("Unrelated terminator for %s",rule_names[node.rule]);
+                // print("Unrelated terminator for %s",rule_names[node.rule]);
                 ssn.stack_cursor--;
                 continue;
             }
         }
         if (elem.rule){
             if (node.rule != elem.value && elem.optional){
-                print("Optional rule %s@%i opt %i skipped since %s@%i was found instead",rule_names[elem.value],s,curr_option,rule_names[node.rule],node.sequence);
+                // print("Optional rule %s@%i opt %i skipped since %s@%i was found instead",rule_names[elem.value],s,curr_option,rule_names[node.rule],node.sequence);
                 ssn.stack_cursor--;
                 continue;
             }
             if (!analyze_rule(node.rule, node.option, current_table)) return false;
         } else {
-             print("Found tokn %v %i vs %i %i vs %i",token_to_slice(node.t),node.sequence,s);
+            if (!elem.sem_value){
+                ssn.stack_cursor--;
+                continue;
+            }
+             // print("Found tokn %v %i vs %i %i vs %i",token_to_slice(node.t),node.sequence,s);
              if (node.t.kind != elem.value || node.sequence != s){
                  if (elem.optional){
-                     print("Optional %s inside %s skipped since we found %s instead",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule],sem_rule_strings[node.sem_value]);
+                     // print("Optional %s inside %s skipped since we found %s instead",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule],sem_rule_strings[node.sem_value]);
                      ssn.stack_cursor--;
                      continue;
                  }
-                 print("Wrong token found. Expected %i, found %i on %i (%v). Has rule %s", elem.value, node.t.kind, node.rule, token_to_slice(node.t),rule_names[node.rule]);
+                 // print("Wrong token found. Expected %i, found %i on %i (%v). Has rule %s", elem.value, node.t.kind, node.rule, token_to_slice(node.t),rule_names[node.rule]);
                  return false;
              }
              if (node.action == sem_action_declare) {
@@ -173,7 +176,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
         }
         
     }
-    print("End of check for %s",rule_names[current_rule]);
+    // print("End of check for %s",rule_names[current_rule]);
     return true;
 }
 

@@ -7,7 +7,7 @@ int parser_depth;
 
 chunk_array_t *tree_stack;
 
-#define PRINT_PARSE
+// #define PRINT_PARSE
 #ifdef PRINT_PARSE
 #define parser_debug(...) print(__VA_ARGS__)
 #else
@@ -124,7 +124,7 @@ bool parser_advance_option_sm(parser_sm *parser){
         parser_debug("%sRule %s failed",curr_indent,rule_names[parser->current_rule]);
         if (!pop_parser_stack(parser, true)) return false;
         if (parser_optional(parser)){
-            print("%sOptional subrule failed for %s. Skipping",curr_indent,rule_names[parser->current_rule]);
+            parser_debug("%sOptional subrule failed for %s. Skipping",curr_indent,rule_names[parser->current_rule]);
             return parser_advance_sequence(parser);
         }
         return parser_advance_option_sm(parser);

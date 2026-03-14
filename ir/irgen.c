@@ -50,31 +50,30 @@ codegen eval_rule(int current_rule, int curr_option){
     bool terminator = false;
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
-        if (!elem.sem_value) continue;
-        print("Now checking %s inside %s",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule]);
+        // print("Now checking %s(%s) inside %s",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[elem.value],rule_names[current_rule]);
         ast_node node;
         if (!pop_stack(&gsn, &node)){
-            print("End of tree");
+            // print("End of tree");
             break;
         }
         if (node.terminator){
             if (node.rule == current_rule){
-                print("Terminator for %s",rule_names[node.rule]);
+                // print("Terminator for %s",rule_names[node.rule]);
                 terminator = true;
                 break;
             } else {
-                print("Unrelated terminator for %s",rule_names[node.rule]);
+                // print("Unrelated terminator for %s",rule_names[node.rule]);
                 gsn.stack_cursor--;
                 continue;
             }
         }
         if (elem.rule){
             if (node.rule != elem.value && elem.optional){
-                print("Optional rule %s skipped since %s was found instead",rule_names[elem.value],rule_names[node.rule]);
+                // print("Optional rule %s@%s skipped since %s was found instead",rule_names[elem.value],rule_names[current_rule],rule_names[node.rule]);
                 gsn.stack_cursor--;
                 continue;
             }
-            print("Registering subrule %s as part of %s",sem_rule_strings[elem.sem_value],sem_rule_strings[statement_type]);
+            // print("Registering subrule %s as part of %s",sem_rule_strings[elem.sem_value],sem_rule_strings[statement_type]);
             codegen new_codegen = eval_rule(node.rule, node.option);
             if (gen.ptr) codegen_register_subrule(gen, elem.sem_value, new_codegen);
             else {
@@ -82,19 +81,23 @@ codegen eval_rule(int current_rule, int curr_option){
               break;  
             }
         } else {
-            print("Found tokn %v %i vs %i %i vs %i",token_to_slice(node.t),node.sequence,s);
+            if (!elem.sem_value){
+                gsn.stack_cursor--;
+                continue;
+            }
+            // print("Found tokn %v %i vs %i %i vs %i",token_to_slice(node.t),node.sequence,s);
             if (node.t.kind != elem.value || node.sequence != s){
                 if (elem.optional){
-                    print("Optional %s inside %s skipped since we found %s instead",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule],sem_rule_strings[node.sem_value]);
+                    // print("Optional %s inside %s skipped since we found %s instead",elem.action == sem_action_check ? sem_rule_strings[elem.sem_value] : sem_elem_strings[elem.sem_value],rule_names[current_rule],sem_rule_strings[node.sem_value]);
                     gsn.stack_cursor--;
                     continue;
                 }
-                print("Wrong token found. Expected %i, found %i on %i (%v). Has rule %s", elem.value, node.t.kind, node.rule, token_to_slice(node.t),rule_names[node.rule]);
+                // print("Wrong token found. Expected %i, found %i on %i (%v). Has rule %s", elem.value, node.t.kind, node.rule, token_to_slice(node.t),rule_names[node.rule]);
                 gen = (codegen){};
                 break;  
             }
             if (gen.ptr){
-                print("Registering token %v as part of %s",token_to_slice(node.t),rule_names[statement_type]);
+                // print("Registering token %v as part of %s",token_to_slice(node.t),rule_names[statement_type]);
                 codegen_register_elem(gen, node.sem_value, node.t);
             }
         }
@@ -103,7 +106,7 @@ codegen eval_rule(int current_rule, int curr_option){
         ast_node node;
         if (pop_stack(&gsn, &node)){
             if (!node.terminator || node.rule != current_rule){
-                print("Found wrong for %s instead of %s. Terminator? %i",rule_names[node.rule],rule_names[current_rule],node.terminator);
+                // print("Found wrong for %s instead of %s. Terminator? %i",rule_names[node.rule],rule_names[current_rule],node.terminator);
                 gsn.stack_cursor--;
             }
         }

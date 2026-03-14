@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
     
     // symbol_table *existing_symbols = deserialize_table("test.sym");
     
-    debug_ast(parse_res.ast_stack);
+    // debug_ast(parse_res.ast_stack);
     
     symbol_table *symbols = analyze_semantics(parse_res.ast_stack);
     

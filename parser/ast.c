@@ -4,10 +4,6 @@
 #include "common.h"
 
 void push_node(chunk_array_t *stack, ast_node node){
-    if (node.t.kind)
-        print("%sToken %s to depth %i",indent_by(node.depth),token_name(node.t.kind),node.depth);
-    else
-        print("%sNode %s to depth %i",indent_by(node.depth),rule_names[node.rule],node.depth);
     chunk_array_push(stack, &node);
 }
 
@@ -45,7 +41,7 @@ void debug_ast(chunk_array_t *stack){
         if (node->terminator)
             print("%sTerminator to %s",indent_by(node->depth),rule_names[node->rule]);
         else if (node->t.kind)
-            print("%sToken %s to depth %i",indent_by(node->depth),token_name(node->t.kind),node->depth);
+            print("%sToken %s to depth %i = %v",indent_by(node->depth),token_name(node->t.kind),node->depth,token_to_slice(node->t));
         else
             print("%sNode %s to depth %i",indent_by(node->depth),rule_names[node->rule],node->depth);
     }

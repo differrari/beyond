@@ -103,22 +103,10 @@ grammar_rule language_rules[num_grammar_rules] = {
 	},2, sem_rule_assign, sem_action_none},
 	[rule_funccall] = {{
 		{{ 
-			SYMTOK(OPERATOR,deref,check,sem_rule,"*",true), SYMTOK(OPERATOR,addr,check,sem_rule,"&",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), SYMRULE(argument,args,true), TOKEN(RPAREN,false), 
-		 },6},
-		{{ 
-			SYMTOK(OPERATOR,addr,check,sem_rule,"&",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), SYMRULE(argument,args,true), TOKEN(RPAREN,false), 
-		 },5},
-		{{ 
 			SYMTOK(OPERATOR,deref,check,sem_rule,"*",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), SYMRULE(argument,args,true), TOKEN(RPAREN,false), 
 		 },5},
 		{{ 
 			SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), SYMRULE(argument,args,true), TOKEN(RPAREN,false), 
-		 },4},
-		{{ 
-			SYMTOK(OPERATOR,deref,check,sem_rule,"*",true), SYMTOK(OPERATOR,addr,check,sem_rule,"&",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), TOKEN(RPAREN,false), 
-		 },5},
-		{{ 
-			SYMTOK(OPERATOR,addr,check,sem_rule,"&",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), TOKEN(RPAREN,false), 
 		 },4},
 		{{ 
 			SYMTOK(OPERATOR,deref,check,sem_rule,"*",true), SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), TOKEN(RPAREN,false), 
@@ -126,7 +114,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			SYMCHECK(IDENTIFIER,func,false), TOKEN(LPAREN,false), TOKEN(RPAREN,false), 
 		 },3},
-	},8, sem_rule_call, sem_action_none},
+	},4, sem_rule_call, sem_action_none},
 	[rule_funcdec] = {{
 		{{ 
 			SYMDEC(IDENTIFIER,type,true), SYMDEC(IDENTIFIER,name,false), SYMRULE(funcarguments,param,true), TOKEN(LBRACE,false), SYMRULE(block,scope,true), TOKEN(RBRACE,false), 
