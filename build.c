@@ -4,7 +4,7 @@ bool bootstrap = true;
 bool rulegen(){
 	new_module("rulegen");
 	set_name("rulegen");
-	set_target(target_native);
+	set_target(target_native, true);
 	set_package_type(package_bin);
 	source("ir/manual_gen.c");
 	source("codegen/codeformat.c");
@@ -41,7 +41,7 @@ void compiler(){
 	if (genc()){
 		new_module("compiler");
 		set_name("cred");
-		set_target(target_native);
+		set_target(target_native, false);
 		set_package_type(package_bin);
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
@@ -61,11 +61,12 @@ void compiler(){
 	
 }
 
-int main(){
+int main(int argc, strarr argv){
 	int __return_val;
+	parse_arguments(argc, argv);
 	u64 start = get_time();
 	print("Start at %i", start);
-	rebuild_self();
+	rebuild_self(true);
 	compiler();
 	u64 end = get_time();
 	print("Compilation finished %lims", end - start);
