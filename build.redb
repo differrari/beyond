@@ -9,7 +9,7 @@ bool rulegen {
     
     set_name("rulegen");
     
-    set_target(target_native);
+    set_target(target_native, true);
     set_package_type(package_bin);
     
     source("ir/manual_gen.c");
@@ -46,7 +46,7 @@ compiler {
         
         set_name("cred");
         
-        set_target(target_native);
+        set_target(target_native, false);
         set_package_type(package_bin);
         
         ignore_source("ruleparser.c");
@@ -68,11 +68,12 @@ compiler {
     }
 }
 
-int main {
+int main(int argc, strarr argv) {
+    parse_arguments(argc,argv);
     u64 start = get_time();
     print("Start at %i",start);
     defer emit_compile_commands();
-    rebuild_self();
+    rebuild_self(true);
     
     compiler();
     
