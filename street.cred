@@ -106,5 +106,8 @@ int main {
     
     traverse_directory(s.data, recursive: true, int (literal directory, literal name){
         print("Inside lambda");
+        traverse_directory(s.data, recursive: true, int (literal directory, literal name){
+            print("Inside lambda 2");
+        });
     });
 }

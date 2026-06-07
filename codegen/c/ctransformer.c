@@ -66,7 +66,7 @@ codegen exp_code_transform(void *ptr, codegen this){
     TRANSFORM(lambda);
     if (code->lambda.ptr){
         string_slice lamname = make_temp_name(sem_rule_func);
-        ctx.lambdas = wrap_in_block(lambda_to_func(code->lambda,lamname), ctx.lambdas, false);
+        ctx.lambdas = wrap_in_block(lambda_to_func(code->lambda,lamname), ctx.lambdas, true);
         return make_literal_expression(lamname);
     }
     TRANSFORM(var);

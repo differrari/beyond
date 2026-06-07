@@ -98,7 +98,12 @@ hello testType_init(){
 }
 
 int _temp_func_0(char* directory, char* name){
+	print("Inside lambda 2");
+}
+
+int _temp_func_1(char* directory, char* name){
 	print("Inside lambda");
+	traverse_directory(s.data, true, _temp_func_0);
 }
 
 int main(){
@@ -134,8 +139,9 @@ int main(){
 	}
 	
 	print();
-	traverse_directory(s.data, true, _temp_func_0);
-	defer:
+	traverse_directory(s.data, true, _temp_func_1);
+	
+defer:
 	cleanup();
 	x = 0;
 	return __return_val;

@@ -35,4 +35,5 @@ void testType_test(testType* instance);
 void testType_helper(testType* instance);
 hello testType_init();
 int _temp_func_0(char* directory, char* name);
+int _temp_func_1(char* directory, char* name);
 int main();
