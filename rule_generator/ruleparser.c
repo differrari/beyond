@@ -112,7 +112,7 @@ linked_list_t * parse_rule(Token rule, TokenStream *ts){
                 linked_list_push(rulelist,seq);
                 seq = linked_list_create();
             }
-        } else if (t.kind == TOK_NEWLINE) break;
+        } else if (t.kind == TOK_SEMICOLON) break;
         else {
             bool has_tag = false;
             Token sep = {};
@@ -234,11 +234,11 @@ void emit_rule_prints(){
 extern void generate_code(const char *name, codegen cg);
 
 int main(int argc, char *argv[]){
-    char *content = read_full_file("rules.config",0);
+    char *content = read_full_file("cred.rules",0);
     
     Scanner s = scanner_make(content, strlen(content));
     Tokenizer tk = tokenizer_make(&s);
-    tk.parse_newline = true;
+    // tk.parse_newline = true;
     tk.comment_type = TOKENIZER_COMMENT_TYPE_HASH;
     TokenStream ts;
     ts_init(&ts, &tk);

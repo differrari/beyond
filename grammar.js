@@ -13,7 +13,7 @@ export default grammar({
 		include: $ => prec(97,choice(seq($.SYMBOL, "includeC", $.LPAREN, $.inc, $.RPAREN),seq($.SYMBOL, "include", $.inc))),
 		separator: $ => prec(96,choice(seq($.SEMICOLON),seq($.NEWLINE))),
 		assignment: $ => prec(95,choice(seq($.variable, $.OPERATOR, $.expression),seq($.chain, $.OPERATOR, $.expression))),
-		funccall: $ => prec(94,choice(seq(optional("*"), optional("&"), $.func, $.LPAREN, optional($.argument), $.RPAREN))),
+		funccall: $ => prec(94,choice(seq(optional("*"), $.func, $.LPAREN, optional($.argument), $.RPAREN))),
 		funcdec: $ => prec(93,choice(seq(optional($.type), $.name, optional($.funcarguments), $.LBRACE, optional($.block), $.RBRACE))),
 		funcsign: $ => prec(92,choice(seq(optional($.type), $.name, optional($.funcarguments)))),
 		funcarguments: $ => prec(91,choice(seq($.LPAREN, optional($.argdec), $.RPAREN))),
