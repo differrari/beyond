@@ -1,18 +1,36 @@
 (load "~/redbuild/v3/redbuild.lisp")
 
-(let ((rule-mod (make-instance `redbuild:redmod
-			       :name "rulegen"
-			       :type :bin
-			       :target :linux
-			       :srcs (list 
-										"ir/manual_gen.c" 
-										"codegen/codeformat.c" 
-										"codegen/identity_transform.c" 
-										"codegen/codegen.c" "ir/general.c" 
-										"rule_generator/rulecodegen.c" 
-										"rule_generator/ruleparser.c" 
-										"rule_generator/rule_transform.c"
-						))))
-  (redbuild:quick-build rule-mod :add-dependencies t :run t :success (lambda () (print "Done")))
-  )
-
+(redbuild:quick-build (make-instance `redbuild:redmod
+    :name "rulegen"
+    :type :bin
+    :target :linux
+    :srcs (list 
+		"ir/manual_gen.c" 
+		"codegen/codeformat.c" 
+		"codegen/identity_transform.c" 
+		"codegen/codegen.c" 
+		"ir/general.c" 
+		"rule_generator/rulecodegen.c" 
+		"rule_generator/ruleparser.c" 
+		"rule_generator/rule_transform.c"
+	)
+    :flags (list 
+        "-DNOCODETRANSFORM"
+        "-DRULECODEGEN"
+        "-DRULETRANSFORM"
+    )
+) :add-dependencies t :run t :run-args "languages/lisp.rules" :success (lambda () 
+    (redbuild:quick-cred "semantic/sem_enum.cred" "semantic/semantic_rules")
+    (redbuild:quick-cred "codegen/codegen.cred" "codegen/codegen")
+    (redbuild:quick-build (make-instance `redbuild:redmod
+        :name "cred"
+        :type :bin
+        :target :linux
+        :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
+        :flags (list 
+            "-DCCODEGEN"
+            "-DCTRANS"
+            "-DNORULETRANSFORM"
+        )
+    ) :add-dependencies t :run t :run-args "test.lisp" :success (lambda () (redbuild:emit-compile-commands)))
+))
