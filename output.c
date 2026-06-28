@@ -1,147 +1,14 @@
 #include "output.h"
 #include "string/string.h"
 
-char* heyo(){
-	int a = (int){};
-	return "Value";
-}
-
-bool credbuild(){
-	redb_mod module = new_module("cred");
-	set_name(&module, "credgen");
-	set_target(&module, target_native);
-	redb_mod_source_all(&module, ".cred");
-	return redb_mod_cred_compile(module);
-	switch (hello){
-		case 1: {print("1");} break;
-		case 2: {print("22");} break;
-		case 3: {print("3");} break;
-	}
-}
-
-int a(){
-	chunk_array_t* testarr = 0;
-	char* ly = "like";
-	int test = 0;
-	testarr = chunk_array_create(12, sizeof(int));
-	int x = *(int*)chunk_array_get(testarr, 0);
-	chunk_array_push(testarr, 0);
-}
-
-void draw(int x, int y, int color, int overwrite){
-	int b = 0;
-}
-
-void c(int x){
-	int l = (int){};
-	if (x){
-		return 0;
-	}
-	
-}
-
-void print(){
-	
-}
-
-int t = u + i;
-
-char* test_enum_strings[] = {
-	[test_enum_one] = "one",
-	[test_enum_two] = "two",
-	[test_enum_three] = "three",
-};
-test_enum test_enum_from_string(char * val){
-	if (!strcmp("one", val)){
-		return test_enum_one;
-	} else if (!strcmp("two", val)){
-		return test_enum_two;
-	} else if (!strcmp("three", val)){
-		return test_enum_three;
-	}
-	
-}
-
-int hello_func(hello instance, int rule, Token elem){
-	if (instance.func){
-		return instance.func(instance.ptr, rule, elem);
-	}
-	
-	return (int){};
-}
-
-void hello_test(hello instance){
-	if (instance.test){
-		return instance.test(instance.ptr);
-	}
-	
-}
-
-void testType_func(testType* instance, int rule, Token elem){
-	int a = 0;
-}
-
-void testType_test(testType* instance){
-	print("Test succeeded %i", instance->prop1);
-}
-
-void testType_helper(testType* instance){
-	
-}
-
-hello testType_init(){
-	return (hello){
-		.ptr = zalloc(sizeof(testType)),
-		.test = testType_test,
-		.func = testType_func,
-	};
-}
-
-int _temp_func_0(char* directory, char* name){
-	print("Inside lambda 2");
-}
-
-int _temp_func_1(char* directory, char* name){
-	print("Inside lambda");
-	traverse_directory(s.data, true, _temp_func_0);
-}
-
-int main(){
-	int __return_val;
-	int y = a();
-	int x = 1 - (0 - 2);
-	int z = int_get(x, 0);
-	print("This is democracy manifest");
+vide principale(){
+	imprimer("Ciao mondo");
 	for (int i = 0; i < 10; i = i + 1){
-		
+		if (i == 9){
+			imprimer("Le derniere");
+		} else {
+			imprimer("Pas la derniere");
+		}
 	}
-	while (0){
-		print();
-	}
-	__return_val = 0;
-	goto defer;
-	do {
-		print();
-	} while (0);
-	draw(x, y, 0xFF00FF00, 0);
-	x = x + 1;
-	x = int_run(y);
-	if (x < 100){
-		
-	} else {
-		print("Done with x");
-	}
-	y = y + 1;
-	if (y < 100){
-		
-	} else if (y == 100){
-		print("Exactly 100 y");
-	}
-	
-	print();
-	traverse_directory(s.data, true, _temp_func_1);
-	defer:
-	cleanup();
-	x = 0;
-	return __return_val;
+	imprimer("Fine");
 }

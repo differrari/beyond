@@ -1,0 +1,5 @@
+chain -> exp chain?;
+exp  -> sexp | atom;
+sexp@exp -> LPAREN args? RPAREN;
+args -> exp args?;
+atom -> IDENTIFIER@val | STRING@val | NUMBER@val;

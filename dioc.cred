@@ -1,0 +1,18 @@
+@includereC("syscalls/syscalls.h")
+@includereC("languages/pack/it.h")
+
+stampare(literal str){
+    print(str);
+}
+
+vuoto principale {
+    stampare("Ciao mondo");
+    per (int i = 0; i < 10; i = i + 1){
+        se i == 9 {
+            stampare("L'ultima");
+        } oppure {
+            stampare("Non e' l'ultima");
+        }
+    }
+    stampare("Fine");
+}

@@ -49,9 +49,6 @@ bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem el
 
 bool push_ast_rule(int rule, int option, int sequence){
     if (!tree_stack) tree_stack = init_ast();
-    if (rule == 1){
-        print("3 times %s",sem_rule_strings[language_rules[rule].semrule]);
-    }
     push_node(tree_stack, (ast_node){
         .t = {},
         .rule = rule,

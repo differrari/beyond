@@ -1,0 +1,14 @@
+@inclureC("syscalls/syscalls.h")
+@inclureC("languages/pack/it.h")
+
+vide principale {
+    imprimer("Ciao mondo");
+    pour (int i = 0; i < 10; i = i + 1){
+        si i == 9 {
+            imprimer("Le derniere");
+        } autre {
+            imprimer("Pas la derniere");
+        }
+    }
+    imprimer("Fine");
+}

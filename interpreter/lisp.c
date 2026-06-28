@@ -10,7 +10,7 @@ ast_node* next_node(stack_navigator *sn){
     return 0;
 }
 
-void lisp_vm(stack_navigator *sn, int depth){
+void eval(stack_navigator *sn, int depth){
     ast_node *node = next_node(sn);
     while (node){
         if (depth >= 0 && node->depth <= depth){
@@ -19,7 +19,7 @@ void lisp_vm(stack_navigator *sn, int depth){
         }
         if (node->sem_value == sem_rule_exp){
             print("(");
-            lisp_vm(sn,node->depth);
+            eval(sn,node->depth);
         } else if (node->sem_value) print("%v",token_to_slice(node->t));
         node = next_node(sn);
     }
