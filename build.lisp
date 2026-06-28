@@ -3,7 +3,7 @@
 (redbuild:quick-build (make-instance `redbuild:redmod
     :name "rulegen"
     :type :bin
-    :target :linux
+    :target (redbuild:native)
     :srcs (list 
 		"ir/manual_gen.c" 
 		"codegen/codeformat.c" 
@@ -25,7 +25,7 @@
     (redbuild:quick-build (make-instance `redbuild:redmod
         :name "cred"
         :type :bin
-        :target :linux
+        :target (redbuild:native)
         :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
         :flags (list 
             "-DCCODEGEN"
