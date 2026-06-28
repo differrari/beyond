@@ -11,15 +11,6 @@ int curr_indent = 0;
 
 stack_navigator gsn;
 
-void print_stack(ast_node *stack, uint32_t count){
-    for (uint32_t i = 0; i < count; i++){
-        if (!stack[i].t.kind)
-            print("%c[%i,%i] %s ->",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth));
-        else
-            print("%c[%i,%i] %s %v",*rule_names[stack[i].rule],stack[i].option,stack[i].sequence,indent_by(stack[i].depth),token_to_slice(stack[i].t));
-    }
-}
-
 void output_newline(){
     cursor += string_format_buf((buf+cursor), MAX_CHARS, "\n%s", indent_by(curr_indent));
 }
@@ -80,8 +71,7 @@ codegen eval_rule(int current_rule, int curr_option){
 }
 
 codegen gen_code(chunk_array_t *stack, const char *out_name){
-    gsn = (stack_navigator){};
-    gsn.stack = stack;
+    gsn = make_stack_navigator(stack);
     ast_node node = {};
     int new_rule;
     int new_opt;

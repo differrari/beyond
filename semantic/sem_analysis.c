@@ -127,8 +127,7 @@ bool analyze_rule(int current_rule, int curr_option, symbol_table *table){
 int ind = 0;
 
 symbol_table* analyze_semantics(chunk_array_t *stack){
-    ssn = (stack_navigator){};
-    ssn.stack = stack;
+    ssn = make_stack_navigator(stack);
     // output_debug_rule(current_rule);
     ast_node node = {};
     int new_rule;

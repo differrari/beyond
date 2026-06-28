@@ -1,23 +1,19 @@
 TABLE none
-SYMBOL = interf TYPE = none SUBTYPE none NAME = codegen REF = 0
-TABLE interf
-SYMBOL = dec TYPE = int SUBTYPE none NAME = type REF = 0
-SYMBOL = func TYPE = void SUBTYPE none NAME = register_elem REF = 0
-TABLE func
-SYMBOL = param TYPE = int SUBTYPE none NAME = type REF = 0
-SYMBOL = param TYPE = Token SUBTYPE none NAME = elem REF = 0
-END TABLE func
-SYMBOL = func TYPE = void SUBTYPE none NAME = register_subrule REF = 0
-TABLE func
-SYMBOL = param TYPE = int SUBTYPE none NAME = type REF = 0
-SYMBOL = param TYPE = codegen SUBTYPE none NAME = child REF = 0
-END TABLE func
-SYMBOL = func TYPE = bool SUBTYPE none NAME = emit_code REF = 0
+SYMBOL = dec TYPE = bool SUBTYPE none NAME = bootstrap REF = 0
+SYMBOL = func TYPE = bool SUBTYPE none NAME = rulegen REF = 0
 TABLE func
 END TABLE func
-SYMBOL = func TYPE = codegen SUBTYPE none NAME = transform REF = 0
+SYMBOL = func TYPE = bool SUBTYPE none NAME = genc REF = 0
 TABLE func
-SYMBOL = param TYPE = codegen SUBTYPE none NAME = this REF = 0
 END TABLE func
-END TABLE interf
+SYMBOL = func TYPE = none SUBTYPE none NAME = compiler REF = 0
+TABLE func
+END TABLE func
+SYMBOL = func TYPE = int SUBTYPE none NAME = main REF = 0
+TABLE func
+SYMBOL = param TYPE = strarr SUBTYPE none NAME = argv REF = 0
+SYMBOL = param TYPE = int SUBTYPE none NAME = argc REF = 0
+SYMBOL = dec TYPE = u64 SUBTYPE none NAME = start REF = 0
+SYMBOL = dec TYPE = u64 SUBTYPE none NAME = end REF = 0
+END TABLE func
 END TABLE none

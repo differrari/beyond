@@ -140,8 +140,7 @@ int main(){
 	
 	print();
 	traverse_directory(s.data, true, _temp_func_1);
-	
-defer:
+	defer:
 	cleanup();
 	x = 0;
 	return __return_val;

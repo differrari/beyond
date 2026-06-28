@@ -46,6 +46,7 @@ void compiler(){
 		ignore_source("ruleparser.c");
 		ignore_source("build.c");
 		ignore_source("output.c");
+		ignore_source("main.c");
 		add_precomp_flag("CCODEGEN");
 		add_precomp_flag("CTRANS");
 		add_precomp_flag("NORULETRANSFORM");

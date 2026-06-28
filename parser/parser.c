@@ -18,6 +18,20 @@ chunk_array_t *tree_stack;
 
 #define current_parser_rule(parser) language_rules[parser->current_rule].options[parser->option].rules[parser->sequence]
 
+ln_report parse_ln(uint32_t pos, char *content){
+    ln_report rep = {
+        .line_number = 1,
+        .column = 1,
+    };
+    for (uint32_t i = 0; i < pos && content[i]; i++){
+        if (content[i] == '\n'){
+            rep.column = 1;
+            rep.line_number++;
+        } else rep.column++;
+    }
+    return rep;
+}
+
 bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem element){
     if (!element.sem_value) return true;
     if (!tree_stack) tree_stack = init_ast();
@@ -35,6 +49,9 @@ bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem el
 
 bool push_ast_rule(int rule, int option, int sequence){
     if (!tree_stack) tree_stack = init_ast();
+    if (rule == 1){
+        print("3 times %s",sem_rule_strings[language_rules[rule].semrule]);
+    }
     push_node(tree_stack, (ast_node){
         .t = {},
         .rule = rule,
