@@ -229,6 +229,8 @@ typedef struct {
 
 codegen array_entry_code_init();
 
+// MARK: Rule code
+
 typedef struct {
     string_slice name;
     string_slice tag;
@@ -250,3 +252,14 @@ typedef struct {
 } rule_entry_code;
 
 codegen rule_entry_code_init();
+
+// MARK: Lisp code
+
+typedef struct {
+    codegen car_s;
+    Token car_t;
+    int car_int;
+    codegen cdr;
+} s_exp_code;
+
+codegen s_exp_code_init();

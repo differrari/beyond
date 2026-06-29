@@ -98,4 +98,8 @@ codegen rule_entry_code_transform(void *ptr, codegen this){
     return this;
 }
 
+codegen s_exp_code_transform(void *ptr, codegen this){
+    return this;
+}
+
 #endif

@@ -474,3 +474,30 @@ void rule_entry_code_register_subrule(void *ptr, int type, codegen child){
 }
 
 CODEGEN_DEC(rule_entry_code, sem_rule_rule_entry, 0);
+
+#include "syscalls/syscalls.h"
+
+void s_exp_code_register_elem(void *ptr, int type, Token elem){
+    s_exp_code *code = (s_exp_code*)ptr;
+    if (!code->car_s.ptr && !code->car_t.kind){
+        print("It's car");
+        code->car_t = elem;
+    } else {
+        print("Defer to cdr");
+        if (!code->cdr.ptr) code->cdr = s_exp_code_init();
+        s_exp_code_register_elem(code->cdr.ptr, type, elem);
+    }
+}
+
+void s_exp_code_register_subrule(void *ptr, int type, codegen child){
+    s_exp_code *code = (s_exp_code*)ptr;
+    if (!code->car_s.ptr && !code->car_t.kind){
+        print("It's sexp car");
+        code->car_s = child;
+    } else {
+        if (!code->cdr.ptr) code->cdr = s_exp_code_init();
+        s_exp_code_register_subrule(code->cdr.ptr, type, child);
+    }
+}
+
+CODEGEN_DEC(s_exp_code, sem_rule_exp, 0);

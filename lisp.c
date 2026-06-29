@@ -1,3 +1,4 @@
+#include "common.h"
 #include "syscalls/syscalls.h"
 #include "data/format/scanner/scanner.h"
 #include "parser/parser.h"
@@ -6,8 +7,8 @@
 #include "files/helpers.h"
 #include "alloc/allocate.h"
 #include "parser/ast.h"
-#include "interpreter/lisp.h"
-#include "common.h"
+#include "ir/lisp.h"
+#include "interpreter/imaginal.h"
 
 static buffer buf;
 
@@ -68,8 +69,11 @@ int main(int argc, char *argv[]) {
     print_stack(parse_res.ast_stack);
 
     stack_navigator nav = make_stack_navigator(parse_res.ast_stack);
-    eval(&nav, -1);
+    codegen root = s_exp_code_init();
+    gen_ir_lisp(&nav, -1, root.ptr);
 
+    s_exp_code *code = root.ptr;
+
+    apply(code->car_s);
     
-  
 }
