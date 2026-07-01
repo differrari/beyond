@@ -68,12 +68,6 @@ int main(int argc, char *argv[]) {
 
     print_stack(parse_res.ast_stack);
 
-    stack_navigator nav = make_stack_navigator(parse_res.ast_stack);
-    codegen root = s_exp_code_init();
-    gen_ir_lisp(&nav, -1, root.ptr);
-
-    s_exp_code *code = root.ptr;
-
-    apply(code->car_s);
+    imaginal_run(gen_ir_lisp(parse_res.ast_stack));
     
 }

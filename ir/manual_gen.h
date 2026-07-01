@@ -29,6 +29,8 @@ codegen make_indexed_array_entry(string_slice index, codegen exp, codegen chain)
 codegen make_math(codegen lhs, string_slice op, codegen rhs);
 codegen make_rule(string_slice name,  string_slice tag, bool declaration, codegen options, codegen existing);
 codegen make_rule_sequence(string_slice name, string_slice value, string_slice type, string_slice tag, bool optional, codegen existing);
+codegen make_int_atom(i64 a);
+codegen make_true_atom();
 
 static inline codegen make_array_entry(codegen exp, codegen chain){
     return make_indexed_array_entry((string_slice){}, exp, chain);

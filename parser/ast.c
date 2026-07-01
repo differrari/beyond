@@ -8,10 +8,10 @@ void push_node(chunk_array_t *stack, ast_node node){
 }
 
 bool pop_stack(stack_navigator *sn, ast_node* node){
-    if (sn->stack_cursor >= sn->size){
+    if (sn->cursor >= sn->size){
         return false;
     }
-    *node = *(ast_node*)chunk_array_get(sn->stack, sn->stack_cursor++);
+    *node = *(ast_node*)chunk_array_get(sn->stack, sn->cursor++);
     return true;
 }
 

@@ -1,5 +1,25 @@
 #include "imaginal.h"
 #include "syscalls/syscalls.h"
+#include "ir/manual_gen.h"
+
+#define IMAGINAL_DEBUG
+#ifdef IMAGINAL_DEBUG
+#define imaginal_debug(...) print(__VA_ARGS__)
+#else
+#define imaginal_debug(...)
+#endif
+
+bool is_atom(codegen exp){
+    s_exp_code *code = exp.ptr;
+    if (!code) return true;
+    if (code->cdr.ptr) return false;
+    if (code->car.type != car_subexp) return true;
+    return false;
+} 
+
+static inline codegen is_atom_s_exp(codegen exp){
+    return is_atom(exp) ? make_true_atom() : (codegen){};
+}
 
 // apply[fn;x;a] =
 //      [atom[fn] → [eq[fn;CAR] → caar[x];
@@ -15,56 +35,166 @@
 
 codegen imaginal_builtin_add(codegen exp){
     s_exp_code *code = exp.ptr;
-    if (!code) { print("[E] Null ptr"); return (codegen){}; }
-    i64 a = 0;
-    if (code->car_t.kind == TOK_NUMBER) a = parse_int64(code->car_t.start, code->car_t.length);
-    //TODO: subexpressions in car
+    if (!code) { print("[ADD error] Add null ptr"); return (codegen){}; }
+    if (code->car.type != car_num) { print("[ADD error] non-numeric lh %v",token_to_slice(code->car.token)); return (codegen){}; }
+    i64 a = code->car.number;
     i64 b = 0;
-    s_exp_code *car = code->cdr.ptr;
-    if (car){
-        if (car->car_t.kind == TOK_NUMBER) b = parse_int64(car->car_t.start, car->car_t.length);
+    s_exp_code *cdr = code->cdr.ptr;
+    if (cdr){
+        if (cdr->car.type != car_num) { print("[ADD error] non-numeric rh"); return (codegen){}; }
+        b = cdr->car.number;
     }
-    //TODO: subexpression in cdr
-    print("Add %i + %i = %i",a,b,a+b);
+    imaginal_debug("Add %i + %i = %i",a,b,a+b);
     // codegen r = s_exp_code_init();
-    
+    return make_int_atom(a+b);
 }
 
-void apply(codegen exp){
-    s_exp_code *code = exp.ptr;
-    if (!code) { print("[E] Null ptr"); return; }
-    if (code->car_t.kind){
-        string_slice s = token_to_slice(code->car_t);
-        if (slice_lit_match(s, "add", true)){
-            imaginal_builtin_add(code->cdr);
+codegen apply(codegen fn_exp, codegen a, imaginal_env env){
+    s_exp_code *fn = fn_exp.ptr;
+    if (!fn) { print("[APPLY error] Apply null ptr"); return (codegen){}; }
+    if (is_atom(fn_exp)){
+        imaginal_debug("[APPLY] Atomic expression");
+        if (fn->car.type != car_token || fn->car.token.kind != TOK_IDENTIFIER) { print("[APPLY error]: Wrong expression type"); return (codegen){}; }
+        string_slice s = token_to_slice(fn->car.token);
+        if (slice_lit_match(s, "car", true)){
+            // caar[x];
+            return (codegen){};
         }
-        //Atom
-        print("[IE] Atomic expression in car as %v",s);
+        else if (slice_lit_match(s, "cdr", true)){
+            // cdar[x];
+            return (codegen){};
+        }
+        else if (slice_lit_match(s, "cons", true)){
+            // cons[car[x];cadr[x]];
+            return (codegen){};
+        }
+        else if (slice_lit_match(s, "atom", true)){
+            // atom[car[x]];
+            return is_atom_s_exp(a);
+        }
+        else if (slice_lit_match(s, "eq", true)){
+            // eq[car[x];cadr[x]];
+            return (codegen){};
+        } else {
+            return apply(eval(fn_exp,env),a,env);
+        }
     } else {
-        s_exp_code *car = code->car_s.ptr;
-        if (!car){ print("[P] Empty s-exp"); return; }
-        if (!car->car_t.kind) { print("[E] no atomic expression in sub-expression"); return; }
-        string_slice s = token_to_slice(car->car_t);
+        imaginal_debug("[APPLY] Non-atomic expression");
+        if (fn->car.type != car_subexp || !fn->car.subexp.ptr){ print("[APPLY error] not a sub-expression"); return (codegen){}; }
+        s_exp_code *car = fn->car.subexp.ptr;
+        if (!is_atom(fn->car.subexp) || car->car.type != car_token || car->car.token.kind) { print("[APPLY error] no atomic expression in sub-expression"); return (codegen){}; }
+        string_slice s = token_to_slice(car->car.token);
         if (slice_lit_match(s, "lambda", true)){
-            print("[P] Handle lambda case");
-            return;
+            imaginal_debug("[APPLY todo] Handle lambda case");
+            // eval[caddr[fn]; pairlis[cadr[fn];x;a]];
+            return (codegen){};
         }
         if (slice_lit_match(s, "label", true)){
-            print("[P] Handle lambda case");
-            return;
+            imaginal_debug("[APPLY todo] Handle lambda case");
+            // apply[caddr[fn];x;cons[cons[cadr[fn];caddr[fn]];a]]]
+            return (codegen){};
         }
-        print("[E] unknown expression %v in apply",s);
-        return;
+        print("[APPLY error] unknown expression %v in apply",s);
+        return (codegen){};
     }
 }
 
-// eval[e;a] = [atom[e] → cdr[assoc[e;a]];
-//      atom[car[e]] →
-//              [eq[car[e];QUOTE] → cadr[e];
-//              eq[car[e];COND] → evcon[cdr[e];a];
-//              T → apply[car[e];evlis[cdr[e];a];a]];
-//      T → apply[car[e];evlis[cdr[e];a];a]]
+// eval[e;a] = 
+    // [atom[e] → cdr[assoc[e;a]];
+    //  atom[car[e]] →
+    //          [eq[car[e];QUOTE] → cadr[e];
+    //          eq[car[e];COND] → evcon[cdr[e];a];
+    //          T → apply[car[e];evlis[cdr[e];a];a]];
+    //  T → apply[car[e];evlis[cdr[e];a];a]]
+     
+codegen eval(codegen exp, imaginal_env env){
+    s_exp_code *code = exp.ptr;
+    if (!code) { print("[EVAL error] null ptr"); return (codegen){}; }
+    if (is_atom(exp)){
+        imaginal_debug("[EVAL todo] handle atomic expression");
+        return (codegen){};
+    }
+    else if (code->car.type == car_token && code->car.token.kind == TOK_IDENTIFIER){
+        string_slice s = token_to_slice(code->car.token);
+        imaginal_debug("[EVAL] Atomic car expression %v",s);
+        if (slice_lit_match(s, "cond", true)){
+            imaginal_debug("[EVAL todo] Handle cond case");
+            // evcon[cdr[e];a];
+            return (codegen){};
+        }
+        else if (slice_lit_match(s, "quote", true)){
+            imaginal_debug("[EVAL todo] Handle quote case");
+            //  cadr[e];
+            return (codegen){};
+        } else if (slice_lit_match(s, "add", true)){
+            return imaginal_builtin_add(code->cdr);
+        } else {
+            // apply[car[e];evlis[cdr[e];a];a]];
+            return (codegen){};
+        }
+    } else if (code->car.type == car_subexp){
+        imaginal_debug("[EVAL todo] Has sub-expression");
+        // apply[car[e];evlis[cdr[e];a];a]];
+        return (codegen){};
+    }
+    else {
+        print("[EVAL error] Unknown expression");
+        return (codegen){};
+    }
+}
 
-void eval(codegen exp){
-    
+void imaginal_print_car(lisp_val car){
+    switch (car.type) {
+        case car_token:
+            print("%v",token_to_slice(car.token));
+            break;
+        case car_num:
+            print("%i",car.number);
+            break;
+        case car_true:
+            print("t");
+            break;
+        case car_subexp:
+            print("(");
+            imaginal_print_exp(car.subexp);
+            print(")");
+        default: print("{err wrong type %i}",car.type);
+    }
+}
+
+void imaginal_print_exp(codegen c){
+    if (!c.ptr){
+        print("nil");
+        return;
+    }
+    if (c.type != sem_rule_sexp){
+        print("{err wrong rule}");
+        return;
+    }
+    s_exp_code *code = c.ptr;
+    if (is_atom(c)){
+        imaginal_print_car(code->car);
+        return;
+    }
+    print("(");
+    imaginal_print_car(code->car);
+    imaginal_print_exp(code->cdr);
+    print(")");
+}
+
+void imaginal_run(codegen c){
+    if (!c.ptr) {
+        print("[IMAGINAL ERROR]: Empty program");
+        return;
+    }
+    do {
+        s_exp_code *code = c.ptr;
+#ifdef IMAGINAL_DEBUG
+        imaginal_print_exp(eval(code->car.subexp, 0));
+#else 
+        eval(code->car.subexp, 0);
+#endif
+        c = code->cdr;
+    } while (c.ptr);
+    // imaginal_print_exp(eval(ir,0));
 }

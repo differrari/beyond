@@ -351,7 +351,6 @@ codegen enum_code_transform(void *ptr, codegen this){
     emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
     codegen to_str = make_declaration(string_format("%v_strings[]",token_to_slice(code->name)).data, slice_from_literal("char*"), make_array(codegen_transform(code->contents, code->contents)));
     pop_and_restore_context(orig);
-    //TODO: includes string.h
     
     orig = save_and_push_context((emit_context){ .convenience = convenience_type_from_string, .context_prefix = token_to_slice(code->name) });
     codegen from_str = codegen_transform(code->contents, code->contents);

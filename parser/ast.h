@@ -15,9 +15,9 @@ typedef struct {
 } ast_node;
 
 typedef struct {
-    uintptr_t stack_cursor;//TODO: rename to just cursor
+    uintptr_t cursor;
     chunk_array_t *stack;
-    size_t size;//TODO: add this to the sem analysis and irgen
+    size_t size;
 } stack_navigator;
 
 void push_node(chunk_array_t *stack, ast_node node);
@@ -38,6 +38,6 @@ static inline stack_navigator make_stack_navigator(chunk_array_t *stack){
     return (stack_navigator){
         .stack = stack,
         .size = tree_count(stack),
-        .stack_cursor = 0,
+        .cursor = 0,
     };
 }

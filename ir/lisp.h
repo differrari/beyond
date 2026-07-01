@@ -3,4 +3,4 @@
 #include "parser/ast.h"
 #include "ir/general.h"
 
-void gen_ir_lisp(stack_navigator *sn, int depth, s_exp_code *code);
+codegen gen_ir_lisp(chunk_array_t *stack);

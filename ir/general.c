@@ -483,8 +483,19 @@ CODEGEN_DEC(rule_entry_code, sem_rule_rule_entry, 0);
 
 void s_exp_code_register_elem(void *ptr, int type, Token elem){
     s_exp_code *code = (s_exp_code*)ptr;
-    if (!code->car_s.ptr && !code->car_t.kind){
-        code->car_t = elem;
+    if (!code->car.type){
+        switch (elem.kind){
+            case TOK_NUMBER: 
+                code->car.number = parse_int64(elem.start, elem.length);
+                code->car.type = car_num;
+            break;
+            case TOK_IDENTIFIER: 
+            case TOK_STRING: 
+                code->car.token = elem;
+                code->car.type = car_token;
+            break;
+            default: print("[ERROR] unknown token type"); return;
+        }
     } else {
         if (!code->cdr.ptr) code->cdr = s_exp_code_init();
         s_exp_code_register_elem(code->cdr.ptr, type, elem);
@@ -493,8 +504,9 @@ void s_exp_code_register_elem(void *ptr, int type, Token elem){
 
 void s_exp_code_register_subrule(void *ptr, int type, codegen child){
     s_exp_code *code = (s_exp_code*)ptr;
-    if (!code->car_s.ptr && !code->car_t.kind){
-        code->car_s = child;
+    if (!code->car.type){
+        code->car.type = car_subexp;
+        code->car.subexp = child;
     } else {
         if (!code->cdr.ptr) code->cdr = s_exp_code_init();
         s_exp_code_register_subrule(code->cdr.ptr, type, child);

@@ -37,7 +37,7 @@ codegen eval_rule(int current_rule, int curr_option){
     sem_rule statement_type = language_rules[current_rule].semrule;
     codegen gen = begin_rule(statement_type);
 
-    // print("Current rule %s@%i",rule_name(current_rule),curr_option);
+    print("Current rule %s@%i",rule_names[current_rule],curr_option);
     for (int s = 0; s < language_rules[current_rule].options[curr_option].num_elements; s++){
         grammar_elem elem = language_rules[current_rule].options[curr_option].rules[s];
         if (elem.rule){
@@ -70,7 +70,7 @@ codegen eval_rule(int current_rule, int curr_option){
     return gen;
 }
 
-codegen gen_code(chunk_array_t *stack, const char *out_name){
+codegen gen_code(chunk_array_t *stack){
     gsn = make_stack_navigator(stack);
     ast_node node = {};
     int new_rule;

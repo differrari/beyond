@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
     
     u64 sg = profiler_delta();
     
-    codegen ir = gen_code(parse_res.ast_stack, outname);
+    codegen ir = gen_code(parse_res.ast_stack);
     if (!ir.ptr) return -1;
     
     u64 id = profiler_delta();

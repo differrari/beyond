@@ -256,9 +256,14 @@ codegen rule_entry_code_init();
 // MARK: Lisp code
 
 typedef struct {
-    codegen car_s;
-    Token car_t;
-    int car_int;
+    enum { car_none, car_subexp, car_token, car_num, car_true } type;
+    codegen subexp;
+    Token token;
+    int number;
+} lisp_val;
+
+typedef struct {
+    lisp_val car;
     codegen cdr;
 } s_exp_code;
 
