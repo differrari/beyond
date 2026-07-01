@@ -17,12 +17,12 @@ codegen imaginal_builtin_add(codegen exp){
     s_exp_code *code = exp.ptr;
     if (!code) { print("[E] Null ptr"); return (codegen){}; }
     i64 a = 0;
-    if (code->car_t.kind) a = parse_int64(code->car_t.start, code->car_t.length);
+    if (code->car_t.kind == TOK_NUMBER) a = parse_int64(code->car_t.start, code->car_t.length);
     //TODO: subexpressions in car
     i64 b = 0;
     s_exp_code *car = code->cdr.ptr;
     if (car){
-        if (car->car_t.kind) b = parse_int64(car->car_t.start, car->car_t.length);
+        if (car->car_t.kind == TOK_NUMBER) b = parse_int64(car->car_t.start, car->car_t.length);
     }
     //TODO: subexpression in cdr
     print("Add %i + %i = %i",a,b,a+b);

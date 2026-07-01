@@ -40,6 +40,7 @@ enum sem_rule {
     array_entry,
     rule_sequence,
     rule_entry,
+    sexp,
 }
 
 enum sem_elem { 

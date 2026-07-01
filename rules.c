@@ -25,7 +25,7 @@ grammar_rule language_rules[num_grammar_rules] = {
 		{{ 
 			TOKEN(LPAREN), TOKEN(RPAREN), 
 		 },2},
-	},2, sem_rule_exp, sem_action_none},
+	},2, sem_rule_sexp, sem_action_none},
 	[rule_args] = {{
 		{{ 
 			RULE(exp), RULE(args), 

@@ -44,6 +44,7 @@ char* sem_rule_strings[] = {
 	[sem_rule_array_entry] = "array_entry",
 	[sem_rule_rule_sequence] = "rule_sequence",
 	[sem_rule_rule_entry] = "rule_entry",
+	[sem_rule_sexp] = "sexp",
 };
 sem_rule sem_rule_from_string(char * val){
 	if (!strcmp("none", val)){
@@ -128,6 +129,8 @@ sem_rule sem_rule_from_string(char * val){
 		return sem_rule_rule_sequence;
 	} else if (!strcmp("rule_entry", val)){
 		return sem_rule_rule_entry;
+	} else if (!strcmp("sexp", val)){
+		return sem_rule_sexp;
 	}
 	
 }

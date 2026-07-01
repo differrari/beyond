@@ -35,6 +35,7 @@ codegen begin_rule(sem_rule type){
         case sem_rule_array_entry: return array_entry_code_init();
         case sem_rule_rule_sequence: return rule_sequence_code_init();
         case sem_rule_rule_entry: return rule_entry_code_init();
+        case sem_rule_sexp: return s_exp_code_init();
         case sem_rule_syn:
         case sem_rule_parent:
         case sem_rule_val: 

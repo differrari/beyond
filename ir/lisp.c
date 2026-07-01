@@ -17,13 +17,13 @@ void gen_ir_lisp(stack_navigator *sn, int depth, s_exp_code *code){
             print(")");
             return;
         }
-        if (node->sem_value == sem_rule_exp){
+        if (node->sem_value == sem_rule_sexp){
             print("(");
             codegen new_code = s_exp_code_init();
             gen_ir_lisp(sn,node->depth, new_code.ptr);
             s_exp_code_register_subrule(code, 0, new_code);
         } else if (node->sem_value) {
-            print("Register %v",token_to_slice(node->t));
+            print("[%s] %v",sem_rule_strings[node->sem_value],token_to_slice(node->t));
             s_exp_code_register_elem(code, 0, node->t);
         }
         node = next_node(sn);

@@ -42,6 +42,7 @@ typedef enum {
 	sem_rule_array_entry,
 	sem_rule_rule_sequence,
 	sem_rule_rule_entry,
+	sem_rule_sexp,
 } sem_rule;
 
 extern char* sem_rule_strings[];
