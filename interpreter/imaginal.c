@@ -143,58 +143,9 @@ codegen eval(codegen exp, imaginal_env env){
     }
 }
 
-void imaginal_print_car(lisp_val car){
-    switch (car.type) {
-        case car_token:
-            print("%v",token_to_slice(car.token));
-            break;
-        case car_num:
-            print("%i",car.number);
-            break;
-        case car_true:
-            print("t");
-            break;
-        case car_subexp:
-            print("(");
-            imaginal_print_exp(car.subexp);
-            print(")");
-        default: print("{err wrong type %i}",car.type);
-    }
-}
-
-void imaginal_print_exp(codegen c){
-    if (!c.ptr){
-        print("nil");
-        return;
-    }
-    if (c.type != sem_rule_sexp){
-        print("{err wrong rule}");
-        return;
-    }
-    s_exp_code *code = c.ptr;
-    if (is_atom(c)){
-        imaginal_print_car(code->car);
-        return;
-    }
-    print("(");
-    imaginal_print_car(code->car);
-    imaginal_print_exp(code->cdr);
-    print(")");
-}
-
-void imaginal_run(codegen c){
-    if (!c.ptr) {
-        print("[IMAGINAL ERROR]: Empty program");
-        return;
-    }
-    do {
-        s_exp_code *code = c.ptr;
-#ifdef IMAGINAL_DEBUG
-        imaginal_print_exp(eval(code->car.subexp, 0));
-#else 
-        eval(code->car.subexp, 0);
-#endif
-        c = code->cdr;
-    } while (c.ptr);
-    // imaginal_print_exp(eval(ir,0));
+codegen s_exp_code_transform(void *ptr, codegen this){
+    s_exp_code *code = ptr;
+    code->car.subexp = eval(code->car.subexp, 0);
+    if (code->cdr.ptr) codegen_transform(code->cdr, code->cdr);
+    return this;
 }
