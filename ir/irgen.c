@@ -78,3 +78,7 @@ codegen gen_code(chunk_array_t *stack){
     if (!switch_rule(&gsn, &new_rule,&new_opt)) return (codegen){};
     return eval_rule(new_rule,new_opt);
 }
+
+void debug_print_ir(codegen root){
+    codegen_debug_print(root, root);
+}

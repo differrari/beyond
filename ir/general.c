@@ -538,6 +538,7 @@ void print_car(lisp_val car){
             print("(");
             codegen_debug_print(car.subexp,car.subexp);
             print(")");
+            break;
         default: print("{err wrong type %i}",car.type);
     }
 }
@@ -546,15 +547,23 @@ void print_car(lisp_val car){
 
 #include "interpreter/imaginal.h"
 void s_exp_code_debug_print(void *ptr, codegen this){
-  s_exp_code *code = (s_exp_code*)ptr;
-  if (!code) return;
-  if (is_atom(this)){
+    if (!this.ptr){
+        print("nil");
+        return;
+    }
+    if (this.type != sem_rule_sexp){
+        print("{err wrong rule %s}",sem_rule_strings[this.type]);
+        return;
+    }
+    s_exp_code *code = this.ptr;
+    if (is_atom(this)){
+        print_car(code->car);
+        return;
+    }
+    print("(");
     print_car(code->car);
-    return;
-  }
-  print("(");
-  print_car(code->car);
-  codegen_debug_print(code->cdr,code->cdr);
+    codegen_debug_print(code->cdr,code->cdr);
+    print(")");
 }
 #endif
 

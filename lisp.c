@@ -9,6 +9,7 @@
 #include "parser/ast.h"
 #include "ir/lisp.h"
 #include "interpreter/imaginal.h"
+#include "ir/irgen.h"
 
 static buffer buf;
 
@@ -68,6 +69,6 @@ int main(int argc, char *argv[]) {
 
     print_stack(parse_res.ast_stack);
 
-    imaginal_run(gen_ir_lisp(parse_res.ast_stack));
+    debug_print_ir(gen_ir_lisp(parse_res.ast_stack));
     
 }
