@@ -5,17 +5,27 @@
 
 void *codegen_page;
 
+codegen default_transform(void *ptr, codegen this){
+    return this;
+}
+
+bool default_emit_code(void *ptr){
+    return false;
+}
+
 #define CODEGEN_DEC(name,t,subscope) \
-extern bool name##_emit_code(void*ptr);\
-extern codegen name##_transform(void*ptr, codegen this);\
+__attribute__((weak)) bool name##_emit_code(void*ptr);\
+__attribute__((weak)) codegen name##_transform(void*ptr, codegen this);\
+__attribute__((weak)) void name##_debug_print(void*ptr,codegen this);\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\
         .ptr = allocate(codegen_page, sizeof(name), page_alloc),\
         .register_elem = name##_register_elem,\
         .register_subrule = name##_register_subrule,\
-        .emit_code = name##_emit_code,\
-        .transform = name##_transform,\
+        .emit_code = name##_emit_code ?: default_emit_code,\
+        .transform = name##_transform ?: default_transform,\
+        .debug_print = name##_debug_print ?: 0,\
         .get_subscope = subscope,\
         .type = t,\
     };\
@@ -512,5 +522,40 @@ void s_exp_code_register_subrule(void *ptr, int type, codegen child){
         s_exp_code_register_subrule(code->cdr.ptr, type, child);
     }
 }
+
+void print_car(lisp_val car){
+    switch (car.type) {
+        case car_token:
+            print("%v",token_to_slice(car.token));
+            break;
+        case car_num:
+            print("%i",car.number);
+            break;
+        case car_true:
+            print("t");
+            break;
+        case car_subexp:
+            print("(");
+            codegen_debug_print(car.subexp,car.subexp);
+            print(")");
+        default: print("{err wrong type %i}",car.type);
+    }
+}
+
+#ifndef RULECODEGEN
+
+#include "interpreter/imaginal.h"
+void s_exp_code_debug_print(void *ptr, codegen this){
+  s_exp_code *code = (s_exp_code*)ptr;
+  if (!code) return;
+  if (is_atom(this)){
+    print_car(code->car);
+    return;
+  }
+  print("(");
+  print_car(code->car);
+  codegen_debug_print(code->cdr,code->cdr);
+}
+#endif
 
 CODEGEN_DEC(s_exp_code, sem_rule_sexp, 0);

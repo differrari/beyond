@@ -8,6 +8,7 @@ typedef struct codegen {
 	int type;
 	void (*register_elem)(void* instance, int type, Token elem);
 	void (*register_subrule)(void* instance, int type, codegen child);
+	void (*debug_print)(void* instance, codegen this);
 	bool (*emit_code)(void* instance);
 	codegen (*transform)(void* instance, codegen this);
 	codegen (*get_subscope)(void* instance);
@@ -15,6 +16,7 @@ typedef struct codegen {
 
 void codegen_register_elem(codegen instance, int type, Token elem);
 void codegen_register_subrule(codegen instance, int type, codegen child);
+void codegen_debug_print(codegen instance, codegen this);
 bool codegen_emit_code(codegen instance);
 codegen codegen_transform(codegen instance, codegen this);
 codegen codegen_get_subscope(codegen instance);

@@ -7,7 +7,6 @@
     :srcs (list 
 		"ir/manual_gen.c" 
 		"codegen/codeformat.c" 
-		"codegen/identity_transform.c" 
 		"codegen/codegen.c" 
 		"ir/general.c" 
 		"rule_generator/rulecodegen.c" 

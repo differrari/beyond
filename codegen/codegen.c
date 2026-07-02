@@ -15,6 +15,13 @@ void codegen_register_subrule(codegen instance, int type, codegen child){
 	
 }
 
+void codegen_debug_print(codegen instance, codegen this){
+	if (instance.debug_print){
+		return instance.debug_print(instance.ptr, this);
+	}
+	
+}
+
 bool codegen_emit_code(codegen instance){
 	if (instance.emit_code){
 		return instance.emit_code(instance.ptr);

@@ -2,7 +2,6 @@
 /home/di/beyond/rules.c
 /home/di/beyond/codegen/codeformat.c
 /home/di/beyond/codegen/codegen.c
-/home/di/beyond/codegen/identity_transform.c
 /home/di/beyond/codegen/c/ccode.c
 /home/di/beyond/codegen/c/ctransformer.c
 /home/di/beyond/codegen/graph/graphcode.c

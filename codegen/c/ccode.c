@@ -483,16 +483,4 @@ bool array_entry_code_emit_code(void *ptr){
     return true;
 }
 
-bool rule_sequence_code_emit_code(void *ptr){
-    return false;
-}
-
-bool rule_entry_code_emit_code(void *ptr){
-    return false;
-}
-
-bool s_exp_code_emit_code(void *ptr){
-    return false;
-}
-
 #endif
