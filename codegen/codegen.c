@@ -15,9 +15,9 @@ void codegen_register_subrule(codegen instance, int type, codegen child){
 	
 }
 
-void codegen_debug_print(codegen instance, codegen this){
+void codegen_debug_print(codegen instance, codegen this, int depth){
 	if (instance.debug_print){
-		return instance.debug_print(instance.ptr, this);
+		return instance.debug_print(instance.ptr, this, depth);
 	}
 	
 }

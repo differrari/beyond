@@ -40,16 +40,16 @@ bool parse_arguments(int argc, char *argv[]){
 
 int main(int argc, char *argv[]) {
 
-  if (!parse_arguments(argc, argv)) return -1;
-
-  Scanner scan = scanner_make(buf.buffer,strlen(buf.buffer));
+    if (!parse_arguments(argc, argv)) return -1;
     
-  Tokenizer tk = tokenizer_make(&scan);
-  // tk.skip_type_check = true;
-  tk.comment_type = TOKENIZER_COMMENT_TYPE_SLASH;
-  tk.parse_newline = argc && strcmp(argv[1],"-nl") == 0;
-  TokenStream ts;
-  ts_init(&ts, &tk);
+    Scanner scan = scanner_make(buf.buffer,strlen(buf.buffer));
+        
+    Tokenizer tk = tokenizer_make(&scan);
+    // tk.skip_type_check = true;
+    tk.comment_type = TOKENIZER_COMMENT_TYPE_SLASH;
+    tk.parse_newline = argc && strcmp(argv[1],"-nl") == 0;
+    TokenStream ts;
+    ts_init(&ts, &tk);
 
     parser_sm parser = (parser_sm){
         .current_rule = 0,
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    print_stack(parse_res.ast_stack);
+    // print_stack(parse_res.ast_stack);
 
     debug_print_ir(gen_ir_lisp(parse_res.ast_stack));
     

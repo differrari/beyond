@@ -80,5 +80,5 @@ codegen gen_code(chunk_array_t *stack){
 }
 
 void debug_print_ir(codegen root){
-    codegen_debug_print(root, root);
+    codegen_debug_print(root, root, 0);
 }

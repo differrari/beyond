@@ -2,6 +2,7 @@
 #include "semantic/semantic_rules.h"
 #include "alloc/allocate.h"
 #include "syscalls/syscalls.h"
+#include "common.h"
 
 void *codegen_page;
 
@@ -16,7 +17,7 @@ bool default_emit_code(void *ptr){
 #define CODEGEN_DEC(name,t,subscope) \
 __attribute__((weak)) bool name##_emit_code(void*ptr);\
 __attribute__((weak)) codegen name##_transform(void*ptr, codegen this);\
-__attribute__((weak)) void name##_debug_print(void*ptr,codegen this);\
+__attribute__((weak)) void name##_debug_print(void*ptr,codegen this, int depth);\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\
@@ -523,21 +524,19 @@ void s_exp_code_register_subrule(void *ptr, int type, codegen child){
     }
 }
 
-void print_car(lisp_val car){
+void print_car(lisp_val car, int depth){
     switch (car.type) {
         case car_token:
-            print("%v",token_to_slice(car.token));
+            print("%s%v",indent_by(depth),token_to_slice(car.token));
             break;
         case car_num:
-            print("%i",car.number);
+            print("%s%i",indent_by(depth),car.number);
             break;
         case car_true:
-            print("t");
+            print("%st",indent_by(depth));
             break;
         case car_subexp:
-            print("(");
-            codegen_debug_print(car.subexp,car.subexp);
-            print(")");
+            codegen_debug_print(car.subexp,car.subexp, depth+1);
             break;
         default: print("{err wrong type %i}",car.type);
     }
@@ -546,24 +545,24 @@ void print_car(lisp_val car){
 #ifndef RULECODEGEN
 
 #include "interpreter/imaginal.h"
-void s_exp_code_debug_print(void *ptr, codegen this){
+void s_exp_code_debug_print(void *ptr, codegen this, int depth){
     if (!this.ptr){
-        print("nil");
+        print("%snil",indent_by(depth));
         return;
     }
     if (this.type != sem_rule_sexp){
-        print("{err wrong rule %s}",sem_rule_strings[this.type]);
+        print("%s{err wrong rule %s}",indent_by(depth),sem_rule_strings[this.type]);
         return;
     }
     s_exp_code *code = this.ptr;
     if (is_atom(this)){
-        print_car(code->car);
+        print_car(code->car, depth);
         return;
     }
-    print("(");
-    print_car(code->car);
-    codegen_debug_print(code->cdr,code->cdr);
-    print(")");
+    print("%s(",indent_by(depth));
+    print_car(code->car, depth);
+    codegen_debug_print(code->cdr,code->cdr, depth+1);
+    print("%s)",indent_by(depth));
 }
 #endif
 

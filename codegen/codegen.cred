@@ -5,7 +5,7 @@ interface codegen {
     int type;
     void register_elem(int type, Token elem);
     void register_subrule(int type, codegen child);
-    void debug_print(codegen this);//TODO: "this" is too manual, we should pass the entire interface
+    void debug_print(codegen this, int depth);//TODO: "this" is too manual, we should pass the entire interface
     bool emit_code();
     codegen transform(codegen this);
     codegen get_subscope();
