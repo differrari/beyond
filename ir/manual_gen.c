@@ -235,16 +235,16 @@ codegen make_rule_sequence(string_slice name, string_slice value, string_slice t
 }
 
 codegen make_int_atom(i64 a){
-    codegen s = s_exp_code_init();
-    s_exp_code *code = s.ptr;
-    code->car.number = a;
-    code->car.type = car_num;
+    codegen s = lisp_val_code_init();
+    lisp_val_code *code = s.ptr;
+    code->number = a;
+    code->type = car_num;
     return s;
 }
 
 codegen make_true_atom(){
-    codegen s = s_exp_code_init();
-    s_exp_code *code = s.ptr;
-    code->car.type = car_true;
+    codegen s = lisp_val_code_init();
+    lisp_val_code *code = s.ptr;
+    code->type = car_true;
     return s;
 }

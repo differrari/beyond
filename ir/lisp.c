@@ -7,7 +7,7 @@ ast_node* next_node(stack_navigator *sn){
     return node;
 }
 
-extern void s_exp_code_register_elem(void *ptr, int type, Token elem);
+extern void lisp_val_code_register_elem(void *ptr, int type, Token elem);
 extern void s_exp_code_register_subrule(void *ptr, int type, codegen child);
 
 void make_ir_from_node(stack_navigator *sn, int depth, s_exp_code *code){
@@ -23,8 +23,11 @@ void make_ir_from_node(stack_navigator *sn, int depth, s_exp_code *code){
             make_ir_from_node(sn,node->depth, new_code.ptr);
             s_exp_code_register_subrule(code, 0, new_code);
         } else if (node->sem_value) {
-            // print("[%s] %v",sem_rule_strings[node->sem_value],token_to_slice(node->t));
-            s_exp_code_register_elem(code, 0, node->t);
+            ast_node *tok_node = next_node(sn);
+            // print("[%s] %v",sem_rule_strings[tok_node->sem_value],token_to_slice(tok_node->t));
+            codegen new_atom = lisp_val_code_init();
+            lisp_val_code_register_elem(new_atom.ptr, 0, tok_node->t);
+            s_exp_code_register_subrule(code, 0, new_atom);
         }
         node = next_node(sn);
     }

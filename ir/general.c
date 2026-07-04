@@ -492,59 +492,68 @@ CODEGEN_DEC(rule_entry_code, sem_rule_rule_entry, 0);
 
 #include "syscalls/syscalls.h"
 
-void s_exp_code_register_elem(void *ptr, int type, Token elem){
-    s_exp_code *code = (s_exp_code*)ptr;
-    if (!code->car.type){
-        switch (elem.kind){
-            case TOK_NUMBER: 
-                code->car.number = parse_int64(elem.start, elem.length);
-                code->car.type = car_num;
-            break;
-            case TOK_IDENTIFIER: 
-            case TOK_STRING: 
-                code->car.token = elem;
-                code->car.type = car_token;
-            break;
-            default: print("[ERROR] unknown token type"); return;
-        }
-    } else {
-        if (!code->cdr.ptr) code->cdr = s_exp_code_init();
-        s_exp_code_register_elem(code->cdr.ptr, type, elem);
+void lisp_val_code_register_elem(void *ptr, int type, Token elem){
+    lisp_val_code *code = (lisp_val_code*)ptr;
+    switch (elem.kind){
+        case TOK_NUMBER: 
+            code->number = parse_int64(elem.start, elem.length);
+            code->type = car_num;
+        break;
+        case TOK_IDENTIFIER: 
+            code->type = car_identifier;
+            code->val = token_to_slice(elem);
+        break;
+        case TOK_STRING: 
+            code->type = car_string;    
+            code->val = token_to_slice(elem);
+        break;
+        default: print("[ERROR] unknown token type %s",token_name(elem.kind)); return;
     }
+}
+
+void lisp_val_code_register_subrule(void *ptr, int type, codegen child){
+    
+}
+
+#ifndef RULECODEGEN
+void lisp_val_code_debug_print(void *ptr, codegen this, int depth){
+    lisp_val_code *car = ptr;
+    switch (car->type) {
+        case car_identifier:
+            print("%s%v",indent_by(depth),car->val);
+            break;
+        case car_string:
+            print("%s%v",indent_by(depth),car->val);
+            break;
+        case car_num:
+            print("%s%i",indent_by(depth),car->number);
+            break;
+        case car_true:
+            print("%st",indent_by(depth));
+            break;
+        default: print("{err wrong type %i}",car->type);
+    }
+}
+#endif
+
+CODEGEN_DEC(lisp_val_code, sem_rule_lisp_val, 0);
+
+void s_exp_code_register_elem(void *ptr, int type, Token elem){
+    
 }
 
 void s_exp_code_register_subrule(void *ptr, int type, codegen child){
     s_exp_code *code = (s_exp_code*)ptr;
-    if (!code->car.type){
-        code->car.type = car_subexp;
-        code->car.subexp = child;
+    if (!code->car.ptr){
+        code->car = child;
     } else {
         if (!code->cdr.ptr) code->cdr = s_exp_code_init();
         s_exp_code_register_subrule(code->cdr.ptr, type, child);
     }
 }
 
-void print_car(lisp_val car, int depth){
-    switch (car.type) {
-        case car_token:
-            print("%s%v",indent_by(depth),token_to_slice(car.token));
-            break;
-        case car_num:
-            print("%s%i",indent_by(depth),car.number);
-            break;
-        case car_true:
-            print("%st",indent_by(depth));
-            break;
-        case car_subexp:
-            codegen_debug_print(car.subexp,car.subexp, depth+1);
-            break;
-        default: print("{err wrong type %i}",car.type);
-    }
-}
-
 #ifndef RULECODEGEN
 
-#include "interpreter/imaginal.h"
 void s_exp_code_debug_print(void *ptr, codegen this, int depth){
     if (!this.ptr){
         print("%snil",indent_by(depth));
@@ -555,12 +564,12 @@ void s_exp_code_debug_print(void *ptr, codegen this, int depth){
         return;
     }
     s_exp_code *code = this.ptr;
-    if (is_atom(this)){
-        print_car(code->car, depth);
+    if (!code->cdr.ptr){
+        codegen_debug_print(code->car, code->car, depth);
         return;
     }
     print("%s(",indent_by(depth));
-    print_car(code->car, depth);
+    codegen_debug_print(code->car, code->car, depth);
     codegen_debug_print(code->cdr,code->cdr, depth+1);
     print("%s)",indent_by(depth));
 }
