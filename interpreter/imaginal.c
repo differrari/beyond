@@ -1,6 +1,7 @@
 #include "imaginal.h"
 #include "syscalls/syscalls.h"
 #include "ir/manual_gen.h"
+#include "ir/arch_transformer.h"
 
 #define IMAGINAL_DEBUG
 #ifdef IMAGINAL_DEBUG
@@ -9,12 +10,22 @@
 #define imaginal_debug(...)
 #endif
 
+#define nil_exp (codegen){}
+
 bool is_atom(codegen exp){
     return exp.type == sem_rule_lisp_val;
 } 
 
 static inline codegen is_atom_s_exp(codegen exp){
-    return is_atom(exp) ? make_true_atom() : (codegen){};
+    return is_atom(exp) ? make_true_atom() : nil_exp;
+}
+
+bool is_nil(codegen m){
+    return (!m.ptr || !m.type);
+}
+
+codegen evlis(codegen m){
+    return codegen_transform(m, m);
 }
 
 // apply[fn;x;a] =
@@ -40,7 +51,7 @@ codegen imaginal_builtin_add(codegen exp){
         if (cdr_val->type != car_num) { print("[ADD error] non-numeric rh"); return (codegen){}; }
         b = cdr_val->number;
     }
-    imaginal_debug("Add %i + %i = %i",a,b,a+b);
+    imaginal_debug("[ADD trace] %i + %i = %i",a,b,a+b);
     // codegen r = s_exp_code_init();
     return make_int_atom(a+b);
 }
@@ -52,37 +63,48 @@ string_slice car_id(codegen car){
     return code->val;
 }
 
-codegen apply(codegen fn_exp, codegen a, imaginal_env env){
-    s_exp_code *fn = fn_exp.ptr;
-    if (!fn) { print("[APPLY error] Apply null ptr"); return (codegen){}; }
+codegen apply(codegen fn_exp, codegen a){
+    if (!fn_exp.ptr) { print("[APPLY error] Apply null ptr"); return (codegen){}; }
     if (is_atom(fn_exp)){
-        imaginal_debug("[APPLY] Atomic expression");
-        string_slice s = car_id(fn->car);
+        imaginal_debug("[APPLY trace] Atomic expression");
+        string_slice s = car_id(fn_exp);
         if (!s.length) { print("[APPLY error]: Wrong expression type"); return (codegen){}; }
         if (slice_lit_match(s, "car", true)){
-            // caar[x];
-            return (codegen){};
+            if (a.type != sem_rule_sexp) return nil_exp;
+            if (is_atom(a)) return nil_exp;
+            s_exp_code *arg = a.ptr;
+            arg = arg->car.ptr;
+            return arg->car;
         }
         else if (slice_lit_match(s, "cdr", true)){
-            // cdar[x];
-            return (codegen){};
+            if (a.type != sem_rule_sexp) return nil_exp;
+            if (is_atom(a)) return nil_exp;
+            s_exp_code *arg = a.ptr;
+            arg = arg->car.ptr;
+            return arg->cdr;
         }
         else if (slice_lit_match(s, "cons", true)){
-            // cons[car[x];cadr[x]];
-            return (codegen){};
+            return a;
         }
         else if (slice_lit_match(s, "atom", true)){
-            // atom[car[x]];
-            return is_atom_s_exp(a);
+            s_exp_code *arg = a.ptr;
+            if (!arg) return make_true_atom();
+            if (is_atom(a)) return make_true_atom();
+            if (arg->cdr.ptr && arg->cdr.type) return nil_exp;
+            codegen_debug_print(arg->cdr,arg->cdr,0);
+            return is_atom_s_exp(arg->car);
         }
         else if (slice_lit_match(s, "eq", true)){
             // eq[car[x];cadr[x]];
             return (codegen){};
+        } else if (slice_lit_match(s, "add", true)){
+            return imaginal_builtin_add(a);
         } else {
-            return apply(eval(fn_exp,env),a,env);
+            return apply(eval(fn_exp),a);
         }
     } else {
-        imaginal_debug("[APPLY] Non-atomic expression");
+        s_exp_code *fn = fn_exp.ptr;
+        imaginal_debug("[APPLY trace] Non-atomic expression");
         s_exp_code *car = fn->car.ptr;
         if (!is_atom(car->car)) { print("[APPLY error] no atomic expression in sub-expression"); return (codegen){}; }
         string_slice s = car_id(car->car);
@@ -93,7 +115,7 @@ codegen apply(codegen fn_exp, codegen a, imaginal_env env){
             return (codegen){};
         }
         if (slice_lit_match(s, "label", true)){
-            imaginal_debug("[APPLY todo] Handle lambda case");
+            imaginal_debug("[APPLY todo] Handle label case");
             // apply[caddr[fn];x;cons[cons[cadr[fn];caddr[fn]];a]]]
             return (codegen){};
         }
@@ -109,8 +131,8 @@ codegen apply(codegen fn_exp, codegen a, imaginal_env env){
     //          eq[car[e];COND] → evcon[cdr[e];a];
     //          T → apply[car[e];evlis[cdr[e];a];a]];
     //  T → apply[car[e];evlis[cdr[e];a];a]]
-     
-codegen eval(codegen exp, imaginal_env env){
+
+codegen eval(codegen exp){
     s_exp_code *code = exp.ptr;
     if (!code) { print("[EVAL error] null ptr"); return (codegen){}; }
     if (is_atom(exp)){
@@ -119,21 +141,18 @@ codegen eval(codegen exp, imaginal_env env){
     }
     else if (is_atom(code->car)){
         string_slice s = car_id(code->car);
-        imaginal_debug("[EVAL] Atomic car expression %v",s);
+        imaginal_debug("[EVAL trace] Atomic car expression %v",s);
         if (slice_lit_match(s, "cond", true)){
             imaginal_debug("[EVAL todo] Handle cond case");
             // evcon[cdr[e];a];
             return (codegen){};
         }
         else if (slice_lit_match(s, "quote", true)){
-            imaginal_debug("[EVAL todo] Handle quote case");
-            //  cadr[e];
-            return (codegen){};
-        } else if (slice_lit_match(s, "add", true)){
-            return imaginal_builtin_add(code->cdr);
+            s_exp_code *arg = code->cdr.ptr;
+            if (!arg) return nil_exp;
+            return arg->car;
         } else {
-            // apply[car[e];evlis[cdr[e];a];a]];
-            return (codegen){};
+            return apply(code->car, evlis(code->cdr));
         }
     } 
     else {
@@ -143,8 +162,9 @@ codegen eval(codegen exp, imaginal_env env){
 }
 
 codegen s_exp_code_transform(void *ptr, codegen this){
+    if (is_nil(this)) return nil_exp;
     s_exp_code *code = ptr;
-    if (code->car.type == sem_rule_sexp) code->car = eval(code->car, 0);
-    if (code->cdr.ptr) codegen_transform(code->cdr, code->cdr);
+    if (code->car.type == sem_rule_sexp) code->car = eval(code->car);
+    TRANSFORM(cdr);
     return this;
 }

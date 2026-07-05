@@ -2,11 +2,12 @@
 
 #include "ir/general.h"
 #include "data/struct/hashmap.h"
+#include "data/struct/stack.h"
 
-typedef hash_map_t* imaginal_env;
+typedef arr_stack_t *imaginal_env;
 
-codegen apply(codegen fn_exp, codegen a, imaginal_env env);
-codegen eval(codegen exp, imaginal_env);
+codegen apply(codegen fn_exp, codegen a);
+codegen eval(codegen exp);
 bool is_atom(codegen exp);
 
 void imaginal_run(codegen c);
