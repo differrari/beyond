@@ -248,3 +248,10 @@ codegen make_true_atom(){
     code->type = car_true;
     return s;
 }
+
+codegen make_list(codegen single){
+    codegen s = s_exp_code_init();
+    s_exp_code *code = s.ptr;
+    code->car = single;
+    return s;
+}

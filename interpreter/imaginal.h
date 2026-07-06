@@ -10,6 +10,4 @@ codegen apply(codegen fn_exp, codegen a);
 codegen eval(codegen exp);
 bool is_atom(codegen exp);
 
-void imaginal_run(codegen c);
-
-void imaginal_print_exp(codegen c);
+void imaginal_print(codegen exp);

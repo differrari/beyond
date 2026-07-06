@@ -516,20 +516,23 @@ void lisp_val_code_register_subrule(void *ptr, int type, codegen child){
 }
 
 #ifndef RULECODEGEN
+
+extern buffer imaginal_buf;
+
 void lisp_val_code_debug_print(void *ptr, codegen this, int depth){
     lisp_val_code *car = ptr;
     switch (car->type) {
         case car_identifier:
-            print("%s%v",indent_by(depth),car->val);
+            buffer_write(&imaginal_buf,"%v ",car->val);
             break;
         case car_string:
-            print("%s%v",indent_by(depth),car->val);
+            buffer_write(&imaginal_buf,"%v ",car->val);
             break;
         case car_num:
-            print("%s%i",indent_by(depth),car->number);
+            buffer_write(&imaginal_buf,"%i ",car->number);
             break;
         case car_true:
-            print("%st",indent_by(depth));
+            buffer_write(&imaginal_buf,"t ");
             break;
         default: print("{err wrong type %i}",car->type);
     }
@@ -556,22 +559,19 @@ void s_exp_code_register_subrule(void *ptr, int type, codegen child){
 
 void s_exp_code_debug_print(void *ptr, codegen this, int depth){
     if (!this.ptr){
-        print("%snil",indent_by(depth));
+        buffer_write(&imaginal_buf,"nil");
         return;
     }
     if (this.type != sem_rule_sexp){
-        print("%s{err wrong rule %s}",indent_by(depth),sem_rule_strings[this.type]);
+        buffer_write(&imaginal_buf,"{err wrong rule %s}",sem_rule_strings[this.type]);
         return;
     }
     s_exp_code *code = this.ptr;
-    if (!code->cdr.ptr){
-        codegen_debug_print(code->car, code->car, depth);
-        return;
-    }
-    print("%s(",indent_by(depth));
-    codegen_debug_print(code->car, code->car, depth);
-    codegen_debug_print(code->cdr,code->cdr, depth+1);
-    print("%s)",indent_by(depth));
+    buffer_write(&imaginal_buf,"(");
+    codegen_debug_print(code->car, code->car, depth+1);
+    buffer_write(&imaginal_buf," . ");
+    codegen_debug_print(code->cdr, code->cdr, depth+1);
+    buffer_write(&imaginal_buf,")");
 }
 #endif
 
