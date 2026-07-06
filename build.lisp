@@ -27,7 +27,6 @@
         :target (redbuild:native)
         :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
         :flags (list 
-            "-g"
             "-DCCODEGEN"
             "-DCTRANS"
             "-DNORULETRANSFORM"
