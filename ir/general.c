@@ -500,8 +500,14 @@ void lisp_val_code_register_elem(void *ptr, int type, Token elem){
             code->type = car_num;
         break;
         case TOK_IDENTIFIER: 
-            code->type = car_identifier;
-            code->val = token_to_slice(elem);
+            if (slice_lit_match(token_to_slice(elem), "t", true))
+                code->type = car_true;
+            else if (slice_lit_match(token_to_slice(elem), "nil", true))
+                code->type = car_none;
+            else {
+                code->val = token_to_slice(elem);
+                code->type = car_identifier;
+            }
         break;
         case TOK_STRING: 
             code->type = car_string;    

@@ -46,23 +46,36 @@ bool is_nil(codegen m){
     return (!m.ptr || !m.type);
 }
 
-codegen imaginal_builtin_add(codegen exp){
+typedef enum { imaginal_add, imaginal_sub, imaginal_mul, imaginal_div } imaginal_math;
+
+codegen imaginal_builtin_math(codegen exp, imaginal_math op){
     s_exp_code *code = exp.ptr;
-    if (!code) { print("[ADD error] Add null ptr"); return (codegen){}; }
+    if (!code) { print("[MATH error] Add null ptr"); return (codegen){}; }
     lisp_val_code *car_val = code->car.ptr;
-    if (!code->car.ptr) { print("[ADD error] null car"); return nil_exp; }
-    if (car_val->type != car_num) { print("[ADD error] non-numeric lh %v",car_val->val); return (codegen){}; }
+    if (!code->car.ptr) { print("[MATH error] null car"); return nil_exp; }
+    if (car_val->type != car_num) { print("[MATH error] non-numeric lh %v",car_val->val); return (codegen){}; }
     i64 a = car_val->number;
     i64 b = 0;
     s_exp_code *cdr = code->cdr.ptr;
     if (cdr){
         lisp_val_code *cdr_val = (code->cdr.type == sem_rule_lisp_val) ? code->cdr.ptr : ((s_exp_code*)code->cdr.ptr)->car.ptr;
-        if (cdr_val->type != car_num) { print("[ADD error] non-numeric rh"); return (codegen){}; }
+        if (cdr_val->type != car_num) { print("[MATH error] non-numeric rh"); return (codegen){}; }
         b = cdr_val->number;
     }
-    imaginal_debug("[ADD trace] %i + %i = %i",a,b,a+b);
+    imaginal_debug("[MATH trace] %i op %i = %i",a,b,a+b);
     // codegen r = s_exp_code_init();
-    return make_int_atom(a+b);
+    switch (op) {
+        case imaginal_add: return make_int_atom(a+b);
+        case imaginal_sub: return make_int_atom(a-b);
+        case imaginal_mul: return make_int_atom(a*b);
+        case imaginal_div: {
+            if (b == 0){
+                print("[MATH error] divide by 0");
+                return nil_exp;
+            }
+            return make_int_atom(a/b);
+        } 
+    }
 }
 
 static inline string_slice car_id(codegen car){
@@ -166,7 +179,13 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         else if (slice_lit_match(s, "eq", true)){
             return equality(a);
         } else if (slice_lit_match(s, "add", true)){
-            return imaginal_builtin_add(a);
+            return imaginal_builtin_math(a,imaginal_add);
+        } else if (slice_lit_match(s, "sub", true)){
+            return imaginal_builtin_math(a,imaginal_sub);
+        } else if (slice_lit_match(s, "mul", true)){
+            return imaginal_builtin_math(a,imaginal_mul);
+        } else if (slice_lit_match(s, "div", true)){
+            return imaginal_builtin_math(a,imaginal_div);
         } else {
             return apply(eval(fn_exp, env),a, env);
         }
@@ -182,8 +201,8 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
             return eval(car(cdr(cdr(fn_exp))), &local);
         }
         if (slice_lit_match(s, "label", true)){//TODO: will become define and maybe move to eval so it doesn't need the double paren
-            *env = cons(cons(car(cdr(fn_exp)), car(cdr(cdr(fn_exp)))), *env);
-            return nil_exp;
+            codegen local = cons(cons(car(cdr(fn_exp)), car(cdr(cdr(fn_exp)))), *env);
+            return apply(car(cdr(cdr(fn_exp))),a,&local);
         }
         print("[APPLY error] unknown expression %v in apply",s);
         return nil_exp;
@@ -277,7 +296,12 @@ codegen eval(codegen exp, codegen *env){
         }
         else if (slice_lit_match(s, "quote", true)){
             return car(cdr(exp));
-        } else {
+        } 
+        /*else if (slice_lit_match(s, "define", true)){
+            *env = cons(cons(car(cdr(fn_exp)), car(cdr(cdr(fn_exp)))), *env);
+            return nil_exp;
+        } */
+        else {
             return apply(code->car, evlis(code->cdr, env), env);
         }
     } 
