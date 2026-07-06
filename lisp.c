@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
 
     ir = perform_transformations(ir);
 
+    print("Final result");
     imaginal_print(ir);
     
 }
