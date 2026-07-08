@@ -62,7 +62,6 @@ codegen imaginal_builtin_math(codegen exp, imaginal_math op){
         if (cdr_val->type != car_num) { print("[MATH error] non-numeric rh"); return (codegen){}; }
         b = cdr_val->number;
     }
-    // codegen r = s_exp_code_init();
     switch (op) {
         case imaginal_add: imaginal_debug("[MATH trace] %i + %i = %i",a,b,a+b); return make_int_atom(a+b);
         case imaginal_sub: imaginal_debug("[MATH trace] %i - %i = %i",a,b,a-b); return make_int_atom(a-b);
@@ -203,7 +202,7 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         }
         if (slice_lit_match(s, "label", true)){
             codegen local = cons(
-                cons(car(cdr(fn_exp)), make_list(car(cdr(cdr(fn_exp))))),
+                cons(car(cdr(fn_exp)), car(cdr(cdr(fn_exp)))),
                 *env
             );
             return apply(car(cdr(cdr(fn_exp))),a,&local);
@@ -255,12 +254,12 @@ codegen copy_val(codegen a){
 codegen assoc(codegen x, codegen a){
     imaginal_debug("[EVAL trace] assoc");
     if (is_nil(a)) {
-        print("Symbol not found:");
+        print("[ASSOC error] Symbol not found:");
         imaginal_print(x);
         return nil_exp;
     }
     if (equality_atom(car(car(a)), x)){
-        return copy_val(car(cdr(car(a))));
+        return copy_val(cdr(car(a)));
     }
     return assoc(x, cdr(a));
 }
@@ -270,10 +269,12 @@ codegen evlis(codegen l, codegen *env){
     if (is_nil(l)) return nil_exp;
     s_exp_code *code = l.ptr;
     codegen local = *env;
-    code->car = eval(code->car, &local);
+    codegen n = s_exp_code_init();
+    s_exp_code *ncode = n.ptr;
+    ncode->car = eval(code->car, &local);
     imaginal_debug("[S_EXP trace] next");
-    if (code->cdr.ptr) code->cdr = evlis(code->cdr, &local);
-    return l;
+    if (code->cdr.ptr) ncode->cdr = evlis(code->cdr, &local);
+    return n;
 }
 
 // eval[e;a] = 
