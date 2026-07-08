@@ -192,17 +192,20 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         }
     } else {
         s_exp_code *fn = fn_exp.ptr;
-        imaginal_debug("[APPLY trace] Non-atomic expression");
         codegen c = car(fn_exp);
         if (!is_atom(c)) { print("[APPLY error] no atomic expression in sub-expression"); return (codegen){}; }
         string_slice s = car_id(c);
+        imaginal_debug("[APPLY trace] Non-atomic expression %v",s);
         if (!s.length) return (codegen){};
         if (slice_lit_match(s, "lambda", true)){
             codegen local = pairlis(car(cdr(fn_exp)),a,*env);
             return eval(car(cdr(cdr(fn_exp))), &local);
         }
-        if (slice_lit_match(s, "label", true)){//TODO: will become define and maybe move to eval so it doesn't need the double paren
-            codegen local = cons(cons(car(cdr(fn_exp)), car(cdr(cdr(fn_exp)))), *env);
+        if (slice_lit_match(s, "label", true)){
+            codegen local = cons(
+                cons(car(cdr(fn_exp)), make_list(car(cdr(cdr(fn_exp))))),
+                *env
+            );
             return apply(car(cdr(cdr(fn_exp))),a,&local);
         }
         print("[APPLY error] unknown expression %v in apply",s);
@@ -251,7 +254,11 @@ codegen copy_val(codegen a){
 
 codegen assoc(codegen x, codegen a){
     imaginal_debug("[EVAL trace] assoc");
-    if (is_nil(a)) return nil_exp;
+    if (is_nil(a)) {
+        print("Symbol not found:");
+        imaginal_print(x);
+        return nil_exp;
+    }
     if (equality_atom(car(car(a)), x)){
         return copy_val(car(cdr(car(a))));
     }

@@ -1,3 +1,6 @@
-((label hey (lambda (a) (add a a)))) 
-(hey 2) 
-(hey 5)
+((label m (lambda (n) 
+    (cond
+        ((eq n 1) 0)
+        ((eq n 2) 1)
+        (t 3)
+))) 3)
