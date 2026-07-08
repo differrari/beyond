@@ -62,17 +62,17 @@ codegen imaginal_builtin_math(codegen exp, imaginal_math op){
         if (cdr_val->type != car_num) { print("[MATH error] non-numeric rh"); return (codegen){}; }
         b = cdr_val->number;
     }
-    imaginal_debug("[MATH trace] %i op %i = %i",a,b,a+b);
     // codegen r = s_exp_code_init();
     switch (op) {
-        case imaginal_add: return make_int_atom(a+b);
-        case imaginal_sub: return make_int_atom(a-b);
-        case imaginal_mul: return make_int_atom(a*b);
+        case imaginal_add: imaginal_debug("[MATH trace] %i + %i = %i",a,b,a+b); return make_int_atom(a+b);
+        case imaginal_sub: imaginal_debug("[MATH trace] %i - %i = %i",a,b,a-b); return make_int_atom(a-b);
+        case imaginal_mul: imaginal_debug("[MATH trace] %i * %i = %i",a,b,a*b); return make_int_atom(a*b);
         case imaginal_div: {
             if (b == 0){
                 print("[MATH error] divide by 0");
                 return nil_exp;
             }
+            imaginal_debug("[MATH trace] %i/%i = %i",a,b,a/b);
             return make_int_atom(a/b);
         } 
     }
@@ -131,8 +131,9 @@ static inline codegen cdr(codegen a){
 
 static inline codegen cons(codegen a, codegen b){
     codegen news = s_exp_code_init();
-    codegen_register_subrule(news, a.type, a);
-    codegen_register_subrule(news, b.type, b);
+    s_exp_code *code = news.ptr;
+    code->car = a;
+    code->cdr = b;
     return news;
 }
 
