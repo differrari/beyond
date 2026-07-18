@@ -18,12 +18,6 @@ void imaginal_print(codegen exp){
     print("%v",slice_from_buffer(&imaginal_buf));
 }
 
-#define nil_exp (codegen){}
-
-bool is_atom(codegen exp){
-    return exp.type == sem_rule_lisp_val;
-} 
-
 bool is_true(codegen exp){
     switch (exp.type) {
         case sem_rule_sexp: {
@@ -42,7 +36,7 @@ static inline codegen is_atom_s_exp(codegen exp){
     return is_atom(exp) ? make_true_atom() : nil_exp;
 }
 
-bool is_nil(codegen m){
+static inline bool is_nil(codegen m){
     return (!m.ptr || !m.type);
 }
 
@@ -77,13 +71,6 @@ codegen imaginal_builtin_math(codegen exp, imaginal_math op){
     }
 }
 
-static inline string_slice car_id(codegen car){
-    if (car.type != sem_rule_lisp_val) return (string_slice){};
-    lisp_val_code *code = car.ptr;
-    if (code->type != car_identifier) return (string_slice){};
-    return code->val;
-}
-
 bool equality_atom(codegen a, codegen b){
     if (a.type != b.type || a.type != sem_rule_lisp_val) return false;
     lisp_val_code *acode = a.ptr;
@@ -114,34 +101,25 @@ static inline codegen equality(codegen args){
     return equality_atom_exp(a, b);
 }
 
-static inline codegen car(codegen a){
-    if (a.type != sem_rule_sexp) return nil_exp;
-    if (is_atom(a)) return nil_exp;
-    s_exp_code *arg = a.ptr;
-    return arg->car;
-}
-
-static inline codegen cdr(codegen a){
-    if (a.type != sem_rule_sexp) return nil_exp;
-    if (is_atom(a)) return nil_exp;
-    s_exp_code *arg = a.ptr;
-    return arg->cdr;
-}
-
-static inline codegen cons(codegen a, codegen b){
-    codegen news = s_exp_code_init();
-    s_exp_code *code = news.ptr;
-    code->car = a;
-    code->cdr = b;
-    return news;
-}
-
 codegen pairlis(codegen x, codegen y, codegen env){
     if (is_nil(x)) return env;
     return cons(
         cons(car(x), car(y)),
         pairlis(cdr(x), cdr(y), env)
     );
+}
+
+codegen evlis(codegen l, codegen *env){
+    imaginal_debug("[S_EXP trace] transform");
+    if (is_nil(l)) return nil_exp;
+    s_exp_code *code = l.ptr;
+    codegen local = *env;
+    codegen n = s_exp_code_init();
+    s_exp_code *ncode = n.ptr;
+    ncode->car = eval(code->car, &local);
+    imaginal_debug("[S_EXP trace] next");
+    if (code->cdr.ptr) ncode->cdr = evlis(code->cdr, &local);
+    return n;
 }
 
 // apply[fn;x;a] =
@@ -153,6 +131,8 @@ codegen pairlis(codegen x, codegen y, codegen env){
 //                  T → apply[eval[fn;a];x;a]];
 //      eq[car[fn];LAMBDA] → eval[caddr[fn]; pairlis[cadr[fn];x;a]];
 //      eq[car[fn];LABEL] → apply[caddr[fn];x;cons[cons[cadr[fn];caddr[fn]];a]]]
+
+codegen (*imaginal_fallback_fncall)(codegen fn_exp, codegen a, codegen *env);
 
 codegen apply(codegen fn_exp, codegen a, codegen *env){
     if (!fn_exp.ptr) { print("[APPLY error] Apply null ptr"); return (codegen){}; }
@@ -187,7 +167,14 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         } else if (slice_lit_match(s, "div", true)){
             return imaginal_builtin_math(a,imaginal_div);
         } else {
-            return apply(eval(fn_exp, env),a, env);
+            codegen exp = eval(fn_exp, env);
+            if (is_nil(exp)){
+                if (imaginal_fallback_fncall){
+                    return imaginal_fallback_fncall(fn_exp, evlis(a, env), env);
+                }
+                return nil_exp;
+            }
+            return apply(exp, a, env);
         }
     } else {
         s_exp_code *fn = fn_exp.ptr;
@@ -254,27 +241,16 @@ codegen copy_val(codegen a){
 codegen assoc(codegen x, codegen a){
     imaginal_debug("[EVAL trace] assoc");
     if (is_nil(a)) {
-        print("[ASSOC error] Symbol not found:");
-        imaginal_print(x);
+        if (!imaginal_fallback_fncall){
+            print("[ASSOC error] Symbol not found:");
+            imaginal_print(x);
+        }
         return nil_exp;
     }
     if (equality_atom(car(car(a)), x)){
         return copy_val(cdr(car(a)));
     }
     return assoc(x, cdr(a));
-}
-
-codegen evlis(codegen l, codegen *env){
-    imaginal_debug("[S_EXP trace] transform");
-    if (is_nil(l)) return nil_exp;
-    s_exp_code *code = l.ptr;
-    codegen local = *env;
-    codegen n = s_exp_code_init();
-    s_exp_code *ncode = n.ptr;
-    ncode->car = eval(code->car, &local);
-    imaginal_debug("[S_EXP trace] next");
-    if (code->cdr.ptr) ncode->cdr = evlis(code->cdr, &local);
-    return n;
 }
 
 // eval[e;a] = 

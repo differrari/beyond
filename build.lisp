@@ -1,5 +1,10 @@
 (load "~/redbuild/v3/redbuild.lisp")
 
+(defparameter *is-lib* t)
+
+(defmacro exname () (if (eq *is-lib* t) "imaginal" "cred"))
+(defmacro extype () (if (eq *is-lib* t) :lib :bin))
+
 (redbuild:quick-build (make-instance `redbuild:redmod
     :name "rulegen"
     :type :bin
@@ -22,8 +27,8 @@
     (redbuild:quick-cred "semantic/sem_enum.cred" "semantic/semantic_rules")
     (redbuild:quick-cred "codegen/codegen.cred" "codegen/codegen")
     (redbuild:quick-build (make-instance `redbuild:redmod
-        :name "cred"
-        :type :bin
+        :name (exname)
+        :type (extype)
         :target (redbuild:native)
         :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
         :flags (list 

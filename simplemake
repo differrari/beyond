@@ -6,6 +6,7 @@
 /home/di/beyond/codegen/c/ctransformer.c
 /home/di/beyond/codegen/graph/graphcode.c
 /home/di/beyond/interpreter/imaginal.c
+/home/di/beyond/interpreter/repl.c
 /home/di/beyond/ir/general.c
 /home/di/beyond/ir/ir_create.c
 /home/di/beyond/ir/irgen.c

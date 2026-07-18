@@ -4,7 +4,41 @@
 #include "data/struct/hashmap.h"
 #include "data/struct/stack.h"
 
+#define nil_exp (codegen){}
 typedef arr_stack_t *imaginal_env;
+
+static inline bool is_atom(codegen exp){
+    return exp.type == sem_rule_lisp_val;
+} 
+
+static inline codegen car(codegen a){
+    if (a.type != sem_rule_sexp) return nil_exp;
+    if (is_atom(a)) return nil_exp;
+    s_exp_code *arg = a.ptr;
+    return arg->car;
+}
+
+static inline codegen cdr(codegen a){
+    if (a.type != sem_rule_sexp) return nil_exp;
+    if (is_atom(a)) return nil_exp;
+    s_exp_code *arg = a.ptr;
+    return arg->cdr;
+}
+
+static inline codegen cons(codegen a, codegen b){
+    codegen news = s_exp_code_init();
+    s_exp_code *code = news.ptr;
+    code->car = a;
+    code->cdr = b;
+    return news;
+}
+
+static inline string_slice car_id(codegen car){
+    if (car.type != sem_rule_lisp_val) return (string_slice){};
+    lisp_val_code *code = car.ptr;
+    if (code->type != car_identifier) return (string_slice){};
+    return code->val;
+}
 
 codegen apply(codegen fn_exp, codegen a, codegen *env);
 codegen eval(codegen exp, codegen *env);
