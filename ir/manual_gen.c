@@ -263,3 +263,11 @@ codegen make_list(codegen single){
     code->car = single;
     return s;
 }
+
+codegen make_lambda(codegen contents){
+    codegen s = s_exp_code_init();
+    s_exp_code *code = s.ptr;
+    code->car = make_id_atom(SLICE("lambda"));
+    code->cdr = contents;
+    return s;
+}

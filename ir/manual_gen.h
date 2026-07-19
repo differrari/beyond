@@ -33,6 +33,7 @@ codegen make_id_atom(string_slice sl);
 codegen make_int_atom(i64 a);
 codegen make_true_atom();
 codegen make_list(codegen single);
+codegen make_lambda(codegen contents);
 
 static inline codegen make_array_entry(codegen exp, codegen chain){
     return make_indexed_array_entry((string_slice){}, exp, chain);
