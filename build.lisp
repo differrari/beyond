@@ -29,7 +29,7 @@
     (redbuild:quick-build (make-instance `redbuild:redmod
         :name (exname)
         :type (extype)
-        :target (redbuild:native)
+        :target (redbuild:dyn-target)
         :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
         :flags (list 
             "-DCCODEGEN"

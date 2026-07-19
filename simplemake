@@ -1,3 +1,5 @@
+# Compile these files against glfw, libc, libm and https://github.com/differrari/redlib/
+# or use using https://github.com/differrari/redbuild/blob/main/Simplemakefile
 /home/di/beyond/lisp.c
 /home/di/beyond/rules.c
 /home/di/beyond/codegen/codeformat.c
