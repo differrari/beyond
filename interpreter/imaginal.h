@@ -7,6 +7,10 @@
 #define nil_exp (codegen){}
 typedef arr_stack_t *imaginal_env;
 
+typedef codegen (*imaginal_fallback)(codegen fn_exp, codegen a, codegen *env);
+
+extern imaginal_fallback imaginal_fallback_fncall;
+
 static inline bool is_atom(codegen exp){
     return exp.type == sem_rule_lisp_val;
 } 

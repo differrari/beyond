@@ -65,15 +65,15 @@ codegen imaginal_builtin_math(codegen exp, imaginal_math op){
         b = cdr_val->number;
     }
     switch (op) {
-        case imaginal_add: imaginal_debug("[MATH trace] %i + %i = %i",a,b,a+b); return make_int_atom(a+b);
-        case imaginal_sub: imaginal_debug("[MATH trace] %i - %i = %i",a,b,a-b); return make_int_atom(a-b);
-        case imaginal_mul: imaginal_debug("[MATH trace] %i * %i = %i",a,b,a*b); return make_int_atom(a*b);
+        case imaginal_add: imaginal_debug("[ADD trace] %i + %i = %i",a,b,a+b); return make_int_atom(a+b);
+        case imaginal_sub: imaginal_debug("[SUB trace] %i - %i = %i",a,b,a-b); return make_int_atom(a-b);
+        case imaginal_mul: imaginal_debug("[MUL trace] %i * %i = %i",a,b,a*b); return make_int_atom(a*b);
         case imaginal_div: {
             if (b == 0){
-                print("[MATH error] divide by 0");
+                print("[DIV error] divide by 0");
                 return nil_exp;
             }
-            imaginal_debug("[MATH trace] %i/%i = %i",a,b,a/b);
+            imaginal_debug("[DIV trace] %i/%i = %i",a,b,a/b);
             return make_int_atom(a/b);
         } 
     }
@@ -135,6 +135,7 @@ codegen evlis(codegen l, codegen *env){
     ncode->car = eval(code->car, &local);
     imaginal_debug("[S_EXP trace] next");
     if (code->cdr.ptr) ncode->cdr = evlis(code->cdr, &local);
+    imaginal_debug("[S_EXP trace] done");
     return n;
 }
 
@@ -148,7 +149,7 @@ codegen evlis(codegen l, codegen *env){
 //      eq[car[fn];LAMBDA] → eval[caddr[fn]; pairlis[cadr[fn];x;a]];
 //      eq[car[fn];LABEL] → apply[caddr[fn];x;cons[cons[cadr[fn];caddr[fn]];a]]]
 
-codegen (*imaginal_fallback_fncall)(codegen fn_exp, codegen a, codegen *env);
+extern codegen (*imaginal_fallback_fncall)(codegen fn_exp, codegen a, codegen *env);
 
 codegen apply(codegen fn_exp, codegen a, codegen *env){
     if (!fn_exp.ptr) { print("[APPLY error] Apply null ptr"); return (codegen){}; }

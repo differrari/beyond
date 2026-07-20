@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     if (!ir.type || !ir.ptr) return -1;
 
-    debug_print_ir(ir);
+    // debug_print_ir(ir);
 
     ir = perform_transformations(ir);
 

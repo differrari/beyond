@@ -32,22 +32,37 @@ codegen parse_lisp(string_slice code){
     return gen_ir_lisp(parse_res.ast_stack);
 }
 
-codegen repl_run(string_slice code, bool p){
+codegen *repl_env = 0;
+
+imaginal_fallback imaginal_fallback_fncall;
+
+bool repl_run(string_slice code, void *_ctx){
+    imaginal_repl_ctx *ctx = _ctx;
+    if (!ctx) return false;
+
+    imaginal_fallback_fncall = ctx->fallback;
+    
     codegen ir = parse_lisp(code);
 
-    if (!ir.type || !ir.ptr) return nil_exp;
+    if (!ir.type || !ir.ptr){
+        return false;
+    } 
+
+    repl_env = &ctx->environment;
 
     ir = perform_transformations(ir);
 
-    if (p) imaginal_print(ir);
+    if (ctx->should_print) {
+        imaginal_print(ir);
+    }
 
-    return ir;
+    ctx->output = cons(ctx->output,ir);
+
+    return true;
 }
 
-codegen env = nil_exp;
-
 codegen s_exp_code_transform(void *ptr, codegen this){
-    return evlis(this, &env);
+    return evlis(this, repl_env ?: &nil_exp);
 }
 
 #if !defined(CTRANS) && !defined(RULETRANSFORM)
