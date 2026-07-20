@@ -134,8 +134,7 @@ sem_rule sem_rule_from_string(char * val){
 		return sem_rule_sexp;
 	} else if (!strcmp("lisp_val", val)){
 		return sem_rule_lisp_val;
-	}
-	
+	}return 0;
 }
 
 
@@ -163,8 +162,7 @@ sem_elem sem_elem_from_string(char * val){
 		return sem_elem_ref;
 	} else if (!strcmp("count", val)){
 		return sem_elem_count;
-	}
-	
+	}return 0;
 }
 
 
@@ -180,8 +178,7 @@ sem_action sem_action_from_string(char * val){
 		return sem_action_declare;
 	} else if (!strcmp("check", val)){
 		return sem_action_check;
-	}
-	
+	}return 0;
 }
 
 
@@ -203,6 +200,5 @@ semantic_types semantic_types_from_string(char * val){
 		return semantic_types_int32;
 	} else if (!strcmp("passthrough", val)){
 		return semantic_types_passthrough;
-	}
-	
+	}return 0;
 }

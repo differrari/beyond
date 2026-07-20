@@ -3,7 +3,7 @@
 #include "data/format/tokenizer/tokenizer.h"
 #include "rules.h"
 typedef struct codegen codegen;
-typedef struct codegen { 
+struct codegen { 
 	void* ptr;
 	int type;
 	void (*register_elem)(void* instance, int type, Token elem);
@@ -12,7 +12,7 @@ typedef struct codegen {
 	bool (*emit_code)(void* instance);
 	codegen (*transform)(void* instance, codegen this);
 	codegen (*get_subscope)(void* instance);
- } codegen;
+ };
 
 void codegen_register_elem(codegen instance, int type, Token elem);
 void codegen_register_subrule(codegen instance, int type, codegen child);

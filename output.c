@@ -58,8 +58,7 @@ test_enum test_enum_from_string(char * val){
 		return test_enum_two;
 	} else if (!strcmp("three", val)){
 		return test_enum_three;
-	}
-	
+	}return 0;
 }
 
 int hello_func(hello instance, int rule, Token elem){

@@ -341,13 +341,13 @@ bool int_code_emit_code(void *ptr){
         emit_slice(code->name);
         emit_const(";");
         emit_newline();
-        emit_const("typedef struct ");
+        emit_const("struct ");
         emit_slice(code->name);
         emit_const(" { ");
         increase_indent(true);
             codegen_emit_code(code->contents);
         decrease_indent(true);
-        emit(" } %v;",code->name);
+        emit_const(" };");
         emit_newline();
     }
     pop_and_restore_context(orig);

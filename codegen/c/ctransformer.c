@@ -368,7 +368,7 @@ codegen enum_case_code_transform(void *ptr, codegen this){
     if (ctx.convenience == convenience_type_to_string){
         return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, token_to_slice(code->name))), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain, code->chain));
     } if (ctx.convenience == convenience_type_from_string){
-        codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain, code->chain)) : (codegen){};
+        codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain, code->chain)) : make_return(make_const_exp(SLICE("0")));
         codegen i = make_if(
             invert_exp(wrap_in_expression(make_func_call(slice_from_literal("strcmp"), 
                 make_argument(make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), 
