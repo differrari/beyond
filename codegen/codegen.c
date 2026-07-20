@@ -15,9 +15,9 @@ void codegen_register_subrule(codegen instance, int type, codegen child){
 	
 }
 
-void codegen_debug_print(codegen instance, codegen this, int depth){
+void codegen_debug_print(codegen instance, int depth){
 	if (instance.debug_print){
-		return instance.debug_print(instance, this, depth);
+		return instance.debug_print(instance, depth);
 	}
 	
 }
@@ -30,9 +30,9 @@ bool codegen_emit_code(codegen instance){
 	return (bool){};
 }
 
-codegen codegen_transform(codegen instance, codegen this){
+codegen codegen_transform(codegen instance){
 	if (instance.transform){
-		return instance.transform(instance, this);
+		return instance.transform(instance);
 	}
 	
 	return (codegen){};

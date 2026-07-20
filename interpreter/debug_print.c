@@ -4,7 +4,7 @@
 
 extern buffer imaginal_buf;
 
-void lisp_val_code_debug_print(codegen instance, codegen this, int depth){
+void lisp_val_code_debug_print(codegen instance, int depth){
     lisp_val_code *car = instance.ptr;
     switch (car->type) {
         case car_identifier:
@@ -23,7 +23,7 @@ void lisp_val_code_debug_print(codegen instance, codegen this, int depth){
     }
 }
 
-void s_exp_code_debug_print(codegen instance, codegen this, int depth){
+void s_exp_code_debug_print(codegen instance, int depth){
     if (!instance.ptr){
         buffer_write(&imaginal_buf,"nil");
         return;
@@ -34,8 +34,8 @@ void s_exp_code_debug_print(codegen instance, codegen this, int depth){
     }
     s_exp_code *code = instance.ptr;
     buffer_write(&imaginal_buf,"(");
-    codegen_debug_print(code->car, code->car, depth+1);
+    codegen_debug_print(code->car, depth+1);
     buffer_write(&imaginal_buf," . ");
-    codegen_debug_print(code->cdr, code->cdr, depth+1);
+    codegen_debug_print(code->cdr, depth+1);
     buffer_write(&imaginal_buf,")");
 }

@@ -8,15 +8,15 @@ struct codegen {
 	int type;
 	void (*register_elem)(codegen instance, int type, Token elem);
 	void (*register_subrule)(codegen instance, int type, codegen child);
-	void (*debug_print)(codegen instance, codegen this, int depth);
+	void (*debug_print)(codegen instance, int depth);
 	bool (*emit_code)(codegen instance);
-	codegen (*transform)(codegen instance, codegen this);
+	codegen (*transform)(codegen instance);
 	codegen (*get_subscope)(codegen instance);
  };
 
 void codegen_register_elem(codegen instance, int type, Token elem);
 void codegen_register_subrule(codegen instance, int type, codegen child);
-void codegen_debug_print(codegen instance, codegen this, int depth);
+void codegen_debug_print(codegen instance, int depth);
 bool codegen_emit_code(codegen instance);
-codegen codegen_transform(codegen instance, codegen this);
+codegen codegen_transform(codegen instance);
 codegen codegen_get_subscope(codegen instance);

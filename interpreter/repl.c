@@ -61,12 +61,12 @@ bool repl_run(string_slice code, void *_ctx){
     return true;
 }
 
-codegen s_exp_code_transform(codegen instance, codegen this){
-    return evlis(this, repl_env ?: &nil_exp);
+codegen s_exp_code_transform(codegen instance){
+    return evlis(instance, repl_env ?: &nil_exp);
 }
 
 #if !defined(CTRANS) && !defined(RULETRANSFORM)
 codegen perform_transformations(codegen root){
-    return codegen_transform(root,root);
+    return codegen_transform(root);
 }
 #endif

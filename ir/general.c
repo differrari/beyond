@@ -8,7 +8,7 @@ void *codegen_page;
 
 #define CODEGEN_DEC(name,t,subscope,printer) \
 extern bool name##_emit_code(codegen instance);\
-extern codegen name##_transform(codegen instance, codegen this);\
+extern codegen name##_transform(codegen instance);\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\
@@ -515,7 +515,7 @@ void lisp_val_code_register_subrule(codegen instance, int type, codegen child){
 #ifdef RULECODEGEN
 CODEGEN_DEC(lisp_val_code, sem_rule_lisp_val, 0, 0);
 #else
-extern void lisp_val_code_debug_print(codegen instance, codegen this, int depth);
+extern void lisp_val_code_debug_print(codegen instance, int depth);
 CODEGEN_DEC(lisp_val_code, sem_rule_lisp_val, 0, lisp_val_code_debug_print);
 #endif
 
@@ -536,6 +536,6 @@ void s_exp_code_register_subrule(codegen instance, int type, codegen child){
 #ifdef RULECODEGEN
 CODEGEN_DEC(s_exp_code, sem_rule_sexp, 0, 0);
 #else
-extern void s_exp_code_debug_print(codegen instance, codegen this, int depth);
+extern void s_exp_code_debug_print(codegen instance, int depth);
 CODEGEN_DEC(s_exp_code, sem_rule_sexp, 0, s_exp_code_debug_print);
 #endif

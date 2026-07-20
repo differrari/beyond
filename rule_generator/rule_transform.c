@@ -9,7 +9,7 @@ codegen additional_rules = {};
 codegen literals = {};
 
 codegen perform_transformations(codegen root){
-    root = codegen_transform(root,root);
+    root = codegen_transform(root);
     rule_entry_code *code = root.ptr;
     while (code->chain.ptr) code = code->chain.ptr;
     if (additional_rules.ptr) code->chain = additional_rules;
@@ -30,11 +30,11 @@ bool is_string_lit_alphanum(string_slice slice){
     return true;
 }
 
-codegen blk_code_transform(codegen instance, codegen this){
+codegen blk_code_transform(codegen instance){
     blk_code *code = instance.ptr;
     TRANSFORM(stat);
     TRANSFORM(chain);
-    return this;
+    return instance;
 }
 
 codegen get_inserted_rule(codegen list, string_slice name){
@@ -78,7 +78,7 @@ codegen insert_new_rule(codegen list, string_slice name, string_slice tag, bool 
     return list;
 }
 
-codegen rule_sequence_code_transform(codegen instance, codegen this){
+codegen rule_sequence_code_transform(codegen instance){
     rule_sequence_code *code = instance.ptr;
     if (code->tag.length && *code->tag.data != '"' && is_token(code->name)){
         additional_rules = insert_new_rule(additional_rules, code->tag, (string_slice){}, false, code->name);
@@ -88,22 +88,22 @@ codegen rule_sequence_code_transform(codegen instance, codegen this){
     else if (code->name.length && *code->name.data == '"' && is_string_lit_alphanum(code->name))
         literals = insert_new_rule(literals, slice_from_literal("literals"), (string_slice){}, false, code->name);
     TRANSFORM(chain);
-    return this;
+    return instance;
 }
 
-codegen rule_entry_code_transform(codegen instance, codegen this){
+codegen rule_entry_code_transform(codegen instance){
     rule_entry_code *code = instance.ptr;
     TRANSFORM(list);
     TRANSFORM(chain);
-    return this;
+    return instance;
 }
 
-codegen s_exp_code_transform(codegen instance, codegen this){
-    return this;
+codegen s_exp_code_transform(codegen instance){
+    return instance;
 }
 
-codegen lisp_val_code_transform(codegen instance, codegen this){
-    return this;
+codegen lisp_val_code_transform(codegen instance){
+    return instance;
 }
 
 

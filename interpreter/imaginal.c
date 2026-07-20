@@ -14,7 +14,7 @@ buffer imaginal_buf;
 void imaginal_print(codegen exp){
     if (!imaginal_buf.buffer) imaginal_buf = buffer_create(0x1000, buffer_can_grow);
     buffer_wipe(&imaginal_buf);
-    codegen_debug_print(exp, exp, 0);
+    codegen_debug_print(exp, 0);
     print("%v",slice_from_buffer(&imaginal_buf));
 }
 
