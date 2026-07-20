@@ -1,0 +1,21 @@
+#:parser testparser {
+
+	reset line # will reset FSM on a newline
+	
+    tokens {
+        pathcomp: [a-zA-Z_-\ ]
+        path: (first-optional:/ pathcomp){1+} /? # means: slash, optional the first time, pathcomponent, whole thing repeated
+        url: ...
+    }
+
+    test: "Hello" (capture ("World" or "Friend")) {
+        print(rule.all)
+        print(rule.captures[0])
+    }
+    # means: expect Hello, followed by either World or Friend, capture the second word, on detection, print the whole string, then the first capture
+
+    link: not:! [ capture:(not:]{0+}) ] ( capture(not:){0+} ) {
+        print("Link ${rule.captures[0]} ${rule.captures[1]}");
+    }
+
+}

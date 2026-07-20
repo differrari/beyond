@@ -42,6 +42,7 @@ static inline string_slice car_id(codegen car){
 
 codegen apply(codegen fn_exp, codegen a, codegen *env);
 codegen eval(codegen exp, codegen *env);
+codegen evlis(codegen l, codegen *env);
 bool is_atom(codegen exp);
 
 void imaginal_print(codegen exp);

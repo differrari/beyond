@@ -1,9 +1,11 @@
 (load "~/redbuild/v3/redbuild.lisp")
 
-(defparameter *is-lib* t)
+(defparameter *is-lib* nil)
+(defparameter *interpreter* nil)
 
 (defmacro exname () (if (eq *is-lib* t) "imaginal" "cred"))
 (defmacro extype () (if (eq *is-lib* t) :lib :bin))
+(defmacro if-comp (a b) (if (eq *interpreter* nil) a b))
 
 (redbuild:quick-build (make-instance `redbuild:redmod
     :name "rulegen"
@@ -23,18 +25,18 @@
         "-DRULECODEGEN"
         "-DRULETRANSFORM"
     )
-) :add-dependencies t :run t :run-args "languages/lisp.rules" :success (lambda () 
+) :add-dependencies t :run t :run-args (if-comp "languages/cred.rules" "languages/lisp.rules") :success (lambda () 
     (redbuild:quick-cred "semantic/sem_enum.cred" "semantic/semantic_rules")
     (redbuild:quick-cred "codegen/codegen.cred" "codegen/codegen")
     (redbuild:quick-build (make-instance `redbuild:redmod
         :name (exname)
         :type (extype)
         :target (redbuild:dyn-target)
-        :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" "main.c" "ruleparser.c"))
+        :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" (if-comp "lisp_test.c" "cred_main.c") "ruleparser.c"))
         :flags (list 
             "-DCCODEGEN"
             "-DCTRANS"
             "-DNORULETRANSFORM"
         )
-    ) :add-dependencies t :run t :run-args "test.lisp" :success (lambda () (redbuild:emit-compile-commands)))
+    ) :add-dependencies t :run t :run-args (if-comp "street.cred" "test.lisp") :success (lambda () (redbuild:emit-compile-commands)))
 ))

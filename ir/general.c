@@ -15,9 +15,9 @@ bool default_emit_code(void *ptr){
 }
 
 #define CODEGEN_DEC(name,t,subscope) \
-__attribute__((weak)) bool name##_emit_code(void*ptr);\
-__attribute__((weak)) codegen name##_transform(void*ptr, codegen this);\
-__attribute__((weak)) void name##_debug_print(void*ptr,codegen this, int depth);\
+__attribute__((weak)) bool name##_emit_code(void*ptr) { return false; };\
+__attribute__((weak)) codegen name##_transform(void*ptr, codegen this) { return this; };\
+__attribute__((weak)) void name##_debug_print(void*ptr,codegen this, int depth) {};\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\
@@ -521,30 +521,6 @@ void lisp_val_code_register_subrule(void *ptr, int type, codegen child){
     
 }
 
-#ifndef RULECODEGEN
-
-extern buffer imaginal_buf;
-
-void lisp_val_code_debug_print(void *ptr, codegen this, int depth){
-    lisp_val_code *car = ptr;
-    switch (car->type) {
-        case car_identifier:
-            buffer_write(&imaginal_buf,"%v ",car->val);
-            break;
-        case car_string:
-            buffer_write(&imaginal_buf,"%v ",car->val);
-            break;
-        case car_num:
-            buffer_write(&imaginal_buf,"%i ",car->number);
-            break;
-        case car_true:
-            buffer_write(&imaginal_buf,"t ");
-            break;
-        default: print("{err wrong type %i}",car->type);
-    }
-}
-#endif
-
 CODEGEN_DEC(lisp_val_code, sem_rule_lisp_val, 0);
 
 void s_exp_code_register_elem(void *ptr, int type, Token elem){
@@ -560,25 +536,5 @@ void s_exp_code_register_subrule(void *ptr, int type, codegen child){
         s_exp_code_register_subrule(code->cdr.ptr, type, child);
     }
 }
-
-#ifndef RULECODEGEN
-
-void s_exp_code_debug_print(void *ptr, codegen this, int depth){
-    if (!this.ptr){
-        buffer_write(&imaginal_buf,"nil");
-        return;
-    }
-    if (this.type != sem_rule_sexp){
-        buffer_write(&imaginal_buf,"{err wrong rule %s}",sem_rule_strings[this.type]);
-        return;
-    }
-    s_exp_code *code = this.ptr;
-    buffer_write(&imaginal_buf,"(");
-    codegen_debug_print(code->car, code->car, depth+1);
-    buffer_write(&imaginal_buf," . ");
-    codegen_debug_print(code->cdr, code->cdr, depth+1);
-    buffer_write(&imaginal_buf,")");
-}
-#endif
 
 CODEGEN_DEC(s_exp_code, sem_rule_sexp, 0);

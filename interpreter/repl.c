@@ -44,6 +44,11 @@ codegen repl_run(string_slice code, bool p){
     return ir;
 }
 
+codegen env = nil_exp;
+
+codegen s_exp_code_transform(void *ptr, codegen this){
+    return evlis(this, &env);
+}
 
 #if !defined(CTRANS) && !defined(RULETRANSFORM)
 codegen perform_transformations(codegen root){

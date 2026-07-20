@@ -295,8 +295,3 @@ codegen eval(codegen exp, codegen *env){
         return apply(code->car, evlis(code->cdr, env), env);
     }
 }
-
-codegen s_exp_code_transform(void *ptr, codegen this){
-    codegen env = nil_exp;
-    return evlis(this, &env);
-}
