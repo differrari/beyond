@@ -261,10 +261,10 @@ codegen struct_code_transform(void *ptr, codegen this){
                 maintained = wrap_in_block(codegen_transform(dec->stat, dec->stat),maintained,true);
             } else if (dec->stat.type == sem_rule_func){
                 func_code *function = dec->stat.ptr;
-                function->body = codegen_transform(function->body, function->body);
+                function->body = wrap_in_block(make_declaration("*instance", code->name, make_const_exp(SLICE("instance.ptr"))),codegen_transform(function->body, function->body),false);
                 string_slice parent_name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
-                function->args = make_param(slice_from_string(string_format("%v*",code->name)),slice_from_literal("instance"), function->args);
+                function->args = make_param(token_to_slice(code->parent),slice_from_literal("interf"), function->args);
                 extracted = wrap_in_block(dec->stat, extracted, true);
                 if (code->parent.length){
                     symbol_t *parent_sym = find_symbol(sem_rule_interf, token_to_slice(code->parent));
@@ -324,8 +324,8 @@ codegen int_code_transform(void *ptr, codegen this){
                 stub->type = function->type;
                 stub->name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
-                stub->args = make_param(slice_from_literal("void*"),slice_from_literal("instance"), function->args);
-                codegen call = make_argument(make_literal_expression(slice_from_literal("instance.ptr")), param_to_arg(function->args));
+                stub->args = make_param(code->name,slice_from_literal("instance"), function->args);
+                codegen call = make_argument(make_literal_expression(slice_from_literal("instance")), param_to_arg(function->args));
                 function->args = make_param(code->name,slice_from_literal("instance"), function->args);
                 codegen def = !function->type.length || slice_lit_match(function->type, "void", true) ? (codegen){} : make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type))));
                 function->body = 

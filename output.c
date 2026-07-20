@@ -63,7 +63,7 @@ test_enum test_enum_from_string(char * val){
 
 int hello_func(hello instance, int rule, Token elem){
 	if (instance.func){
-		return instance.func(instance.ptr, rule, elem);
+		return instance.func(instance, rule, elem);
 	}
 	
 	return (int){};
@@ -71,21 +71,23 @@ int hello_func(hello instance, int rule, Token elem){
 
 void hello_test(hello instance){
 	if (instance.test){
-		return instance.test(instance.ptr);
+		return instance.test(instance);
 	}
 	
 }
 
-void testType_func(testType* instance, int rule, Token elem){
+void testType_func(hello interf, int rule, Token elem){
+	testType *instance = instance.ptr;
 	int a = 0;
 }
 
-void testType_test(testType* instance){
+void testType_test(hello interf){
+	testType *instance = instance.ptr;
 	print("Test succeeded %i", instance->prop1);
 }
 
-void testType_helper(testType* instance){
-	
+void testType_helper(hello interf){
+	testType *instance = instance.ptr;
 }
 
 hello testType_init(){
@@ -139,7 +141,8 @@ int main(){
 	
 	print();
 	traverse_directory(s.data, true, _temp_func_1);
-	defer:
+	
+defer:
 	cleanup();
 	x = 0;
 	return __return_val;
