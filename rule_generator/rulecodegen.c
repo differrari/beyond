@@ -23,6 +23,123 @@ void generate_code(const char *name, codegen cg){
     output_code(name,"js");
 }
 
+
+bool dec_code_emit_code(void* ptr){
+    return false;
+}
+
+bool ass_code_emit_code(void *ptr){
+    return false;
+}
+
+bool call_code_emit_code(void *ptr){
+    return false;
+}
+
+bool cond_code_emit_code(void *ptr){
+    return false;
+}
+
+bool jmp_code_emit_code(void *ptr){
+    return false;
+}
+
+bool label_code_emit_code(void *ptr){
+    return false;
+}
+
+bool exp_code_emit_code(void *ptr){
+    return false;
+}
+
+bool arg_code_emit_code(void *ptr){
+    return false;
+}
+
+bool param_code_emit_code(void *ptr){
+    return false;
+}
+
+bool func_code_emit_code(void *ptr){
+    return false;
+}
+
+bool for_code_emit_code(void* ptr){
+    return false;
+}
+
+bool while_code_emit_code(void* ptr){
+    return false;
+}
+
+bool dowhile_code_emit_code(void* ptr){
+    return false;
+}
+
+bool var_code_emit_code(void* ptr){
+    return false;
+}
+
+bool inc_code_emit_code(void *ptr){
+    return false;
+}
+
+bool struct_code_emit_code(void *ptr){
+    return false;
+}
+
+bool ret_code_emit_code(void *ptr){
+    return false;
+}
+
+bool def_code_emit_code(void *ptr){
+    return false;
+}
+
+bool int_code_emit_code(void *ptr){
+    return false;
+}
+
+bool enum_code_emit_code(void *ptr){
+    return false;
+}
+
+bool enum_case_code_emit_code(void *ptr){
+    return false;
+}
+
+bool else_code_emit_code(void *ptr){
+    return false;
+}
+
+bool switch_code_emit_code(void *ptr){
+    return false;
+}
+
+bool case_code_emit_code(void *ptr){
+    return false;
+}
+
+bool prop_init_code_emit_code(void *ptr){
+    return false;
+}
+
+bool struct_init_code_emit_code(void *ptr){
+    return false;
+}
+
+bool cast_code_emit_code(void *ptr){
+    return false;
+}
+
+bool array_init_code_emit_code(void *ptr){
+    return false;
+}
+
+bool array_entry_code_emit_code(void *ptr){
+    return false;
+}
+
 bool blk_code_emit_code(void* ptr){
     blk_code *code = ptr;
     emit_const("seq(");
@@ -68,6 +185,14 @@ bool rule_entry_code_emit_code(void *ptr){
     emit_const(")),");
     emit_newline();
     codegen_emit_code(code->chain);
+    return false;
+}
+
+bool s_exp_code_emit_code(void *ptr, codegen this){
+    return false;
+}
+
+bool lisp_val_code_emit_code(void *ptr, codegen this){
     return false;
 }
 

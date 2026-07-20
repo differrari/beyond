@@ -15,8 +15,8 @@ bool default_emit_code(void *ptr){
 }
 
 #define CODEGEN_DEC(name,t,subscope,printer) \
-__attribute__((weak)) extern bool name##_emit_code(void*ptr);\
-__attribute__((weak)) extern codegen name##_transform(void*ptr, codegen this);\
+extern bool name##_emit_code(void*ptr);\
+extern codegen name##_transform(void*ptr, codegen this);\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\

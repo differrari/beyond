@@ -15,6 +15,7 @@
 		"ir/manual_gen.c" 
 		"codegen/codeformat.c" 
 		"codegen/codegen.c" 
+		"codegen/identity_transform.c"
 		"ir/general.c" 
 		"rule_generator/rulecodegen.c" 
 		"rule_generator/ruleparser.c" 
@@ -32,7 +33,7 @@
         :name (exname)
         :type (extype)
         :target (redbuild:dyn-target)
-        :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" (if-comp "lisp_test.c" "cred_main.c") "ruleparser.c"))
+        :srcs (redbuild:all-sources-ignoring "c" (list "output.c" "build.c" (if-comp "lisp_test.c" "cred_main.c") (if-comp "interpreter/repl.c" nil) "ruleparser.c"))
         :flags (list 
             "-DCCODEGEN"
             "-DCTRANS"

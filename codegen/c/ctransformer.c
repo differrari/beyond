@@ -403,8 +403,33 @@ codegen case_code_transform(void *ptr, codegen this){
     return this;
 }
 
+codegen prop_init_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen struct_init_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen cast_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen array_init_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen array_entry_code_transform(void *ptr, codegen this){
+    return this;
+}
+
+codegen lisp_val_code_transform(void *ptr, codegen this){
+    return this;
+}
+
 codegen perform_transformations(codegen root){
     return codegen_transform(root,root);
 }
 
 #endif
+
