@@ -6,12 +6,12 @@ typedef struct codegen codegen;
 struct codegen { 
 	void* ptr;
 	int type;
-	void (*register_elem)(void* instance, int type, Token elem);
-	void (*register_subrule)(void* instance, int type, codegen child);
-	void (*debug_print)(void* instance, codegen this, int depth);
-	bool (*emit_code)(void* instance);
-	codegen (*transform)(void* instance, codegen this);
-	codegen (*get_subscope)(void* instance);
+	void (*register_elem)(codegen instance, int type, Token elem);
+	void (*register_subrule)(codegen instance, int type, codegen child);
+	void (*debug_print)(codegen instance, codegen this, int depth);
+	bool (*emit_code)(codegen instance);
+	codegen (*transform)(codegen instance, codegen this);
+	codegen (*get_subscope)(codegen instance);
  };
 
 void codegen_register_elem(codegen instance, int type, Token elem);

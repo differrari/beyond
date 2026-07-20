@@ -24,124 +24,124 @@ void generate_code(const char *name, codegen cg){
 }
 
 
-bool dec_code_emit_code(void* ptr){
+bool dec_code_emit_code(codegen instance){
     return false;
 }
 
-bool ass_code_emit_code(void *ptr){
+bool ass_code_emit_code(codegen instance){
     return false;
 }
 
-bool call_code_emit_code(void *ptr){
+bool call_code_emit_code(codegen instance){
     return false;
 }
 
-bool cond_code_emit_code(void *ptr){
+bool cond_code_emit_code(codegen instance){
     return false;
 }
 
-bool jmp_code_emit_code(void *ptr){
+bool jmp_code_emit_code(codegen instance){
     return false;
 }
 
-bool label_code_emit_code(void *ptr){
+bool label_code_emit_code(codegen instance){
     return false;
 }
 
-bool exp_code_emit_code(void *ptr){
+bool exp_code_emit_code(codegen instance){
     return false;
 }
 
-bool arg_code_emit_code(void *ptr){
+bool arg_code_emit_code(codegen instance){
     return false;
 }
 
-bool param_code_emit_code(void *ptr){
+bool param_code_emit_code(codegen instance){
     return false;
 }
 
-bool func_code_emit_code(void *ptr){
+bool func_code_emit_code(codegen instance){
     return false;
 }
 
-bool for_code_emit_code(void* ptr){
+bool for_code_emit_code(codegen instance){
     return false;
 }
 
-bool while_code_emit_code(void* ptr){
+bool while_code_emit_code(codegen instance){
     return false;
 }
 
-bool dowhile_code_emit_code(void* ptr){
+bool dowhile_code_emit_code(codegen instance){
     return false;
 }
 
-bool var_code_emit_code(void* ptr){
+bool var_code_emit_code(codegen instance){
     return false;
 }
 
-bool inc_code_emit_code(void *ptr){
+bool inc_code_emit_code(codegen instance){
     return false;
 }
 
-bool struct_code_emit_code(void *ptr){
+bool struct_code_emit_code(codegen instance){
     return false;
 }
 
-bool ret_code_emit_code(void *ptr){
+bool ret_code_emit_code(codegen instance){
     return false;
 }
 
-bool def_code_emit_code(void *ptr){
+bool def_code_emit_code(codegen instance){
     return false;
 }
 
-bool int_code_emit_code(void *ptr){
+bool int_code_emit_code(codegen instance){
     return false;
 }
 
-bool enum_code_emit_code(void *ptr){
+bool enum_code_emit_code(codegen instance){
     return false;
 }
 
-bool enum_case_code_emit_code(void *ptr){
+bool enum_case_code_emit_code(codegen instance){
     return false;
 }
 
-bool else_code_emit_code(void *ptr){
+bool else_code_emit_code(codegen instance){
     return false;
 }
 
-bool switch_code_emit_code(void *ptr){
+bool switch_code_emit_code(codegen instance){
     return false;
 }
 
-bool case_code_emit_code(void *ptr){
+bool case_code_emit_code(codegen instance){
     return false;
 }
 
-bool prop_init_code_emit_code(void *ptr){
+bool prop_init_code_emit_code(codegen instance){
     return false;
 }
 
-bool struct_init_code_emit_code(void *ptr){
+bool struct_init_code_emit_code(codegen instance){
     return false;
 }
 
-bool cast_code_emit_code(void *ptr){
+bool cast_code_emit_code(codegen instance){
     return false;
 }
 
-bool array_init_code_emit_code(void *ptr){
+bool array_init_code_emit_code(codegen instance){
     return false;
 }
 
-bool array_entry_code_emit_code(void *ptr){
+bool array_entry_code_emit_code(codegen instance){
     return false;
 }
 
-bool blk_code_emit_code(void* ptr){
-    blk_code *code = ptr;
+bool blk_code_emit_code(codegen instance){
+    blk_code *code = instance.ptr;
     emit_const("seq(");
     codegen_emit_code(code->stat);
     emit_const(")");
@@ -152,8 +152,8 @@ bool blk_code_emit_code(void* ptr){
     return true;
 }
 
-bool rule_sequence_code_emit_code(void *ptr){
-    rule_sequence_code *code = ptr;
+bool rule_sequence_code_emit_code(codegen instance){
+    rule_sequence_code *code = instance.ptr;
     if (code->optional){
         emit_const("optional(");
     }
@@ -175,8 +175,8 @@ bool rule_sequence_code_emit_code(void *ptr){
 
 int pref = 100;
 
-bool rule_entry_code_emit_code(void *ptr){
-    rule_entry_code *code = ptr;
+bool rule_entry_code_emit_code(codegen instance){
+    rule_entry_code *code = instance.ptr;
     emit_slice(code->name);
     emit_const(": $ => ");
     emit("prec(%i,",pref--);
@@ -188,11 +188,11 @@ bool rule_entry_code_emit_code(void *ptr){
     return false;
 }
 
-bool s_exp_code_emit_code(void *ptr, codegen this){
+bool s_exp_code_emit_code(codegen instance, codegen this){
     return false;
 }
 
-bool lisp_val_code_emit_code(void *ptr, codegen this){
+bool lisp_val_code_emit_code(codegen instance, codegen this){
     return false;
 }
 

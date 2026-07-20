@@ -61,7 +61,7 @@ bool repl_run(string_slice code, void *_ctx){
     return true;
 }
 
-codegen s_exp_code_transform(void *ptr, codegen this){
+codegen s_exp_code_transform(codegen instance, codegen this){
     return evlis(this, repl_env ?: &nil_exp);
 }
 

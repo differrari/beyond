@@ -31,8 +31,8 @@ void generate_code(const char *name, codegen cg){
     }
 }
 
-bool blk_code_emit_code(void* ptr){
-    blk_code *code = (blk_code*)ptr;
+bool blk_code_emit_code(codegen instance){
+    blk_code *code = (blk_code*)instance.ptr;
     bool emitted = codegen_emit_code(code->stat);
     if (code->chain.ptr){ 
         if (emitted) emit_newline(); 
@@ -47,8 +47,8 @@ void emit_type(symbol_t *sym, bool extra){
     string_free(s);
 }
 
-bool dec_code_emit_code(void* ptr){
-    dec_code *code = (dec_code*)ptr;
+bool dec_code_emit_code(codegen instance){
+    dec_code *code = (dec_code*)instance.ptr;
     if (is_header == false && (ctx.context_rule == sem_rule_struct || ctx.context_rule == sem_rule_interf)) return false;
     if (is_header == true && ctx.context_rule != sem_rule_struct && ctx.context_rule != sem_rule_interf)
         emit_const("extern ");
@@ -65,9 +65,9 @@ bool dec_code_emit_code(void* ptr){
     return true;
 }
 
-bool ass_code_emit_code(void *ptr){
+bool ass_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    ass_code *code = (ass_code*)ptr;
+    ass_code *code = (ass_code*)instance.ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
     codegen_emit_code(code->var);
     emit_const(" = ");
@@ -77,9 +77,9 @@ bool ass_code_emit_code(void *ptr){
     return true;
 }
 
-bool call_code_emit_code(void *ptr){
+bool call_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    call_code *code = (call_code*)ptr;
+    call_code *code = (call_code*)instance.ptr;
     if (code->transform == var_deref){
         emit_const("*");
     }
@@ -98,9 +98,9 @@ bool call_code_emit_code(void *ptr){
     return true;
 }
 
-bool cond_code_emit_code(void *ptr){
+bool cond_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    cond_code *code = (cond_code*)ptr;
+    cond_code *code = (cond_code*)instance.ptr;
     // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
     emit_const("if (");
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
@@ -116,27 +116,27 @@ bool cond_code_emit_code(void *ptr){
     return true;
 }
 
-bool jmp_code_emit_code(void *ptr){
+bool jmp_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    jmp_code *code = (jmp_code*)ptr;
+    jmp_code *code = (jmp_code*)instance.ptr;
     emit_const("goto ");
     emit_slice(code->jump);
     emit_const(";");
     return true;
 }
 
-bool label_code_emit_code(void *ptr){
+bool label_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    label_code *code = (label_code*)ptr;
+    label_code *code = (label_code*)instance.ptr;
     emit_const("\r");
     emit_slice(code->name);
     emit_const(":");
     return true;
 }
 
-bool exp_code_emit_code(void *ptr){
+bool exp_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    exp_code *code = (exp_code*)ptr;
+    exp_code *code = (exp_code*)instance.ptr;
     if (code->paren)
         emit_const("(");
     if (code->invert)
@@ -158,9 +158,9 @@ bool exp_code_emit_code(void *ptr){
     return true;
 }
 
-bool arg_code_emit_code(void *ptr){
+bool arg_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    arg_code *code = (arg_code*)ptr;
+    arg_code *code = (arg_code*)instance.ptr;
     codegen_emit_code(code->exp);
     if (code->chain.ptr){
         emit_const(", ");
@@ -169,8 +169,8 @@ bool arg_code_emit_code(void *ptr){
     return true;
 }
 
-bool param_code_emit_code(void *ptr){
-    param_code *code = (param_code*)ptr;
+bool param_code_emit_code(codegen instance){
+    param_code *code = (param_code*)instance.ptr;
     emit_slice(code->type);
     emit_space();
     emit_slice(code->name);
@@ -181,8 +181,8 @@ bool param_code_emit_code(void *ptr){
     return true;
 }
 
-bool func_code_emit_code(void *ptr){
-    func_code *code = (func_code*)ptr;
+bool func_code_emit_code(codegen instance){
+    func_code *code = (func_code*)instance.ptr;
     if (code->type.length){
         emit_slice(code->type);
         emit_const(" ");
@@ -216,9 +216,9 @@ bool func_code_emit_code(void *ptr){
     return true;
 }
 
-bool for_code_emit_code(void* ptr){
+bool for_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    for_code *code = (for_code*)ptr;
+    for_code *code = (for_code*)instance.ptr;
     emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     emit_const("for (");
     codegen_emit_code(code->initial);
@@ -236,9 +236,9 @@ bool for_code_emit_code(void* ptr){
     return true;
 }
 
-bool while_code_emit_code(void* ptr){
+bool while_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    while_code *code = (while_code*)ptr;
+    while_code *code = (while_code*)instance.ptr;
     emit_const("while (");
     codegen_emit_code(code->condition);
     emit_const("){");
@@ -249,9 +249,9 @@ bool while_code_emit_code(void* ptr){
     return true;
 }
 
-bool dowhile_code_emit_code(void* ptr){
+bool dowhile_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    dowhile_code *code = (dowhile_code*)ptr;
+    dowhile_code *code = (dowhile_code*)instance.ptr;
     emit_const("do {");
     increase_indent(true);
         if (code->body.ptr) codegen_emit_code(code->body);
@@ -262,9 +262,9 @@ bool dowhile_code_emit_code(void* ptr){
     return true;
 }
 
-bool var_code_emit_code(void* ptr){
+bool var_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    var_code *code = (var_code*)ptr;
+    var_code *code = (var_code*)instance.ptr;
     if (code->var.ptr) codegen_emit_code(code->var); 
     else { 
         
@@ -288,16 +288,16 @@ bool var_code_emit_code(void* ptr){
     return true;
 }
 
-bool inc_code_emit_code(void *ptr){
+bool inc_code_emit_code(codegen instance){
     if (is_header == false) return false;
-    inc_code *code = (inc_code*)ptr;
+    inc_code *code = (inc_code*)instance.ptr;
     emit_const("#include ");
     emit_token(code->value);
     return true;
 }
 
-bool struct_code_emit_code(void *ptr){
-    struct_code *code = (struct_code*)ptr;
+bool struct_code_emit_code(codegen instance){
+    struct_code *code = (struct_code*)instance.ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = token_to_slice(code->parent) });
 
     if (is_header != false){
@@ -313,9 +313,9 @@ bool struct_code_emit_code(void *ptr){
     return true;
 }
 
-bool ret_code_emit_code(void *ptr){
+bool ret_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    ret_code *code = (ret_code*)ptr;
+    ret_code *code = (ret_code*)instance.ptr;
     emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
     emit_const("return");
     if (code->expression.ptr){
@@ -327,12 +327,12 @@ bool ret_code_emit_code(void *ptr){
     return true;
 }
 
-bool def_code_emit_code(void *ptr){
+bool def_code_emit_code(codegen instance){
     return true;
 }
 
-bool int_code_emit_code(void *ptr){
-    int_code *code = (int_code*)ptr;
+bool int_code_emit_code(codegen instance){
+    int_code *code = (int_code*)instance.ptr;
     emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = code->name });
     if (is_header != false){
         emit_const("typedef struct ");
@@ -354,8 +354,8 @@ bool int_code_emit_code(void *ptr){
     return is_header != false;
 }
 
-bool enum_code_emit_code(void *ptr){
-    enum_code *code = (enum_code*)ptr;
+bool enum_code_emit_code(codegen instance){
+    enum_code *code = (enum_code*)instance.ptr;
     if (is_header != false){
         emit_const("typedef enum {");
         increase_indent(true);
@@ -371,8 +371,8 @@ bool enum_code_emit_code(void *ptr){
     return true;
 }
 
-bool enum_case_code_emit_code(void *ptr){
-    enum_case_code *code = (enum_case_code*)ptr;
+bool enum_case_code_emit_code(codegen instance){
+    enum_case_code *code = (enum_case_code*)instance.ptr;
     
     emit_slice(ctx.context_prefix);
     emit_const("_");
@@ -385,8 +385,8 @@ bool enum_case_code_emit_code(void *ptr){
     return true;
 }
 
-bool else_code_emit_code(void *ptr){
-    else_code *code = (else_code*)ptr;
+bool else_code_emit_code(codegen instance){
+    else_code *code = (else_code*)instance.ptr;
     emit_const(" else ");
     if (code->block.type == sem_rule_cond){
         codegen_emit_code(code->block);
@@ -400,8 +400,8 @@ bool else_code_emit_code(void *ptr){
     return true;
 }
 
-bool switch_code_emit_code(void *ptr){
-    switch_code *code = (switch_code*)ptr;
+bool switch_code_emit_code(codegen instance){
+    switch_code *code = (switch_code*)instance.ptr;
     emit_const("switch (");
     codegen_emit_code(code->condition);
     emit_const("){");
@@ -412,8 +412,8 @@ bool switch_code_emit_code(void *ptr){
     return true;
 }
 
-bool case_code_emit_code(void *ptr){
-    case_code *code = (case_code*)ptr;
+bool case_code_emit_code(codegen instance){
+    case_code *code = (case_code*)instance.ptr;
     
     emit_const("case ");
     codegen_emit_code(code->match);
@@ -427,8 +427,8 @@ bool case_code_emit_code(void *ptr){
     return true;
 }
 
-bool prop_init_code_emit_code(void *ptr){
-    prop_init_code *code = ptr;
+bool prop_init_code_emit_code(codegen instance){
+    prop_init_code *code = instance.ptr;
     emit(".%v = ",code->name);
     codegen_emit_code(code->expression);
     emit_const(",");
@@ -438,8 +438,8 @@ bool prop_init_code_emit_code(void *ptr){
     return true;
 }
 
-bool struct_init_code_emit_code(void *ptr){
-    struct_init_code *code = ptr;
+bool struct_init_code_emit_code(codegen instance){
+    struct_init_code *code = instance.ptr;
     emit("(%v){",code->name);
     if (code->content.ptr){
         increase_indent(true);
@@ -450,15 +450,15 @@ bool struct_init_code_emit_code(void *ptr){
     return true;
 }
 
-bool cast_code_emit_code(void *ptr){
+bool cast_code_emit_code(codegen instance){
     if (is_header == true) return false;
-    cast_code *code = ptr;
+    cast_code *code = instance.ptr;
     emit("(%v%s)",code->cast,code->reference ? "*" : "");
     return true;
 }
 
-bool array_init_code_emit_code(void *ptr){
-    array_init_code *code = ptr;
+bool array_init_code_emit_code(codegen instance){
+    array_init_code *code = instance.ptr;
     emit_const("{");
     increase_indent(true);
     codegen_emit_code(code->entries);
@@ -467,8 +467,8 @@ bool array_init_code_emit_code(void *ptr){
     return true;
 }
 
-bool array_entry_code_emit_code(void *ptr){
-    array_entry_code *code = ptr;
+bool array_entry_code_emit_code(codegen instance){
+    array_entry_code *code = instance.ptr;
     bool newl = false;
     if (code->index.length){
         newl = true;
@@ -483,19 +483,19 @@ bool array_entry_code_emit_code(void *ptr){
     return true;
 }
 
-bool rule_sequence_code_emit_code(void *ptr){
+bool rule_sequence_code_emit_code(codegen instance){
     return false;
 }
 
-bool rule_entry_code_emit_code(void *ptr){
+bool rule_entry_code_emit_code(codegen instance){
     return false;
 }
 
-bool s_exp_code_emit_code(void *ptr){
+bool s_exp_code_emit_code(codegen instance){
     return false;
 }
 
-bool lisp_val_code_emit_code(void *ptr, codegen this){
+bool lisp_val_code_emit_code(codegen instance, codegen this){
     return false;
 }
 

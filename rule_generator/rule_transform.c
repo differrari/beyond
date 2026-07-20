@@ -30,8 +30,8 @@ bool is_string_lit_alphanum(string_slice slice){
     return true;
 }
 
-codegen blk_code_transform(void *ptr, codegen this){
-    blk_code *code = ptr;
+codegen blk_code_transform(codegen instance, codegen this){
+    blk_code *code = instance.ptr;
     TRANSFORM(stat);
     TRANSFORM(chain);
     return this;
@@ -78,8 +78,8 @@ codegen insert_new_rule(codegen list, string_slice name, string_slice tag, bool 
     return list;
 }
 
-codegen rule_sequence_code_transform(void *ptr, codegen this){
-    rule_sequence_code *code = this.ptr;
+codegen rule_sequence_code_transform(codegen instance, codegen this){
+    rule_sequence_code *code = instance.ptr;
     if (code->tag.length && *code->tag.data != '"' && is_token(code->name)){
         additional_rules = insert_new_rule(additional_rules, code->tag, (string_slice){}, false, code->name);
         code->name = code->tag;
@@ -91,18 +91,18 @@ codegen rule_sequence_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen rule_entry_code_transform(void *ptr, codegen this){
-    rule_entry_code *code = ptr;
+codegen rule_entry_code_transform(codegen instance, codegen this){
+    rule_entry_code *code = instance.ptr;
     TRANSFORM(list);
     TRANSFORM(chain);
     return this;
 }
 
-codegen s_exp_code_transform(void *ptr, codegen this){
+codegen s_exp_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen lisp_val_code_transform(void *ptr, codegen this){
+codegen lisp_val_code_transform(codegen instance, codegen this){
     return this;
 }
 

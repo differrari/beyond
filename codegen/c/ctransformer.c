@@ -13,8 +13,8 @@ string_slice resolve_type(symbol_t *sym, bool subtype, string_slice fallback){
     return slice_from_string(type_name(sym, subtype, true));
 }
 
-codegen blk_code_transform(void *ptr, codegen this){
-    blk_code *code = (blk_code*)ptr;
+codegen blk_code_transform(codegen instance, codegen this){
+    blk_code *code = (blk_code*)instance.ptr;
     TRANSFORM(stat);
     if (ctx.lambdas.ptr && code->stat.type == sem_rule_func){
         blk_code *lcode = ctx.lambdas.ptr;
@@ -29,8 +29,8 @@ codegen blk_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen dec_code_transform(void *ptr, codegen this){
-    dec_code *code = (dec_code*)ptr;
+codegen dec_code_transform(codegen instance, codegen this){
+    dec_code *code = (dec_code*)instance.ptr;
     symbol_t *sym = find_symbol(sem_rule_dec, code->name);
     code->type = resolve_type(sym, false, code->type);
     if (code->initial_value.ptr){
@@ -44,8 +44,8 @@ codegen dec_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen ass_code_transform(void *ptr, codegen this){
-    ass_code *code = (ass_code*)ptr;
+codegen ass_code_transform(codegen instance, codegen this){
+    ass_code *code = (ass_code*)instance.ptr;
     TRANSFORM(expression);
     return this;
 }
@@ -61,8 +61,8 @@ codegen lambda_to_func(codegen lambda, string_slice name){
     return func;
 }
 
-codegen exp_code_transform(void *ptr, codegen this){
-    exp_code *code = (exp_code*)ptr;
+codegen exp_code_transform(codegen instance, codegen this){
+    exp_code *code = (exp_code*)instance.ptr;
     TRANSFORM(lambda);
     if (code->lambda.ptr){
         string_slice lamname = make_temp_name(sem_rule_func);
@@ -74,39 +74,39 @@ codegen exp_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen call_code_transform(void *ptr, codegen this){
-    call_code *code = (call_code*)ptr;
+codegen call_code_transform(codegen instance, codegen this){
+    call_code *code = (call_code*)instance.ptr;
     TRANSFORM(args);
     return this;
 }
 
-codegen arg_code_transform(void *ptr, codegen this){
-    arg_code *code = (arg_code*)ptr;
+codegen arg_code_transform(codegen instance, codegen this){
+    arg_code *code = (arg_code*)instance.ptr;
     TRANSFORM(chain);
     TRANSFORM(exp);
     return this;
 }
 
-codegen cond_code_transform(void *ptr, codegen this){
-    cond_code *code = (cond_code*)ptr;
+codegen cond_code_transform(codegen instance, codegen this){
+    cond_code *code = (cond_code*)instance.ptr;
     TRANSFORM(cond);
     TRANSFORM(chain);
     TRANSFORM(scope);
     return this;
 }
 
-codegen jmp_code_transform(void *ptr, codegen this){
-    jmp_code *code = (jmp_code*)ptr;
+codegen jmp_code_transform(codegen instance, codegen this){
+    jmp_code *code = (jmp_code*)instance.ptr;
     return this;
 }
 
-codegen label_code_transform(void *ptr, codegen this){
-    label_code *code = (label_code*)ptr;
+codegen label_code_transform(codegen instance, codegen this){
+    label_code *code = (label_code*)instance.ptr;
     return this;
 }
 
-codegen param_code_transform(void *ptr, codegen this){
-    param_code *code = (param_code*)ptr;
+codegen param_code_transform(codegen instance, codegen this){
+    param_code *code = (param_code*)instance.ptr;
     code->type = resolve_type(find_symbol(sem_rule_param, code->name), false, code->type);
     TRANSFORM(chain);
     return this;
@@ -146,8 +146,8 @@ void replace_returns(codegen body, bool has_return){
     
 }
 
-codegen func_code_transform(void *ptr, codegen this){
-    func_code *code = (func_code*)ptr;
+codegen func_code_transform(codegen instance, codegen this){
+    func_code *code = (func_code*)instance.ptr;
     
     if (code->signature.ptr){
         func_code *sig = code->signature.ptr;
@@ -176,8 +176,8 @@ codegen func_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen for_code_transform(void *ptr, codegen this){
-    for_code *code = (for_code*)ptr;
+codegen for_code_transform(codegen instance, codegen this){
+    for_code *code = (for_code*)instance.ptr;
     TRANSFORM(initial);
     TRANSFORM(increment);
     TRANSFORM(condition);
@@ -185,22 +185,22 @@ codegen for_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen while_code_transform(void *ptr, codegen this){
-    while_code *code = (while_code*)ptr;
+codegen while_code_transform(codegen instance, codegen this){
+    while_code *code = (while_code*)instance.ptr;
     TRANSFORM(condition);
     TRANSFORM(body);
     return this;
 }
 
-codegen dowhile_code_transform(void *ptr, codegen this){
-    dowhile_code *code = (dowhile_code*)ptr;
+codegen dowhile_code_transform(codegen instance, codegen this){
+    dowhile_code *code = (dowhile_code*)instance.ptr;
     TRANSFORM(condition);
     TRANSFORM(body);
     return this;
 }
 
-codegen var_code_transform(void *ptr, codegen this){
-    var_code *code = (var_code*)ptr;
+codegen var_code_transform(codegen instance, codegen this){
+    var_code *code = (var_code*)instance.ptr;
     string_slice orig_var_name = code->var.ptr ? ((var_code*)code->var.ptr)->name : (string_slice){};
     TRANSFORM(var);
     TRANSFORM(expression);
@@ -243,13 +243,13 @@ codegen var_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen inc_code_transform(void *ptr, codegen this){
-    inc_code *code = (inc_code*)ptr;
+codegen inc_code_transform(codegen instance, codegen this){
+    inc_code *code = (inc_code*)instance.ptr;
     return this;
 }
 
-codegen struct_code_transform(void *ptr, codegen this){
-    struct_code *code = (struct_code*)ptr;
+codegen struct_code_transform(codegen instance, codegen this){
+    struct_code *code = (struct_code*)instance.ptr;
     blk_code *dec = code->contents.ptr;
     codegen extracted = {};
     codegen maintained = {};
@@ -296,21 +296,21 @@ codegen struct_code_transform(void *ptr, codegen this){
     return wrap_in_block(this,extracted, false);
 }
 
-codegen ret_code_transform(void *ptr, codegen this){
-    ret_code *code = (ret_code*)ptr;
+codegen ret_code_transform(codegen instance, codegen this){
+    ret_code *code = (ret_code*)instance.ptr;
     TRANSFORM(expression);
     return this;
 }
 
-codegen def_code_transform(void *ptr, codegen this){
-    def_code *code = (def_code*)ptr;
+codegen def_code_transform(codegen instance, codegen this){
+    def_code *code = (def_code*)instance.ptr;
     TRANSFORM(expression);
     ctx.defer_statements = wrap_in_block(code->expression, ctx.defer_statements, true);
     return (codegen){};
 }
 
-codegen int_code_transform(void *ptr, codegen this){
-    int_code *code = (int_code*)ptr;
+codegen int_code_transform(codegen instance, codegen this){
+    int_code *code = (int_code*)instance.ptr;
     blk_code *dec = code->contents.ptr;
     codegen extracted = {};
     while (dec){
@@ -344,8 +344,8 @@ codegen int_code_transform(void *ptr, codegen this){
     return wrap_in_block(this,extracted, false);
 }
 
-codegen enum_code_transform(void *ptr, codegen this){
-    enum_code *code = (enum_code*)ptr;
+codegen enum_code_transform(codegen instance, codegen this){
+    enum_code *code = (enum_code*)instance.ptr;
     TRANSFORM(contents);
     
     emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
@@ -363,8 +363,8 @@ codegen enum_code_transform(void *ptr, codegen this){
         false);
 }
 
-codegen enum_case_code_transform(void *ptr, codegen this){
-    enum_case_code *code = (enum_case_code*)ptr;
+codegen enum_case_code_transform(codegen instance, codegen this){
+    enum_case_code *code = (enum_case_code*)instance.ptr;
     if (ctx.convenience == convenience_type_to_string){
         return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, token_to_slice(code->name))), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain, code->chain));
     } if (ctx.convenience == convenience_type_from_string){
@@ -382,48 +382,48 @@ codegen enum_case_code_transform(void *ptr, codegen this){
     return this;
 }
 
-codegen else_code_transform(void *ptr, codegen this){
-    else_code *code = (else_code*)ptr;
+codegen else_code_transform(codegen instance, codegen this){
+    else_code *code = (else_code*)instance.ptr;
     TRANSFORM(block);
     return this;
 }
 
-codegen switch_code_transform(void *ptr, codegen this){
-    switch_code *code = (switch_code*)ptr;
+codegen switch_code_transform(codegen instance, codegen this){
+    switch_code *code = (switch_code*)instance.ptr;
     TRANSFORM(condition);
     TRANSFORM(cases);
     return this;
 }
 
-codegen case_code_transform(void *ptr, codegen this){
-    case_code *code = (case_code*)ptr;
+codegen case_code_transform(codegen instance, codegen this){
+    case_code *code = (case_code*)instance.ptr;
     TRANSFORM(match);
     TRANSFORM(body);
     TRANSFORM(chain);
     return this;
 }
 
-codegen prop_init_code_transform(void *ptr, codegen this){
+codegen prop_init_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen struct_init_code_transform(void *ptr, codegen this){
+codegen struct_init_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen cast_code_transform(void *ptr, codegen this){
+codegen cast_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen array_init_code_transform(void *ptr, codegen this){
+codegen array_init_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen array_entry_code_transform(void *ptr, codegen this){
+codegen array_entry_code_transform(codegen instance, codegen this){
     return this;
 }
 
-codegen lisp_val_code_transform(void *ptr, codegen this){
+codegen lisp_val_code_transform(codegen instance, codegen this){
     return this;
 }
 

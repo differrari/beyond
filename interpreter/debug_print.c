@@ -4,8 +4,8 @@
 
 extern buffer imaginal_buf;
 
-void lisp_val_code_debug_print(void *ptr, codegen this, int depth){
-    lisp_val_code *car = ptr;
+void lisp_val_code_debug_print(codegen instance, codegen this, int depth){
+    lisp_val_code *car = instance.ptr;
     switch (car->type) {
         case car_identifier:
             buffer_write(&imaginal_buf,"%v ",car->val);
@@ -23,16 +23,16 @@ void lisp_val_code_debug_print(void *ptr, codegen this, int depth){
     }
 }
 
-void s_exp_code_debug_print(void *ptr, codegen this, int depth){
-    if (!this.ptr){
+void s_exp_code_debug_print(codegen instance, codegen this, int depth){
+    if (!instance.ptr){
         buffer_write(&imaginal_buf,"nil");
         return;
     }
-    if (this.type != sem_rule_sexp){
-        buffer_write(&imaginal_buf,"{err wrong rule %s}",sem_rule_strings[this.type]);
+    if (instance.type != sem_rule_sexp){
+        buffer_write(&imaginal_buf,"{err wrong rule %s}",sem_rule_strings[instance.type]);
         return;
     }
-    s_exp_code *code = this.ptr;
+    s_exp_code *code = instance.ptr;
     buffer_write(&imaginal_buf,"(");
     codegen_debug_print(code->car, code->car, depth+1);
     buffer_write(&imaginal_buf," . ");

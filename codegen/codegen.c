@@ -3,28 +3,28 @@
 
 void codegen_register_elem(codegen instance, int type, Token elem){
 	if (instance.register_elem){
-		return instance.register_elem(instance.ptr, type, elem);
+		return instance.register_elem(instance, type, elem);
 	}
 	
 }
 
 void codegen_register_subrule(codegen instance, int type, codegen child){
 	if (instance.register_subrule){
-		return instance.register_subrule(instance.ptr, type, child);
+		return instance.register_subrule(instance, type, child);
 	}
 	
 }
 
 void codegen_debug_print(codegen instance, codegen this, int depth){
 	if (instance.debug_print){
-		return instance.debug_print(instance.ptr, this, depth);
+		return instance.debug_print(instance, this, depth);
 	}
 	
 }
 
 bool codegen_emit_code(codegen instance){
 	if (instance.emit_code){
-		return instance.emit_code(instance.ptr);
+		return instance.emit_code(instance);
 	}
 	
 	return (bool){};
@@ -32,7 +32,7 @@ bool codegen_emit_code(codegen instance){
 
 codegen codegen_transform(codegen instance, codegen this){
 	if (instance.transform){
-		return instance.transform(instance.ptr, this);
+		return instance.transform(instance, this);
 	}
 	
 	return (codegen){};
@@ -40,7 +40,7 @@ codegen codegen_transform(codegen instance, codegen this){
 
 codegen codegen_get_subscope(codegen instance){
 	if (instance.get_subscope){
-		return instance.get_subscope(instance.ptr);
+		return instance.get_subscope(instance);
 	}
 	
 	return (codegen){};

@@ -12,7 +12,7 @@ class dec_code: codegen {
     codegen *initial_value;
     
     register_elem(int type, Token elem){
-        dec_code *declaration = (dec_code*)ptr;
+        dec_code *declaration = (dec_code*)instance.ptr;
         switch (type) {
             case sem_elem_type: declaration->type = elem; 
             case sem_elem_name: declaration->name = elem;
@@ -41,9 +41,9 @@ class dec_code: codegen {
 //     void *initial_value;
 // } dec_code;
 
-// void declaration_register_elem(void* ptr, int type, Token elem){
+// void declaration_register_elem(codegen instance, int type, Token elem){
 //     print("Registering element of type %i for declaration",type);
-//     dec_code *declaration = (dec_code*)ptr;
+//     dec_code *declaration = (dec_code*)instance.ptr;
 //     switch (type) {
 //         case sem_elem_type: declaration->type = elem; 
 //         case sem_elem_name: declaration->name = elem;
