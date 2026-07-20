@@ -8,7 +8,7 @@ codegen parse_lisp(string_slice code){
     Scanner scan = scanner_make(code.data,strlen(code.data));
         
     Tokenizer tk = tokenizer_make(&scan);
-    tk.comment_type = TOKENIZER_COMMENT_TYPE_SLASH;
+    tk.comment_type = TOKENIZER_COMMENT_TYPE_SEMI;
     tk.parse_newline = false;
     TokenStream ts;
     ts_init(&ts, &tk);
