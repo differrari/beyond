@@ -13,7 +13,7 @@ bool credbuild {
 
 	set_target(&module,target_native);
 
-	&module.source_all(".cred");
+	module.source_all(".cred");
 
 	return module.cred_compile();
 	

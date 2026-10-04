@@ -5,6 +5,7 @@
 #include "ir/arch_transformer.h"
 #include "imaginal.h"
 #include "shell/shell.h"
+#include "parser/parser.h"
 
 typedef struct {
     codegen environment;
@@ -13,7 +14,8 @@ typedef struct {
     imaginal_fallback fallback;
 } imaginal_repl_ctx;
 
-codegen parse_lisp(string_slice code);
+codegen parse_lisp_ir(string_slice code);
+parse_result parse_lisp(string_slice code);
 
 bool repl_run(string_slice code, void *ctx);
 

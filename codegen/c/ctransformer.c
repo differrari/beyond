@@ -431,5 +431,11 @@ codegen perform_transformations(codegen root){
     return codegen_transform(root);
 }
 
+#ifndef LISP
+codegen s_exp_code_transform(codegen instance){
+    return instance;
+}
+#endif
+
 #endif
 

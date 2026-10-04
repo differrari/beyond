@@ -4,7 +4,7 @@
 #include "parser/parser.h"
 #include "ir/lisp.h"
 
-codegen parse_lisp(string_slice code){
+parse_result parse_lisp(string_slice code){
     Scanner scan = scanner_make(code.data,strlen(code.data));
         
     Tokenizer tk = tokenizer_make(&scan);
@@ -21,7 +21,12 @@ codegen parse_lisp(string_slice code){
         .scanner_pos = scan.pos,
     };
 
-    parse_result parse_res = parse(code.data, &ts, &parser);
+    return parse(code.data, &ts, &parser);
+}
+
+codegen parse_lisp_ir(string_slice code){
+    
+    parse_result parse_res = parse_lisp(code);
     
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, code.data);
@@ -42,7 +47,7 @@ bool repl_run(string_slice code, void *_ctx){
 
     imaginal_fallback_fncall = ctx->fallback;
     
-    codegen ir = parse_lisp(code);
+    codegen ir = parse_lisp_ir(code);
 
     if (!ir.type || !ir.ptr){
         return false;

@@ -158,8 +158,8 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
 }
 
 parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
-    Token t;
-    bool result;
+    Token t = {};
+    bool result = true;
     if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false };
     while (ts_next(ts, &t)) {
         // print("Read token@%i",parser->scan->pos);

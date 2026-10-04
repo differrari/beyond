@@ -1,7 +1,7 @@
 (load "~/redbuild/v3/redbuild.lisp")
 
 (defvar *beyond-lib* nil)
-(defvar *beyond-interpreter* t)
+(defvar *beyond-interpreter* nil)
 
 (defmacro exname () (if (eq *beyond-interpreter* t) "imaginal" "cred"))
 (defmacro extype () (if (eq *beyond-lib* t) :lib :bin))

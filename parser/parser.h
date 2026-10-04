@@ -29,7 +29,7 @@ typedef struct {
     uint32_t file;
     uint32_t line_number;
     uint32_t column;
-} ln_report; 
+} ln_report;
 
 ln_report parse_ln(uint32_t pos, char *content);
 

@@ -517,7 +517,7 @@ void atom_code_register_subrule(codegen instance, int type, codegen child){
     
 }
 
-#ifdef RULECODEGEN
+#if defined(RULECODEGEN) || !defined(LISP)
 CODEGEN_DEC(atom_code, sem_rule_atom, 0, 0);
 #else
 extern void atom_code_debug_print(codegen instance, int depth);
@@ -538,7 +538,7 @@ void s_exp_code_register_subrule(codegen instance, int type, codegen child){
     }
 }
 
-#ifdef RULECODEGEN
+#if defined(RULECODEGEN) || !defined(LISP)
 CODEGEN_DEC(s_exp_code, sem_rule_sexp, 0, 0);
 #else
 extern void s_exp_code_debug_print(codegen instance, int depth);

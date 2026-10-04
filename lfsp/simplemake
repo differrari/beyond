@@ -1,0 +1,4 @@
+# Compile these files against raylib, libc, libm and https://github.com/differrari/redlib/
+# or use using https://github.com/differrari/redbuild/blob/main/Simplemakefile
+language.c
+main.c
