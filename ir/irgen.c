@@ -70,13 +70,11 @@ codegen eval_rule(int current_rule, int curr_option){
     return gen;
 }
 
+#include "lisp.h"
+
 codegen gen_code(chunk_array_t *stack){
     gsn = make_stack_navigator(stack);
-    ast_node node = {};
-    int new_rule;
-    int new_opt;
-    if (!switch_rule(&gsn, &new_rule,&new_opt)) return (codegen){};
-    return eval_rule(new_rule,new_opt);
+    return make_ir_from_node(&gsn, -1, (codegen){});
 }
 
 void debug_print_ir(codegen root){

@@ -60,6 +60,20 @@ bool push_ast_rule(int rule, int option, int sequence){
     return true;
 }
 
+bool push_ast_term(int rule, int option){
+    if (!tree_stack) tree_stack = init_ast();
+    push_node(tree_stack, (ast_node){
+        .t = {},
+        .rule = rule,
+        .option = option,
+        .depth = parser_depth,
+        .sequence = -1,
+        .terminate = true,
+        .sem_value = language_rules[rule].semrule,
+    });
+    return true;
+}
+
 size_t furthest_pos = 0;
 uint32_t tok_pos = 0;
 tok_fail furthest_fail = {};
@@ -129,7 +143,8 @@ bool parser_advance_option_sm(parser_sm *parser){
 
 bool parser_advance_sequence(parser_sm *parser){
     if (parser->sequence + 1 == language_rules[parser->current_rule].options[parser->option].num_elements){
-        // parser_debug("Successfully parsed rule %i with option %i",parser->current_rule, parser->option);
+        parser_debug("Successfully parsed rule %i with option %i",parser->current_rule, parser->option);
+        push_ast_term(parser->current_rule,parser->option);
         if (!pop_parser_stack(parser, false)) return true;
         return parser_advance_sequence(parser);
     }
