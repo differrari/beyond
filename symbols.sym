@@ -20,7 +20,7 @@ SYMBOL = func TYPE = bool SUBTYPE none NAME = credbuild REF = 0
 	END TABLE func
 SYMBOL = func TYPE = int SUBTYPE none NAME = a REF = 0
 	TABLE func
-	SYMBOL = dec TYPE = chunk_array SUBTYPE none NAME = testarr REF = 1
+	SYMBOL = dec TYPE = chunk_array SUBTYPE int NAME = testarr REF = 1
 	SYMBOL = dec TYPE = literal SUBTYPE none NAME = ly REF = 0
 	SYMBOL = dec TYPE = int SUBTYPE none NAME = test REF = 0
 	SYMBOL = dec TYPE = int SUBTYPE none NAME = x REF = 0

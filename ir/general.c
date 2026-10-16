@@ -49,6 +49,7 @@ void dec_code_register_elem(codegen instance, int type, Token elem){
     dec_code *code = (dec_code*)instance.ptr;
     switch (type) {
         case sem_elem_type: code->type = token_to_slice(elem); break; 
+        case sem_elem_subtype: code->subtype = token_to_slice(elem); break;
         case sem_elem_name: code->name = token_to_slice(elem); break;
         case sem_elem_ref: code->is_ref = true; break;
         handle_default_tok

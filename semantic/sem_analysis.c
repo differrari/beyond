@@ -81,6 +81,8 @@ bool dec_code_analyze_semantics(codegen instance, symbol_table *table){
         .sym_type = sem_rule_dec,
         .type = code->type,
         .resolved_type = analyze_type(code->type),
+        .subtype = code->subtype,
+        .resolved_subtype = analyze_type(code->subtype),
         .name = code->name,
         .reference_type = code->is_ref
     })) return false;

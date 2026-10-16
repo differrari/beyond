@@ -15,6 +15,7 @@ codegen blk_code_init();
 typedef struct {
     string_slice type;
     string_slice name;
+    string_slice subtype;
     bool is_ref;
     codegen initial_value;
 } dec_code;

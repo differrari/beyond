@@ -235,7 +235,7 @@ codegen var_code_transform(codegen instance){
             symbol_t *sym = find_symbol(sem_rule_dec, symname);
             if (sym){
                 string s = type_name(sym, false, false);
-                if (sym->resolved_subtype){
+                if (sym->subtype.length){
                     function->transform = var_deref;
                     function->cast = make_cast(slice_from_string(type_name(sym, true, false)), true);
                 }

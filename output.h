@@ -34,6 +34,6 @@ void testType_func(hello interf, int rule, Token elem);
 void testType_test(hello interf);
 void testType_helper(hello interf);
 hello testType_init();
-int _temp_func_0(char* directory, char* name);
 int _temp_func_1(char* directory, char* name);
+int _temp_func_0(char* directory, char* name);
 int main();
