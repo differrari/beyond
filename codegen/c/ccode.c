@@ -33,11 +33,20 @@ void generate_code(const char *name, codegen cg){
 
 bool blk_code_emit_code(codegen instance){
     blk_code *code = (blk_code*)instance.ptr;
+    emit_context nctx = ctx;
+    nctx.ignore_semicolon = false;
+    emit_context orig = save_and_push_context(nctx);
     bool emitted = codegen_emit_code(code->stat);
     if (code->chain.ptr){ 
-        if (emitted) emit_newline(); 
-        codegen_emit_code(code->chain); 
-    }
+        if (emitted){
+            if (!ctx.ignore_semicolon) emit_const(";");
+            emit_newline(); 
+        }
+        bool chain_emitted = codegen_emit_code(code->chain);
+        if (chain_emitted && !ctx.ignore_semicolon) emit_const(";"); 
+    } else if (emitted && !ctx.ignore_semicolon) emit_const(";");
+    pop_and_restore_context(orig);
+    ctx.ignore_semicolon = !nctx.ignore_semicolon;
     return emitted;
 }
 
@@ -56,24 +65,22 @@ bool dec_code_emit_code(codegen instance){
     emit_space();
     emit_slice(code->name);
     if (is_header != true && code->initial_value.ptr){
-        emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_dec, .ignore_semicolon = true });
+        emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_dec });
         emit_const(" = ");
         codegen_emit_code(code->initial_value);
         pop_and_restore_context(orig);
     }
-    if (!ctx.ignore_semicolon) emit_const(";");
     return true;
 }
 
 bool ass_code_emit_code(codegen instance){
     if (is_header == true) return false;
     ass_code *code = (ass_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign, .ignore_semicolon = true });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_assign });
     codegen_emit_code(code->var);
     emit_const(" = ");
     codegen_emit_code(code->expression);
     pop_and_restore_context(orig);
-    if (!ctx.ignore_semicolon) emit_const(";");
     return true;
 }
 
@@ -88,31 +95,36 @@ bool call_code_emit_code(codegen instance){
     }
     if (code->cast.ptr)
         codegen_emit_code(code->cast);
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call, .ignore_semicolon = true });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_call });
     emit_slice(code->name);
     emit_const("(");
     codegen_emit_code(code->args);
     emit_const(")");
     pop_and_restore_context(orig);
-    if (!ctx.ignore_semicolon) emit_const(";");
     return true;
 }
 
 bool cond_code_emit_code(codegen instance){
     if (is_header == true) return false;
     cond_code *code = (cond_code*)instance.ptr;
-    // print("Condition code emit being %i",(*(codegen_t*)code->cond).ptr);
     emit_const("if (");
-    emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     codegen_emit_code(code->cond);
-    pop_and_restore_context(orig);
     emit_const("){");
     increase_indent(true);
+        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = false});
         codegen_emit_code(code->scope);
+        pop_and_restore_context(orig);
     decrease_indent(true);
     emit_const("}");
-    if (code->chain.ptr) codegen_emit_code(code->chain);
-    else emit_newline();
+    if (code->chain.ptr){
+        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = false});
+        codegen_emit_code(code->chain);
+        pop_and_restore_context(orig);
+    }
+    else {
+        emit_newline();
+    }
+    ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -121,7 +133,6 @@ bool jmp_code_emit_code(codegen instance){
     jmp_code *code = (jmp_code*)instance.ptr;
     emit_const("goto ");
     emit_slice(code->jump);
-    emit_const(";");
     return true;
 }
 
@@ -131,6 +142,7 @@ bool label_code_emit_code(codegen instance){
     emit_const("\r");
     emit_slice(code->name);
     emit_const(":");
+    ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -141,7 +153,6 @@ bool exp_code_emit_code(codegen instance){
         emit_const("(");
     if (code->invert)
         emit_const("!");
-    emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     if (code->var.ptr) codegen_emit_code(code->var);
     else emit_slice(code->val);
     if (code->exp.ptr){
@@ -154,7 +165,6 @@ bool exp_code_emit_code(codegen instance){
     }
     if (code->paren)
         emit_const(")");
-    pop_and_restore_context(orig);
     return true;
 }
 
@@ -202,16 +212,17 @@ bool func_code_emit_code(codegen instance){
     emit_const("(");
     codegen_emit_code(code->args);
     if (ctx.context_rule == sem_rule_interf || is_header == true){
-        emit_const(");");
+        emit_const(")");
     } else {
         emit_const("){");
-        emit_context orig = save_and_push_context((emit_context){ .context_prefix = code->name, .ignore_semicolon = false });
+        emit_context orig = save_and_push_context((emit_context){ .context_prefix = code->name });
         increase_indent(true);
             codegen_emit_code(code->body);
         decrease_indent(true);
         emit_const("}");
         emit_newline();
         pop_and_restore_context(orig);
+        ctx.ignore_semicolon = true;
     }
     return true;
 }
@@ -219,7 +230,6 @@ bool func_code_emit_code(codegen instance){
 bool for_code_emit_code(codegen instance){
     if (is_header == true) return false;
     for_code *code = (for_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){ .ignore_semicolon = true });
     emit_const("for (");
     codegen_emit_code(code->initial);
     emit_const("; ");
@@ -227,12 +237,12 @@ bool for_code_emit_code(codegen instance){
     emit_const("; ");
     codegen_emit_code(code->increment);
     emit_const(")");
-    pop_and_restore_context(orig);
     emit_const("{");
     increase_indent(true);
         if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent(true);
     emit_const("}");
+    ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -246,6 +256,7 @@ bool while_code_emit_code(codegen instance){
         if (code->body.ptr) codegen_emit_code(code->body);
     decrease_indent(true);
     emit_const("}");
+    ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -254,22 +265,21 @@ bool dowhile_code_emit_code(codegen instance){
     dowhile_code *code = (dowhile_code*)instance.ptr;
     emit_const("do {");
     increase_indent(true);
+        emit_context orig = save_and_push_context(ctx);
         if (code->body.ptr) codegen_emit_code(code->body);
+        pop_and_restore_context(orig);
     decrease_indent(true);
     emit_const("} while (");
         codegen_emit_code(code->condition);
-    emit_const(");");
+    emit_const(")");
     return true;
 }
 
 bool var_code_emit_code(codegen instance){
     if (is_header == true) return false;
     var_code *code = (var_code*)instance.ptr;
-    if (code->var.ptr){
-        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
-        codegen_emit_code(code->var); 
-        pop_and_restore_context(orig);
-    }
+    if (code->var.ptr)
+        codegen_emit_code(code->var);
     else { 
         
         if (code->transform == var_deref){
@@ -284,11 +294,8 @@ bool var_code_emit_code(codegen instance){
     }
     if (code->operation.length) emit_slice(code->operation);
     if (code->expression.ptr){
-        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
         codegen_emit_code(code->expression);
-        pop_and_restore_context(orig);
     } 
-    if (!ctx.ignore_semicolon) emit_const(";");
     return true;
 }
 
@@ -297,12 +304,13 @@ bool inc_code_emit_code(codegen instance){
     inc_code *code = (inc_code*)instance.ptr;
     emit_const("#include ");
     emit_slice(code->value);
+    ctx.ignore_semicolon = true;
     return true;
 }
 
 bool struct_code_emit_code(codegen instance){
     struct_code *code = (struct_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = code->parent });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .context_prefix = code->name, .context_parent = code->parent });
 
     if (is_header != false){
         emit_const("typedef struct ");
@@ -311,23 +319,22 @@ bool struct_code_emit_code(codegen instance){
         increase_indent(true);
             codegen_emit_code(code->contents);
         decrease_indent(true);
-        emit(" } %v;",code->name);
-    } else codegen_emit_code(code->contents);
+        emit(" } %v",code->name);
+    } else
+        codegen_emit_code(code->contents);
     pop_and_restore_context(orig);
+    if (is_header == false) ctx.ignore_semicolon = true;
     return true;
 }
 
 bool ret_code_emit_code(codegen instance){
     if (is_header == true) return false;
     ret_code *code = (ret_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){.context_rule = sem_rule_ret, .ignore_semicolon = true });
     emit_const("return");
     if (code->expression.ptr){
         emit_const(" ");
         codegen_emit_code(code->expression);
     }
-    pop_and_restore_context(orig);
-    emit_const(";");
     return true;
 }
 
@@ -337,7 +344,7 @@ bool def_code_emit_code(codegen instance){
 
 bool int_code_emit_code(codegen instance){
     int_code *code = (int_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .ignore_semicolon = false, .context_prefix = code->name });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_interf, .context_prefix = code->name });
     if (is_header != false){
         emit_const("typedef struct ");
         emit_slice(code->name);
@@ -351,10 +358,10 @@ bool int_code_emit_code(codegen instance){
         increase_indent(true);
             codegen_emit_code(code->contents);
         decrease_indent(true);
-        emit_const(" };");
-        emit_newline();
+        emit_const("}");
     }
     pop_and_restore_context(orig);
+    if (!is_header) ctx.ignore_semicolon = true;
     return is_header != false;
 }
 
@@ -363,15 +370,13 @@ bool enum_code_emit_code(codegen instance){
     if (is_header != false){
         emit_const("typedef enum {");
         increase_indent(true);
-            emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = code->name });
+            emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .ignore_semicolon = false, .context_prefix = code->name });
             codegen_emit_code(code->contents);
             pop_and_restore_context(orig);
         decrease_indent(true);
-        emit_const("} ");
-        emit_slice(code->name);
-        emit_const(";");
-        emit_newline();
+        emit("} %v", code->name);
     }
+    else ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -396,11 +401,13 @@ bool else_code_emit_code(codegen instance){
         codegen_emit_code(code->block);
     } else {
         emit_const("{");
+        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = false});
         increase_indent(true);
             codegen_emit_code(code->block);
         decrease_indent(true);
         emit_const("}");
     }
+    ctx.ignore_semicolon = true;
     return true;
 }
 
@@ -413,6 +420,7 @@ bool switch_code_emit_code(codegen instance){
         codegen_emit_code(code->cases);
     decrease_indent(true);
     emit_const("}");
+    ctx.ignore_semicolon = true;
     return true;
 }
 

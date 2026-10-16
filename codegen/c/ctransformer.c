@@ -295,7 +295,7 @@ codegen struct_code_transform(codegen instance){
         props = make_prop_init(slice_from_literal("ptr"), make_func_call(slice_from_literal("zalloc"), make_func_call(slice_from_literal("sizeof"), make_literal_expression(code->name))), props);
         extracted = wrap_in_block(
             make_function(code->parent, slice_from_string(string_format("%v_init",code->name)), (codegen){}, 
-                make_return(make_struct_init(code->parent, props))
+                wrap_in_block(make_return(make_struct_init(code->parent, props)), (codegen){}, false)
             ), extracted, true);
     }
     return wrap_in_block(instance,extracted, false);
@@ -332,11 +332,11 @@ codegen int_code_transform(codegen instance){
                 stub->args = make_param(code->name,slice_from_literal("instance"), function->args);
                 codegen call = make_argument(make_literal_expression(slice_from_literal("instance")), param_to_arg(function->args));
                 function->args = make_param(code->name,slice_from_literal("instance"), function->args);
-                codegen def = !function->type.length || slice_lit_match(function->type, "void", true) ? (codegen){} : make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type))));
+                codegen def = !function->type.length || slice_lit_match(function->type, "void", true) ? (codegen){} : wrap_in_block(make_return(make_literal_expression(slice_from_string(string_format("(%v){}",function->type)))),(codegen){},false);
                 function->body = 
                     wrap_in_block(
                         make_if(make_var_chain(make_literal_expression(slice_from_literal("instance")), make_literal_expression(stub->name),false), 
-                            make_return(make_var_chain(make_literal_expression(slice_from_literal("instance")),make_func_call(stub->name, call), false)), 
+                            wrap_in_block(make_return(make_var_chain(make_literal_expression(slice_from_literal("instance")),make_func_call(stub->name, call), false)), (codegen){}, false), 
                         (codegen){}), 
                     def, false); //TODO: proper default handling once we have a better type system
                 extracted = wrap_in_block(dec->stat, extracted, true);
@@ -346,7 +346,7 @@ codegen int_code_transform(codegen instance){
         dec = dec->chain.ptr;
     }
     code->contents = wrap_in_block(make_declaration("ptr", slice_from_literal("void*"), (codegen){}), code->contents, false);
-    return wrap_in_block(instance,extracted, false);
+    return wrap_in_block(instance, extracted, false);
 }
 
 codegen enum_code_transform(codegen instance){
@@ -363,8 +363,14 @@ codegen enum_code_transform(codegen instance){
     
     return wrap_in_block(instance, 
         wrap_in_block(to_str,
-           make_function(code->name, slice_from_string(string_format("%v_from_string",code->name)), make_param(slice_from_literal("char *"), slice_from_literal("val"), (codegen){}), from_str),
-          false), 
+            make_function(
+                code->name, 
+                slice_from_string(string_format("%v_from_string",code->name)), 
+                make_param(slice_from_literal("char *"), 
+                    slice_from_literal("val"), 
+                    (codegen){}), 
+                from_str),
+            false), 
         false);
 }
 
@@ -374,14 +380,14 @@ codegen enum_case_code_transform(codegen instance){
         return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, code->name)), make_const_exp(slice_from_string(string_format("\"%v\"",code->name))), codegen_transform(code->chain));
     } if (ctx.convenience == convenience_type_from_string){
         codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain)) : make_return(make_const_exp(SLICE("0")));
+        chain = wrap_in_block(chain, (codegen){ }, false);
         codegen i = make_if(
             invert_exp(wrap_in_expression(make_func_call(slice_from_literal("strcmp"), 
                 make_argument(make_const_exp(slice_from_string(string_format("\"%v\"",code->name))), 
                 make_argument(make_literal_var(slice_from_literal("val")), (codegen){})))))
             , 
-            make_return(make_const_exp(slice_from_string(string_format("%v_%v",ctx.context_prefix,code->name)))), chain);
+            wrap_in_block(make_return(make_const_exp(slice_from_string(string_format("%v_%v",ctx.context_prefix,code->name)))), (codegen){}, false), chain);
         return i;
-        
     }
     TRANSFORM(chain);
     return instance;

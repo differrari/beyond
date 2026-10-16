@@ -1,6 +1,6 @@
 TABLE scope
-SYMBOL = inc TYPE = none SUBTYPE none NAME =  REF = 0
-SYMBOL = inc TYPE = none SUBTYPE none NAME =  REF = 0
+SYMBOL = inc TYPE = none SUBTYPE none NAME = "random.h" REF = 0
+SYMBOL = inc TYPE = none SUBTYPE none NAME = "ing.h" REF = 0
 SYMBOL = func TYPE = literal SUBTYPE none NAME = heyo REF = 0
 	TABLE func
 	SYMBOL = dec TYPE = int SUBTYPE none NAME = a REF = 0

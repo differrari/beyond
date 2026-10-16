@@ -312,11 +312,10 @@ CODEGEN_DEC(var_code, sem_rule_var, 0, 0)
 
 void inc_code_register_elem(codegen instance, int type, Token elem){
     inc_code *code = (inc_code*)instance.ptr;
-    if (elem.kind == TOK_STRING) code->value = token_to_slice(elem);
+    if (elem.kind == TOK_STRING || (elem.kind == TOK_CONST && elem.start && *elem.start == '"')) code->value = token_to_slice(elem);
 }
 
 void inc_code_register_subrule(codegen instance, int type, codegen child){
-    
 }
 
 CODEGEN_DEC(inc_code, sem_rule_inc, 0, 0)
