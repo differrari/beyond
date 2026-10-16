@@ -37,7 +37,7 @@ void blk_code_register_elem(codegen instance, int type, Token elem){
 
 void blk_code_register_subrule(codegen instance, int type, codegen child){
     blk_code *code = (blk_code*)instance.ptr;
-    if (type == sem_rule_scope){
+    if (code->stat.ptr){//TODO: We could make this smarter and similar to s_exp so we can auto-chain
         code->chain = child;
     } else
         code->stat = child;
