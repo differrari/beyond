@@ -47,7 +47,7 @@ bool push_ast_token(Token t, int rule, int option, int sequence, grammar_elem el
     return true;
 }
 
-bool push_ast_rule(int rule, int option, int sequence){
+bool push_ast_rule(int rule, int option, int sequence, int sem_rule){
     if (!tree_stack) tree_stack = init_ast();
     push_node(tree_stack, (ast_node){
         .t = {},
@@ -55,12 +55,12 @@ bool push_ast_rule(int rule, int option, int sequence){
         .option = option,
         .depth = parser_depth,
         .sequence = sequence,
-        .sem_value = language_rules[rule].semrule,
+        .sem_value = language_rules[rule].semrule ?: sem_rule,
     });
     return true;
 }
 
-bool push_ast_term(int rule, int option){
+bool push_ast_term(int rule, int option, int sem_rule){
     if (!tree_stack) tree_stack = init_ast();
     push_node(tree_stack, (ast_node){
         .t = {},
@@ -69,7 +69,7 @@ bool push_ast_term(int rule, int option){
         .depth = parser_depth,
         .sequence = -1,
         .terminate = true,
-        .sem_value = language_rules[rule].semrule,
+        .sem_value = language_rules[rule].semrule ?: sem_rule,
     });
     return true;
 }
@@ -87,14 +87,15 @@ bool parser_advance_to_token(parser_sm *parser, Token t){
     while (current_parser_rule(parser).rule){
         parser_debug("%s[%i] %s[o:%i] subrule %s @%i",curr_indent, parser->sequence, rule_names[parser->current_rule], parser->option, rule_names[current_parser_rule(parser).value],parser->scan->pos);
         create_parse_stack();
+        int sem_rule = current_parser_rule(parser).sem_value;
         // parser_debug("Push state with pos %i",tok_pos);
         parser_depth = chunk_array_push(parser_stack, parser) + 1;
         parser->scanner_pos = tok_pos;
-        parser->tree_pos = tree_count(tree_stack);
         parser->current_rule = current_parser_rule(parser).value;
         parser->sequence = 0;
         parser->option = 0;
-        if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return false;
+        parser->tree_pos = tree_count(tree_stack);
+        if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence, sem_rule)) return false;
     }
     // parser_debug("%sCurrent rule %i. Option %i. Sequence %i",curr_indent, parser->current_rule, parser->option, parser->sequence);
     return true;
@@ -135,8 +136,9 @@ bool parser_advance_option_sm(parser_sm *parser){
         } 
         parser->scan->pos = parser->scanner_pos;
         tok_pos = parser->scanner_pos;
+        parser_sm *outer = chunk_array_get(parser_stack, parser_depth-1);
         tree_reset(tree_stack, parser->tree_pos);
-        if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return false;
+        if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence, outer ? current_parser_rule(outer).sem_value : 0)) return false;
         return true;
     }
 }
@@ -144,8 +146,11 @@ bool parser_advance_option_sm(parser_sm *parser){
 bool parser_advance_sequence(parser_sm *parser){
     if (parser->sequence + 1 == language_rules[parser->current_rule].options[parser->option].num_elements){
         parser_debug("Successfully parsed rule %i with option %i",parser->current_rule, parser->option);
-        push_ast_term(parser->current_rule,parser->option);
+        int rule = parser->current_rule;
+        int opt = parser->option;
         if (!pop_parser_stack(parser, false)) return true;
+        int sem_rule = current_parser_rule(parser).sem_value;
+        push_ast_term(rule,opt,sem_rule);
         return parser_advance_sequence(parser);
     }
     else parser->sequence++;
@@ -175,8 +180,8 @@ bool parse_token(const char *content, Token t, parser_sm *parser){
 parse_result parse(const char *content, TokenStream *ts, parser_sm *parser){
     Token t = {};
     bool result = true;
-    if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence)) return (parse_result){ .result = false };
-    while (ts_next(ts, &t)) {
+    if (!push_ast_rule(parser->current_rule,parser->option, parser->sequence, 0)) return (parse_result){ .result = false };
+    while (ts_next_expecting(ts, &t, current_parser_rule(parser).value)) {
         // print("Read token@%i",parser->scan->pos);
         if (!t.kind)
             break;

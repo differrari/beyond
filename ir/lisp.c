@@ -2,7 +2,7 @@
 #include "syscalls/syscalls.h"
 #include "ir/general.h"
 #include "codegen/code_generator.h"
-#define MOG_LEVEL MOG_VERBOSE
+#define MOG_LEVEL MOG_ERROR
 #define MOG_MODULE "IRGEN"
 #include "utils/mog.h"
 

@@ -4,12 +4,24 @@
 #include "parser/parser.h"
 #include "ir/lisp.h"
 
+bool lisp_identifier(bool is_first, char c){
+    return is_alpha(c) || (!is_first && is_digit(c)) || 
+    c == '_' || 
+    c == '*' || 
+    c == '+' ||
+    c == '-' ||
+    c == '/' ||
+    c == '=' ||
+    false;
+}
+
 parse_result parse_lisp(string_slice code){
     Scanner scan = scanner_make(code.data,strlen(code.data));
         
     Tokenizer tk = tokenizer_make(&scan);
     tk.comment_type = TOKENIZER_COMMENT_TYPE_SEMI;
     tk.parse_newline = false;
+    tk.custom_valid_identifier = lisp_identifier;
     TokenStream ts;
     ts_init(&ts, &tk);
 
@@ -27,6 +39,8 @@ parse_result parse_lisp(string_slice code){
 codegen parse_lisp_ir(string_slice code){
     
     parse_result parse_res = parse_lisp(code);
+    
+    print_stack(parse_res.ast_stack, true);
     
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, code.data);

@@ -265,7 +265,11 @@ bool dowhile_code_emit_code(codegen instance){
 bool var_code_emit_code(codegen instance){
     if (is_header == true) return false;
     var_code *code = (var_code*)instance.ptr;
-    if (code->var.ptr) codegen_emit_code(code->var); 
+    if (code->var.ptr){
+        emit_context orig = save_and_push_context((emit_context){.ignore_semicolon = true});
+        codegen_emit_code(code->var); 
+        pop_and_restore_context(orig);
+    }
     else { 
         
         if (code->transform == var_deref){
@@ -292,13 +296,13 @@ bool inc_code_emit_code(codegen instance){
     if (is_header == false) return false;
     inc_code *code = (inc_code*)instance.ptr;
     emit_const("#include ");
-    emit_token(code->value);
+    emit_slice(code->value);
     return true;
 }
 
 bool struct_code_emit_code(codegen instance){
     struct_code *code = (struct_code*)instance.ptr;
-    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = token_to_slice(code->parent) });
+    emit_context orig = save_and_push_context((emit_context){ .context_rule = sem_rule_struct, .ignore_semicolon = false, .context_prefix = code->name, .context_parent = code->parent });
 
     if (is_header != false){
         emit_const("typedef struct ");
@@ -359,12 +363,12 @@ bool enum_code_emit_code(codegen instance){
     if (is_header != false){
         emit_const("typedef enum {");
         increase_indent(true);
-            emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = token_to_slice(code->name) });
+            emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_none, .context_prefix = code->name });
             codegen_emit_code(code->contents);
             pop_and_restore_context(orig);
         decrease_indent(true);
         emit_const("} ");
-        emit_token(code->name);
+        emit_slice(code->name);
         emit_const(";");
         emit_newline();
     }
@@ -376,7 +380,7 @@ bool enum_case_code_emit_code(codegen instance){
     
     emit_slice(ctx.context_prefix);
     emit_const("_");
-    emit_token(code->name);
+    emit_slice(code->name);
     emit_const(",");
     if (code->chain.ptr) {
         emit_newline();

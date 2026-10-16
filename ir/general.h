@@ -15,6 +15,7 @@ codegen blk_code_init();
 typedef struct {
     string_slice type;
     string_slice name;
+    bool is_ref;
     codegen initial_value;
 } dec_code;
 
@@ -126,7 +127,7 @@ typedef struct {
 codegen var_code_init();
 
 typedef struct {
-    Token value;
+    string_slice value;
 } inc_code;
 
 codegen inc_code_init();
@@ -134,7 +135,7 @@ codegen inc_code_init();
 typedef struct {
     string_slice name;
     codegen contents;
-    Token parent;
+    string_slice parent;
 } struct_code;
 
 codegen struct_code_init();
@@ -159,14 +160,14 @@ typedef struct {
 codegen int_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen contents;
 } enum_code;
 
 codegen enum_code_init();
 
 typedef struct {
-    Token name;
+    string_slice name;
     codegen chain;
 } enum_case_code;
 

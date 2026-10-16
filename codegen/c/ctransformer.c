@@ -65,7 +65,12 @@ codegen exp_code_transform(codegen instance){
     exp_code *code = (exp_code*)instance.ptr;
     TRANSFORM(lambda);
     if (code->lambda.ptr){
-        string_slice lamname = make_temp_name(sem_rule_func);
+        string_slice lamname;
+        if (code->lambda.type == sem_rule_func){
+            func_code *lmda = code->lambda.ptr;
+            if (lmda->name.length) lamname = lmda->name;
+        }
+        if (!lamname.length) lamname = make_temp_name(sem_rule_func);
         ctx.lambdas = wrap_in_block(lambda_to_func(code->lambda,lamname), ctx.lambdas, true);
         return make_literal_expression(lamname);
     }
@@ -264,12 +269,12 @@ codegen struct_code_transform(codegen instance){
                 function->body = wrap_in_block(make_declaration("*instance", code->name, make_const_exp(SLICE("instance.ptr"))),codegen_transform(function->body),false);
                 string_slice parent_name = function->name;
                 function->name = slice_from_string(string_format("%v_%v",code->name,function->name));
-                function->args = make_param(token_to_slice(code->parent),slice_from_literal("interf"), function->args);
+                function->args = make_param(code->parent,slice_from_literal("interf"), function->args);
                 extracted = wrap_in_block(dec->stat, extracted, true);
                 if (code->parent.length){
-                    symbol_t *parent_sym = find_symbol(sem_rule_interf, token_to_slice(code->parent));
+                    symbol_t *parent_sym = find_symbol(sem_rule_interf, code->parent);
                     if (!parent_sym || !parent_sym->child){
-                        print("Error: interface %v not found. Should've done better semantic analysis. smh",token_to_slice(code->parent));
+                        print("Error: interface %v not found. Should've done better semantic analysis. smh",code->parent);
                         return instance;
                     }
                     symbol_table *table = parent_sym->child;
@@ -289,8 +294,8 @@ codegen struct_code_transform(codegen instance){
     if (code->parent.length){
         props = make_prop_init(slice_from_literal("ptr"), make_func_call(slice_from_literal("zalloc"), make_func_call(slice_from_literal("sizeof"), make_literal_expression(code->name))), props);
         extracted = wrap_in_block(
-            make_function(token_to_slice(code->parent), slice_from_string(string_format("%v_init",code->name)), (codegen){}, 
-                make_return(make_struct_init(token_to_slice(code->parent), props))
+            make_function(code->parent, slice_from_string(string_format("%v_init",code->name)), (codegen){}, 
+                make_return(make_struct_init(code->parent, props))
             ), extracted, true);
     }
     return wrap_in_block(instance,extracted, false);
@@ -348,17 +353,17 @@ codegen enum_code_transform(codegen instance){
     enum_code *code = (enum_code*)instance.ptr;
     TRANSFORM(contents);
     
-    emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = token_to_slice(code->name) });
-    codegen to_str = make_declaration(string_format("%v_strings[]",token_to_slice(code->name)).data, slice_from_literal("char*"), make_array(codegen_transform(code->contents)));
+    emit_context orig = save_and_push_context((emit_context){ .convenience = convenience_type_to_string, .context_prefix = code->name });
+    codegen to_str = make_declaration(string_format("%v_strings[]",code->name).data, slice_from_literal("char*"), make_array(codegen_transform(code->contents)));
     pop_and_restore_context(orig);
     
-    orig = save_and_push_context((emit_context){ .convenience = convenience_type_from_string, .context_prefix = token_to_slice(code->name) });
+    orig = save_and_push_context((emit_context){ .convenience = convenience_type_from_string, .context_prefix = code->name });
     codegen from_str = codegen_transform(code->contents);
     pop_and_restore_context(orig);
     
     return wrap_in_block(instance, 
         wrap_in_block(to_str,
-           make_function(token_to_slice(code->name), slice_from_string(string_format("%v_from_string",token_to_slice(code->name))), make_param(slice_from_literal("char *"), slice_from_literal("val"), (codegen){}), from_str),
+           make_function(code->name, slice_from_string(string_format("%v_from_string",code->name)), make_param(slice_from_literal("char *"), slice_from_literal("val"), (codegen){}), from_str),
           false), 
         false);
 }
@@ -366,15 +371,15 @@ codegen enum_code_transform(codegen instance){
 codegen enum_case_code_transform(codegen instance){
     enum_case_code *code = (enum_case_code*)instance.ptr;
     if (ctx.convenience == convenience_type_to_string){
-        return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, token_to_slice(code->name))), make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), codegen_transform(code->chain));
+        return make_indexed_array_entry(slice_from_string(string_format("%v_%v",ctx.context_prefix, code->name)), make_const_exp(slice_from_string(string_format("\"%v\"",code->name))), codegen_transform(code->chain));
     } if (ctx.convenience == convenience_type_from_string){
         codegen chain = code->chain.ptr ? make_else(codegen_transform(code->chain)) : make_return(make_const_exp(SLICE("0")));
         codegen i = make_if(
             invert_exp(wrap_in_expression(make_func_call(slice_from_literal("strcmp"), 
-                make_argument(make_const_exp(slice_from_string(string_format("\"%v\"",token_to_slice(code->name)))), 
+                make_argument(make_const_exp(slice_from_string(string_format("\"%v\"",code->name))), 
                 make_argument(make_literal_var(slice_from_literal("val")), (codegen){})))))
             , 
-            make_return(make_const_exp(slice_from_string(string_format("%v_%v",ctx.context_prefix,token_to_slice(code->name))))), chain);
+            make_return(make_const_exp(slice_from_string(string_format("%v_%v",ctx.context_prefix,code->name)))), chain);
         return i;
         
     }
