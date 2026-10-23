@@ -3,6 +3,7 @@
 #include "data/format/helpers/token_stream.h"
 #include "parser/parser.h"
 #include "ir/lisp.h"
+#include "alloc/gc.h"
 
 bool lisp_identifier(bool is_first, char c){
     return is_alpha(c) || (!is_first && is_digit(c)) || 
@@ -81,7 +82,12 @@ bool repl_run(string_slice code, void *_ctx){
 }
 
 codegen s_exp_code_transform(codegen instance){
-    return evlis(instance, repl_env ?: &nil_exp);
+    codegen result = evlis(instance, repl_env ?: &nil_exp);
+    gc_run(result.ptr);
+    
+    while (gc_run_next());//TODO: this may get optimized out
+    
+    return result;
 }
 
 #if !defined(CTRANS) && !defined(RULETRANSFORM)

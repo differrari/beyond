@@ -255,13 +255,13 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         }
         else if (slice_lit_match(s, "eq", true)){
             return equality(a);
-        } else if (slice_lit_match(s, "add", true)){
+        } else if (slice_lit_match(s, "add", true) || slice_lit_match(s, "+", true)){
             return imaginal_builtin_math(a,imaginal_add);
-        } else if (slice_lit_match(s, "sub", true)){
+        } else if (slice_lit_match(s, "sub", true) || slice_lit_match(s, "-", true)){
             return imaginal_builtin_math(a,imaginal_sub);
-        } else if (slice_lit_match(s, "mul", true)){
+        } else if (slice_lit_match(s, "mul", true) || slice_lit_match(s, "*", true)){
             return imaginal_builtin_math(a,imaginal_mul);
-        } else if (slice_lit_match(s, "div", true)){
+        } else if (slice_lit_match(s, "div", true) || slice_lit_match(s, "/", true)){
             return imaginal_builtin_math(a,imaginal_div);
         } else {
             codegen deb = imaginal_debugger_options(s,a,env);

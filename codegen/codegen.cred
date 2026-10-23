@@ -6,7 +6,7 @@ interface codegen {
     int type;
     void register_elem(int type, Token elem);
     void register_subrule(int type, codegen child);
-    void debug_print(int depth);//TODO: "this" is too manual, we should pass the entire interface
+    void debug_print(int depth);
     bool emit_code();
     bool analyze_semantics(symbol_table *ptr);
     codegen transform();
