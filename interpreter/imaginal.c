@@ -284,7 +284,11 @@ codegen apply(codegen fn_exp, codegen a, codegen *env){
         imaginal_debug(trace,"[APPLY trace] Non-atomic expression %v",s);
         if (!s.length) return (codegen){};
         if (slice_lit_match(s, "lambda", true)){
-            codegen local = pairlis(car(cdr(fn_exp)),a,*env);
+            codegen args = a;
+            if (is_atom(args)){
+                args = cons(a,nil_exp);
+            }
+            codegen local = pairlis(car(cdr(fn_exp)),args,*env);
             return eval_list(cdr(cdr(fn_exp)), true, 0, &local);
         }
         if (slice_lit_match(s, "label", true)){
