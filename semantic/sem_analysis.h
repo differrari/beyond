@@ -14,8 +14,8 @@ typedef struct {
 } symbol_table;
 
 typedef struct symbol_t {
-    Token type;
-    Token subtype;
+    string_slice type;
+    string_slice subtype;
     string_slice name;
     sem_rule sym_type;
     symbol_table *child;
@@ -25,7 +25,9 @@ typedef struct symbol_t {
     int table_type;
 } symbol_t;
 
-symbol_table* new_table();
-symbol_table* analyze_semantics(chunk_array_t *stack);
+struct codegen;
+
+symbol_table* new_table(sem_rule type);
+symbol_table* analyze_semantics(struct codegen ir);
 symbol_t * find_symbol(sem_rule type, string_slice name);
 string_slice make_temp_name(sem_rule type);

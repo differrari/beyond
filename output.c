@@ -10,7 +10,7 @@ bool credbuild(){
 	redb_mod module = new_module("cred");
 	set_name(&module, "credgen");
 	set_target(&module, target_native);
-	redb_mod_source_all(&module, ".cred");
+	redb_mod_source_all(module, ".cred");
 	return redb_mod_cred_compile(module);
 	switch (hello){
 		case 1: {print("1");} break;
@@ -98,19 +98,19 @@ hello testType_init(){
 	};
 }
 
-int _temp_func_0(char* directory, char* name){
+int _temp_func_1(char* directory, char* name){
 	print("Inside lambda 2");
 }
 
-int _temp_func_1(char* directory, char* name){
+int _temp_func_0(char* directory, char* name){
 	print("Inside lambda");
-	traverse_directory(s.data, true, _temp_func_0);
+	traverse_directory(s.data, true, _temp_func_1);
 }
 
 int main(){
 	int __return_val;
 	int y = a();
-	int x = 1 - (0 - 2);
+	int x = 1 - (0 - -2);
 	int z = int_get(x, 0);
 	print("This is democracy manifest");
 	for (int i = 0; i < 10; i = i + 1){
@@ -140,8 +140,9 @@ int main(){
 	}
 	
 	print();
-	traverse_directory(s.data, true, _temp_func_1);
-	defer:
+	traverse_directory(s.data, true, _temp_func_0);
+	
+defer:
 	cleanup();
 	x = 0;
 	return __return_val;

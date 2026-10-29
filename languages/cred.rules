@@ -1,5 +1,5 @@
 block@scope -> 
-    statement@stat block@scope?;
+    statement block@scope?;
     
 statement ->    
     interface@interf | 
@@ -15,7 +15,7 @@ statement ->
     LBRACE block@scope? RBRACE | 
     forloop@for | 
     jump@jmp SEMICOLON | 
-    return@ret SEMICOLON | 
+    return@ret SEMICOLON | # Control flow statements from c
     chain@exp SEMICOLON | 
     assignment@assign SEMICOLON | 
     declaration@dec SEMICOLON | 
@@ -36,16 +36,16 @@ assignment@assign ->
     variable@var OPERATOR("=") expression@exp | chain@var OPERATOR("=") expression@exp;
     
 funccall@call -> 
-    OPERATOR@deref("*")? IDENTIFIER@func LPAREN argument@args? RPAREN;
+    OPERATOR@deref("*")? IDENTIFIER@func LPAREN argument? RPAREN;
     
 funcdec@func -> 
-    IDENTIFIER@type? IDENTIFIER@name funcarguments@param? LBRACE block@scope? RBRACE;
+    IDENTIFIER@type? IDENTIFIER@name funcarguments? LBRACE block@scope? RBRACE;
 
 funcsign@func -> 
-    IDENTIFIER@type? IDENTIFIER@name funcarguments@param?;
+    IDENTIFIER@type? IDENTIFIER@name funcarguments?;
 
 funcarguments -> 
-    LPAREN argdec@param? RPAREN;
+    LPAREN argdec? RPAREN;
 
 argdec@param -> 
     IDENTIFIER@type IDENTIFIER@name COMMA argdec@param | IDENTIFIER@type IDENTIFIER@name;
@@ -57,13 +57,13 @@ argname ->
     IDENTIFIER COLON;
 
 conditional@cond -> 
-    "if" condition@cond LBRACE block@scope? RBRACE else@else?;
+    "if" condition@exp LBRACE block@scope? RBRACE else@else?;
     
 else@else -> 
     "else" LBRACE block@scope? RBRACE | "else" conditional@cond;
     
 condition -> 
-    LPAREN expression@cond RPAREN | expression@cond;
+    LPAREN expression@exp RPAREN | expression@exp;
     
 declaration@dec -> 
     IDENTIFIER@type COLON IDENTIFIER@subtype OPERATOR@ref("*")? IDENTIFIER@name OPERATOR("=") expression@exp | 
@@ -88,7 +88,7 @@ expression@exp ->
     variable@var;
     
 lambda@func -> 
-    IDENTIFIER@type? LPAREN argdec@param RPAREN LBRACE block@scope? RBRACE;
+    IDENTIFIER@type? LPAREN argdec RPAREN LBRACE block@scope? RBRACE;
     
 chain@var -> 
     variable@var DOT@op funccall@exp | variable@var DOT@op variable@exp;
@@ -101,13 +101,13 @@ variable@var ->
     OPERATOR@deref("*")? OPERATOR@addr("&")? IDENTIFIER@var;
     
 forloop@for -> 
-    "for" LPAREN declaration@dec SEMICOLON condition@cond SEMICOLON assignment@assign RPAREN LBRACE block@scope? RBRACE;
+    "for" LPAREN declaration@dec SEMICOLON condition@exp SEMICOLON assignment@assign RPAREN LBRACE block@scope? RBRACE;
     
 whileloop@while -> 
-    "while" condition@cond LBRACE block@scope? RBRACE;
+    "while" condition@exp LBRACE block@scope? RBRACE;
     
 dowhile@dowhile -> 
-    "do" LBRACE block@scope? RBRACE "while" condition@cond;
+    "do" LBRACE block@scope? RBRACE "while" condition@exp;
     
 enum@enum -> 
     "enum" IDENTIFIER@name LBRACE enumcase@enum_case? RBRACE;

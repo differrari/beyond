@@ -1,7 +1,8 @@
 #include "ir/general.h"
 #include "semantic/semantic_rules.h"
+#include "alloc/gc.h"
 
-codegen begin_rule(sem_rule type){
+codegen begin_rule_inner(sem_rule type){
     switch (type){
         case sem_rule_scope: return blk_code_init();
         case sem_rule_dec: return dec_code_init();
@@ -48,4 +49,10 @@ codegen begin_rule(sem_rule type){
         case sem_rule_addr:
             return (codegen){};
     }
+}
+
+codegen begin_rule(sem_rule type){
+    codegen ret = begin_rule_inner(type);
+    if (ret.ptr) gc_register_alloc(ret.ptr);
+    return ret;
 }

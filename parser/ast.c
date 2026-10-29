@@ -47,13 +47,21 @@ void tree_reset(chunk_array_t *tree, size_t to){
     }
 }
 
-void print_stack(chunk_array_t *stack){
+void print_stack(chunk_array_t *stack, bool ignore_syntax_only){
     size_t count = chunk_array_count(stack);
+    int depth = 0;
     for (uint32_t i = 0; i < count; i++){
         ast_node *node = chunk_array_get(stack, i);
-        if (!node->t.kind)
-            print("%c[%i,%i] %s -> (%s)",*rule_names[node->rule],node->option,node->sequence,indent_by(node->depth),sem_rule_strings[node->sem_value]);
-        else
-            print("%c[%i,%i] %s %v (%s)",*rule_names[node->rule],node->option,node->sequence,indent_by(node->depth),token_to_slice(node->t), sem_rule_strings[node->sem_value]);
+        if (ignore_syntax_only && !node->sem_value) continue;
+        if (node->terminate){
+            print("%c[%i,_] %s <- (%s)",*rule_names[node->rule],node->option,indent_by(depth),node->action == sem_action_declare ? sem_elem_strings[node->sem_value] : sem_rule_strings[node->sem_value]);
+            depth--;
+        } else {
+            if (!node->t.kind){
+                depth++;
+                print("%c[%i,%i] %s -> (%s)",*rule_names[node->rule],node->option,node->sequence,indent_by(depth),node->action == sem_action_declare ? sem_elem_strings[node->sem_value] : sem_rule_strings[node->sem_value]);
+            } else
+                print("%c[%i,%i] %s %v (%s)",*rule_names[node->rule],node->option,node->sequence,indent_by(depth),token_to_slice(node->t), node->action == sem_action_declare ? sem_elem_strings[node->sem_value] : sem_rule_strings[node->sem_value]);
+        }
     }
 }

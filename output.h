@@ -14,7 +14,6 @@ typedef enum {
 	test_enum_two,
 	test_enum_three,
 } test_enum;
-
 extern char* test_enum_strings[];
 test_enum test_enum_from_string(char * val);
 typedef struct hello hello;
@@ -22,8 +21,7 @@ struct hello {
 	void* ptr;
 	int (*func)(hello instance, int rule, Token elem);
 	void (*test)(hello instance);
- };
-
+};
 int hello_func(hello instance, int rule, Token elem);
 void hello_test(hello instance);
 typedef struct testType { 
@@ -34,6 +32,6 @@ void testType_func(hello interf, int rule, Token elem);
 void testType_test(hello interf);
 void testType_helper(hello interf);
 hello testType_init();
-int _temp_func_0(char* directory, char* name);
 int _temp_func_1(char* directory, char* name);
+int _temp_func_0(char* directory, char* name);
 int main();

@@ -100,7 +100,7 @@ void lfsp_process_syntax(parse_result result, buffer *output){
         print("%i = %llx",i,(uptr)chunk_array_get(new_res->ast_stack, i) - (uptr)new_res);
     }
     
-    print_stack(new_res->ast_stack);
+    print_stack(new_res->ast_stack,false);
     
     *output = (buffer){
         .buffer = new_res,

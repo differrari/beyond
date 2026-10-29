@@ -2,25 +2,24 @@
 #include "files/buffer.h"
 #include "syscalls/syscalls.h"
 #include "files/helpers.h"
+#include "utils/indent.h"
 
 static buffer buf;
 
 void write_serial_table(symbol_table *table, int indent){
-    buffer_write(&buf,"TABLE %s\n",sem_rule_strings[table->table_type]);
+    buffer_write(&buf,"%sTABLE %s\n",indent_by(indent),sem_rule_strings[table->table_type]);
     for (int i = 0; i < table->symbol_count; i++){
         symbol_t *sym = &table->symbol_table[i];
         if (!sym){
             print("INVALID SYMBOL %i",i);
             return;
         }
-        if (sym->name.length){//TODO: hack
-            buffer_write(&buf,"SYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i\n",sem_rule_strings[sym->sym_type],sym->type.kind ? token_to_slice(sym->type) : make_string_slice("none", 0, 4),sym->subtype.kind ? token_to_slice(sym->subtype) : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
-        }
+        buffer_write(&buf,"%sSYMBOL = %s TYPE = %v SUBTYPE %v NAME = %v REF = %i\n",indent_by(indent),sem_rule_strings[sym->sym_type],sym->type.length ? sym->type : make_string_slice("none", 0, 4),sym->subtype.length ? sym->subtype : make_string_slice("none", 0, 4),sym->name,sym->reference_type);
         if (sym->child){
             write_serial_table(sym->child,indent+1);
         }
     }
-    buffer_write(&buf,"END TABLE %s\n",sem_rule_strings[table->table_type]);
+    buffer_write(&buf,"%sEND TABLE %s\n",indent_by(indent),sem_rule_strings[table->table_type]);
 }
 
 void serialize_table(symbol_table *table, const char *path){
@@ -42,14 +41,14 @@ void read_symbol_line(void *ctx, string_slice line){
         v1.length--;
     print("Reading line %v",v1);
     if (slice_lit_match(v1, "TABLE", true)){
-        symbol_table *nt = new_table();
+        symbol_table *nt = new_table(sem_rule_none);//TODO: parse
         table->symbol_table[table->symbol_count++].child = nt;
         print("Found table at %v",line);
         st_stack[st_stack_count++] = table;
         table = nt;
     }
     if (slice_lit_match(v1, "SYMBOL", true)){
-        symbol_table *nt = new_table();
+        symbol_table *nt = new_table(sem_rule_none);//TODO: parse
         table->symbol_table[table->symbol_count++].name = v1;
     }
     if (slice_lit_match(v1, "END", true)){
@@ -60,7 +59,7 @@ void read_symbol_line(void *ctx, string_slice line){
 
 symbol_table* deserialize_table(const char *path){
     const char *symbols = read_full_file(path, 0);
-    symbol_table *table = new_table();
+    symbol_table *table = new_table(sem_rule_scope);
     read_lines((char*)symbols, table, read_symbol_line);
     return table;
 }

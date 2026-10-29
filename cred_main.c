@@ -10,6 +10,8 @@
 #include "ir/arch_transformer.h"
 #include "codegen/code_generator.h"
 #include "debug/profiler.h"
+#include "parser/ast.h"
+#include "semantic/symbol_serialize.h"
 
 const char* outname = "output";
 const char* sym_out = "symbols.sym";
@@ -71,6 +73,8 @@ int main(int argc, char *argv[]){
     u64 sud = profiler_delta();
     
     parse_result parse_res = parse(buf.buffer, &ts, &parser);
+
+    print_stack(parse_res.ast_stack, true);
     
     u64 pd = profiler_delta();
     
@@ -80,19 +84,19 @@ int main(int argc, char *argv[]){
         return -1;
     } 
     
-    // symbol_table *existing_symbols = deserialize_table("test.sym");
-    
-    symbol_table *symbols = analyze_semantics(parse_res.ast_stack);
-    
-    if (!symbols) return -1;
-    u64 sd = profiler_delta();
-    
-    // serialize_table(symbols, sym_out);
-    
     u64 sg = profiler_delta();
     
     codegen ir = gen_code(parse_res.ast_stack);
     if (!ir.ptr) return -1;
+    
+    symbol_table *symbols = analyze_semantics(ir);
+    
+    // symbol_table *existing_symbols = deserialize_table("test.sym");
+    
+    serialize_table(symbols, sym_out);
+    
+    if (!symbols) return -1;
+    u64 sd = profiler_delta();
     
     u64 id = profiler_delta();
     

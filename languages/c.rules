@@ -1,153 +1,289 @@
-block@scope -> 
-    statement@stat block@scope?;
-    
-statement ->    
-    interface@interf | 
-    enum@enum | 
-    def@def | 
-    struct@struct | 
-    include@inc | 
-    dowhile@dowhile SEMICOLON | 
-    whileloop@while | 
-    conditional@cond | 
-    switch@switch | 
-    funcdec@func | 
-    funcfwd SEMICOLON |
-    LBRACE block@scope? RBRACE | 
-    forloop@for | 
-    jump@jmp SEMICOLON | 
-    contflow@ret SEMICOLON | 
-    chain@exp SEMICOLON | 
-    assignment@assign SEMICOLON | 
-    declaration@dec SEMICOLON | 
-    label@label | 
-    funccall@call SEMICOLON;
-    
-def@def -> 
-    "defer" statement@exp;
-    
-include@inc -> 
-    SYMBOL("@") "includeC" LPAREN CONST@inc RPAREN | 
-    SYMBOL("#") "include" CONST@inc;
-    
-separator -> 
-    SEMICOLON | NEWLINE;
-    
-assignment@assign -> 
-    variable@var OPERATOR("=") expression@exp | chain@var OPERATOR("=") expression@exp;
-    
-funccall@call -> 
-    OPERATOR@deref("*")? IDENTIFIER@func LPAREN argument@args? RPAREN;
+translation_unit -> external_declaration translation_unit | external_declaration |;
 
-funcfwd -> "extern" funcsign |
-        "extern" IDENTIFIER OPERATOR("*")? IDENTIFIER;
-    
-funcdec@func -> 
-    IDENTIFIER@type? IDENTIFIER@name funcarguments@param LBRACE block@scope? RBRACE;
+external_declaration -> function_definition
+                     | declaration;
 
-funcsign@func -> 
-    IDENTIFIER@type? IDENTIFIER@name funcarguments@param;
+function_definition -> declaration_specifiers declarator declaration_list? compound_statement;
 
-funcarguments ->
-    LPAREN argdec@param? RPAREN;
+declaration -> declaration_specifiers init_declarator_list? SEMICOLON
+            | static_assert_declaration
+            | SEMICOLON;
 
-argdec@param -> 
-    "const"? IDENTIFIER@type OPERATOR@ref("*")? IDENTIFIER@name COMMA argdec@param | IDENTIFIER@type OPERATOR@ref("*")? IDENTIFIER@name;
+declaration_specifiers -> declaration_specifier declaration_specifiers | declaration_specifier;
 
-argument@args -> 
-    argname? expression@exp COMMA argument@args | argname? expression@exp;
+declaration_specifier -> storage_class_specifier
+                      | type_specifier
+                      | type_qualifier
+                      | function_specifier
+                      | alignment_specifier;
 
-argname -> 
-    IDENTIFIER COLON;
+declarator -> pointer? direct_declarator;
 
-conditional@cond -> 
-    "if" condition@cond LBRACE block@scope? RBRACE else@else? |
-    "if" condition@cond statement@scope? else@else?;
-    
-else@else -> 
-    "else" LBRACE block@scope? RBRACE | "else" conditional@cond;
-    
-condition -> 
-    LPAREN expression@cond RPAREN |
-    LPAREN expression@cond RPAREN;
-    
-declaration@dec -> 
-    IDENTIFIER@type OPERATOR@ref("*")? IDENTIFIER@name OPERATOR("=") expression@exp | 
-    IDENTIFIER@type OPERATOR@ref("*")? IDENTIFIER@name;
-    
-jump@jmp -> 
-    "goto" IDENTIFIER@jmp;
-    
-label@label -> 
-    IDENTIFIER@name COLON;
-    
-expression@exp -> 
-    OPERATOR@op("!") expression@exp | 
-    LPAREN@syn expression@exp RPAREN | 
-    math@exp | 
-    lambda@func | 
-    chain@exp | 
-    funccall@exp | 
-    CONST@val | 
-    LBRACE@val RBRACE |
-    variable@var;
-    
-lambda@func -> 
-    IDENTIFIER@type? LPAREN argdec@param RPAREN LBRACE block@scope? RBRACE;
-    
-chain@var -> 
-    variable@var DOT@op funccall@exp | 
-    variable@var DOT@op variable@exp | 
-    funccall@exp DOT@op variable@exp;
-    # variable@var OPERATOR@op("->") funccall@exp | 
-    # variable@var OPERATOR@op("->") variable@exp | ;
-    
-math@exp -> 
-    funccall@var OPERATOR@op expression@exp | 
-    chain@var OPERATOR@op expression@exp |
-    CONST@val OPERATOR@op expression@exp | 
-    variable@var OPERATOR@op expression@exp;
-    
-variable@var -> 
-    OPERATOR@deref("*")? OPERATOR@addr("&")? IDENTIFIER@var LBRACKET@op expression@exp RBRACKET | 
-    OPERATOR@deref("*")? OPERATOR@addr("&")? IDENTIFIER@var |
-    IDENTIFIER@var;
-    
-forloop@for -> 
-    "for" LPAREN declaration@dec SEMICOLON condition@cond SEMICOLON assignment@assign RPAREN LBRACE block@scope? RBRACE;
-    
-whileloop@while -> 
-    "while" condition@cond LBRACE block@scope? RBRACE;
-    
-dowhile@dowhile -> 
-    "do" LBRACE block@scope? RBRACE "while" condition@cond;
-    
-enum@enum -> 
-    "enum" IDENTIFIER@name LBRACE enumcase@enum_case? RBRACE;
-    
-enumcase@enum_case -> 
-    IDENTIFIER@name COMMA enumcase@enum_case? | IDENTIFIER@name;
-    
-struct@struct -> 
-    "struct" IDENTIFIER@name LBRACE decblock@scope? RBRACE | 
-    "struct" IDENTIFIER@name COLON IDENTIFIER@parent? LBRACE decblock@scope? RBRACE;
-    
-decblock@scope -> 
-    declaration@dec SEMICOLON decblock@scope? | funcdec@func decblock@scope?;
-    
-contflow@ret -> 
-    "return" expression@exp? |
-    "continue" |
-    "break";
-    
-interface@interf -> 
-    "interface" IDENTIFIER@name LBRACE intblock@scope? RBRACE;
-    
-intblock@scope -> 
-    declaration@dec SEMICOLON intblock@scope? | funcsign@func SEMICOLON intblock@scope?;
-    
-switch@switch -> 
-    "switch" LPAREN expression@exp RPAREN LBRACE switchbody@scope? RBRACE | "switch" expression@exp LBRACE switchbody@scope? RBRACE;
-    
-switchbody@cases -> 
-    "case"? expression@exp COLON LBRACE block@scope? RBRACE switchbody@cases?;
+declaration_list -> declaration declaration_list | declaration;
+
+compound_statement -> LBRACE declaration_or_statement_chain RBRACE;
+
+declaration_or_statement -> declaration | statement;
+
+declaration_or_statement_chain -> declaration_or_statement declaration_or_statement_chain | declaration_or_statement;
+
+init_declarator_list -> init_declarator COMMA init_declarator_list | init_declarator;
+
+init_declarator -> declarator EQUAL initializer | declarator;
+
+static_assert_declaration -> "_Static_assert" LPAREN constant_expression COMMA string_literal RPAREN SEMICOLON;
+
+storage_class_specifier -> "typedef"
+                        | "extern"
+                        | "static"
+                        | "_Thread_local"
+                        | "auto"
+                        | "register";
+
+type_specifier -> "void"
+               | "char"
+               | "short"
+               | "int"
+               | "long"
+               | "float"
+               | "double"
+               | "signed"
+               | "unsigned"
+               | "_Bool"
+               | "_Complex"
+               | "_Imaginary"       (* non_mandated extension *)
+               | atomic_type_specifier
+               | struct_or_union_specifier
+               | enum_specifier
+               | typedef_name;
+
+typedef_name -> identifier;
+
+type_qualifier -> "const"
+               | "restrict"
+               | "volatile"
+               | "_Atomic";
+
+function_specifier -> "inline"
+                   | "_Noreturn";
+
+alignment_specifier -> "_Alignas" LPAREN type_name RPAREN
+                    | "_Alignas" LPAREN constant_expression RPAREN
+                    
+
+pointer -> OPERATOR@deref("*"), type_qualifier_list? pointer?;
+
+direct_declarator -> identifier
+                  | LPAREN declarator RPAREN
+                  | direct_declarator LBRACKET OPERATOR@deref(OPERATOR@deref("*"))? RBRACKET
+                  | direct_declarator LBRACKET "static", type_qualifier_list? assignment_expression RBRACKET
+                  | direct_declarator LBRACKET type_qualifier_list OPERATOR@deref(OPERATOR@deref("*"))? RBRACKET
+                  | direct_declarator LBRACKET type_qualifier_list "static"? assignment_expression RBRACKET
+                  | direct_declarator LBRACKET assignment_expression RBRACKET
+                  | direct_declarator LPAREN parameter_type_list RPAREN
+                  | direct_declarator LPAREN identifier_list RPAREN
+                  | direct_declarator LPAREN RPAREN;
+
+identifier_list -> identifier COMMA identifier_list | identifier;
+
+initializer_list -> designative_initializer COMMA initializer_list | designative_initializer;
+
+designative_initializer -> designation? initializer;
+
+initializer -> LBRACE initializer_list COMMA? RBRACE
+            | assignment_expression;
+
+constant_expression -> conditional_expression;
+
+atomic_type_specifier -> "_Atomic" LPAREN type_name RPAREN;
+
+struct_or_union_specifier -> struct_or_union LBRACE struct_declaration_list RBRACE
+                          | struct_or_union identifier LBRACE struct_declaration_list RBRACE
+                          | struct_or_union identifier;
+
+struct_or_union -> "struct"
+                | "union";
+
+struct_declaration_list -> struct_declaration struct_declaration_list | struct_declaration;
+
+struct_declaration -> specifier_qualifier_list, SEMICOLON     (* for anonymous struct/union *)
+                   | specifier_qualifier_list, struct_declarator_list, SEMICOLON
+                   | static_assert_declaration;
+
+enum_specifier -> "enum" LBRACE enumerator_list COMMA? RBRACE
+               | "enum" identifier LBRACE enumerator_list COMMA? RBRACE
+               | "enum" identifier;
+
+enumerator_list -> enumerator enumerator_list | enumerator;
+
+enumerator -> enumeration_constant EQUAL constant_expression | enumeration_constant;
+
+enumeration_constant -> identifier;
+
+type_name -> specifier_qualifier_list abstract_declarator?;
+
+specifier_qualifier_list -> specifier_qualifier specifier_qualifier_list | specifier_qualifier;
+
+specifier_qualifier -> type_specifier | type_qualifier;
+
+abstract_declarator -> pointer direct_abstract_declarator?
+                    | direct_abstract_declarator;
+
+direct_abstract_declarator -> LPAREN abstract_declarator RPAREN
+                           | LPAREN parameter_type_list RPAREN
+                           | LPAREN RPAREN
+                           | LBRACKET OPERATOR@deref(OPERATOR@deref("*"))? RBRACKET
+                           | LBRACKET "static" type_qualifier_list? assignment_expression RBRACKET
+                           | LBRACKET type_qualifier_list RBRACKET
+                           | LBRACKET type_qualifier_list "static"? assignment_expression RBRACKET
+                           | LBRACKET assignment_expression RBRACKET
+                           | direct_abstract_declarator LBRACKET OPERATOR@deref(OPERATOR@deref("*"))? RBRACKET
+                           | direct_abstract_declarator LBRACKET "static" type_qualifier_list? assignment_expression RBRACKET
+                           | direct_abstract_declarator LBRACKET type_qualifier_list "static"?, assignment_expression RBRACKET
+                           | direct_abstract_declarator LBRACKET type_qualifier_list RBRACKET
+                           | direct_abstract_declarator LBRACKET assignment_expression RBRACKET
+                           | direct_abstract_declarator LPAREN parameter_type_list RPAREN
+                           | direct_abstract_declarator LPAREN RPAREN;
+
+struct_declarator_list -> struct_declarator COMMA struct_declarator_list | struct_declarator;
+
+type_qualifier_list -> type_qualifier type_qualifier_list | type_qualifier;
+
+parameter_type_list -> parameter_list COMMA "..." | parameter_list;
+
+struct_declarator -> COLON constant_expression
+                  | declarator COLON constant_expression
+                  | declarator;
+
+assignment_operator -> EQUAL 
+                    | OPERATOR("*=") 
+                    | OPERATOR("/=") 
+                    | OPERATOR("%=") 
+                    | OPERATOR("+=") 
+                    | OPERATOR("_=") 
+                    | OPERATOR("<<=") 
+                    | OPERATOR(">>=") 
+                    | OPERATOR("&=") 
+                    | OPERATOR("^=") 
+                    | OPERATOR("|=");
+
+parameter_list -> parameter_declaration COMMA parameter_list | parameter_list;
+
+parameter_declaration -> declaration_specifiers declarator 
+                        | declaration_specifiers abstract_declarator
+                        | declaration_specifiers;
+
+expression -> assignment_expression COMMA expression | assignment_expression;
+
+assignment_expression -> conditional_expression
+                      | unary_expression assignment_operator assignment_expression;
+
+conditional_expression -> logical_or_expression OPERATOR("?") expression COLON conditional_expression | logical_or_expression;
+
+logical_or_expression -> logical_and_expression OPERATOR("||") logical_or_expression | logical_and_expression;
+
+logical_and_expression -> inclusive_or_expression OPERATOR("&&") logical_and_expression | inclusive_or_expression;
+
+inclusive_or_expression -> exclusive_or_expression OPERATOR("|") inclusive_or_expression | exclusive_or_expression;
+
+exclusive_or_expression -> and_expression OPERATOR("^") exclusive_or_expression | and_expression;
+
+and_expression -> equality_expression OPERATOR("&") and_expression | equality_expression;
+
+equality_operator -> OPERATOR("==") | OPERATOR("!=");
+equality_expression -> relational_expression equality_operator equality_expression | relational_expression;
+
+relational_operator -> OPERATOR("<") | OPERATOR(">") | OPERATOR("<=") | OPERATOR(">=");
+relational_expression -> shift_expression relational_operator relational_expression | shift_expression;
+
+shift_operator -> OPERATOR("<<") | OPERATOR(">>");
+shift_expression -> additive_expression shift_operator shift_expression | additive_expression;
+
+additive_operator -> OPERATOR("+") | OPERATOR("-");
+additive_expression -> multiplicative_expression additive_operator additive_expression | multiplicative_expression;
+
+multiplicative_operator -> OPERATOR("*") | OPERATOR("/") | OPERATOR("%");
+multiplicative_expression -> cast_expression multiplicative_operator multiplicative_expression | cast_expression;
+
+cast_expression -> unary_expression
+                | LPAREN type_name RPAREN cast_expression;
+
+inc_dec_operator -> OPERATOR("++") OPERATOR("--")
+unary_expression -> postfix_expression
+                 | inc_dec_operator unary_expression
+                 | unary_operator cast_expression
+                 | "sizeof" unary_expression
+                 | "sizeof" LPAREN type_name RPAREN
+                 | "_Alignof" LPAREN type_name RPAREN;
+
+postfix_expression -> primary_expression
+                   | postfix_expression LBRACKET expression RBRACKET
+                   | postfix_expression LPAREN argument_expression_list? RPAREN
+                   | postfix_expression DOT identifier
+                   | postfix_expression "_>" identifier
+                   | postfix_expression inc_dec_operator
+                   | LPAREN type_name RPAREN LBRACE initializer_list COMMA? RBRACE;
+
+unary_operator -> OPERATOR("&")
+               | OPERATOR("*")
+               | OPERATOR("+")
+               | OPERATOR("_")
+               | OPERATOR("~")
+               | OPERATOR("!");
+
+primary_expression -> identifier
+                   | constant
+                   | string
+                   | LPAREN expression RPAREN
+                   | generic_selection;
+
+argument_expression_list -> assignment_expression COMMA argument_expression_list | assignment_expression;
+
+constant -> integer_constant
+         | character_constant
+         | floating_constant
+         | enumeration_constant;
+
+string -> string_literal
+       | "__func__";
+
+generic_selection -> "_Generic" LPAREN assignment_expression COMMA generic_assoc_list RPAREN;
+
+generic_assoc_list -> generic_association COMMA | generic_assoc_list | generic_association;
+
+generic_association -> type_name COLON assignment_expression
+                    | "default" COLON assignment_expression;
+
+designation -> designator_list OPERATOR("=");
+
+designator_list -> designator designator_list | designator;
+
+designator -> LBRACKET constant_expression RBRACKET
+           | DOT identifier;
+
+statement -> labeled_statement
+          | compound_statement
+          | expression_statement
+          | selection_statement
+          | iteration_statement
+          | jump_statement;
+
+labeled_statement -> identifier COLON statement
+                  | "case" constant_expression COLON statement
+                  | "default" COLON statement;
+
+expression_statement -> expression? SEMICOLON;
+
+selection_statement -> "if" LPAREN expression RPAREN statement "else" statement
+                    | "if" LPAREN expression RPAREN statement
+                    | "switch" LPAREN expression RPAREN statement;
+
+ iteration_statement -> "while" LPAREN expression RPAREN statement
+                     | "do" statement "while" LPAREN expression RPAREN SEMICOLON
+                     | "for" LPAREN expression? SEMICOLON expression? SEMICOLON expression? RPAREN statement
+                     | "for" LPAREN declaration expression? SEMICOLON expression? RPAREN statement;
+
+jump_statement -> "goto" identifier SEMICOLON
+               | "continue" SEMICOLON
+               | "break" SEMICOLON
+               | "return" expression? SEMICOLON;

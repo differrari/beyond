@@ -3,6 +3,18 @@
 #include "data/format/helpers/token_stream.h"
 #include "parser/parser.h"
 #include "ir/lisp.h"
+#include "alloc/gc.h"
+
+bool lisp_identifier(bool is_first, char c){
+    return is_alpha(c) || (!is_first && is_digit(c)) || 
+    c == '_' || 
+    c == '*' || 
+    c == '+' ||
+    c == '-' ||
+    c == '/' ||
+    c == '=' ||
+    false;
+}
 
 parse_result parse_lisp(string_slice code){
     Scanner scan = scanner_make(code.data,strlen(code.data));
@@ -10,6 +22,7 @@ parse_result parse_lisp(string_slice code){
     Tokenizer tk = tokenizer_make(&scan);
     tk.comment_type = TOKENIZER_COMMENT_TYPE_SEMI;
     tk.parse_newline = false;
+    tk.custom_valid_identifier = lisp_identifier;
     TokenStream ts;
     ts_init(&ts, &tk);
 
@@ -27,6 +40,8 @@ parse_result parse_lisp(string_slice code){
 codegen parse_lisp_ir(string_slice code){
     
     parse_result parse_res = parse_lisp(code);
+    
+    print_stack(parse_res.ast_stack, true);
     
     if (!parse_res.result){
         ln_report ln = parse_ln(parse_res.fail_info.found.pos, code.data);
@@ -67,7 +82,12 @@ bool repl_run(string_slice code, void *_ctx){
 }
 
 codegen s_exp_code_transform(codegen instance){
-    return evlis(instance, repl_env ?: &nil_exp);
+    codegen result = evlis(instance, repl_env ?: &nil_exp);
+    gc_run(result.ptr);
+    
+    while (gc_run_next());//TODO: this may get optimized out
+    
+    return result;
 }
 
 #if !defined(CTRANS) && !defined(RULETRANSFORM)

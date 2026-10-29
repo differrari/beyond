@@ -16,7 +16,7 @@ void codegen_register_subrule(codegen instance, int type, codegen child){
 }
 
 void codegen_debug_print(codegen instance, int depth){
-	if (instance.debug_print){
+    if (instance.debug_print){
 		return instance.debug_print(instance, depth);
 	}
 	
@@ -28,6 +28,14 @@ bool codegen_emit_code(codegen instance){
 	}
 	
 	return (bool){};
+}
+
+bool codegen_analyze_semantics(codegen instance, symbol_table *table){
+	if (instance.analyze_semantics){
+		return instance.analyze_semantics(instance, table);
+	}
+	
+	return true;
 }
 
 codegen codegen_transform(codegen instance){

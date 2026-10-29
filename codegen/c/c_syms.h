@@ -19,7 +19,7 @@ static inline string type_name(symbol_t *sym, bool sub, bool extra){
     case semantic_types_int64: base = string_from_literal("int64_t"); break;
     case semantic_types_int32: base = string_from_literal("int32_t"); break;
     default:
-    case semantic_types_passthrough: base = string_from_slice(token_to_slice(sub ? sym->subtype : sym->type)); break;
+    case semantic_types_passthrough: base = string_from_slice(sub ? sym->subtype : sym->type); break;
     }
     string chain = {};
     if (extra){

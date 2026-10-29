@@ -1,6 +1,6 @@
 # Compile these files against raylib, libc, libm and https://github.com/differrari/redlib/
 # or use using https://github.com/differrari/redbuild/blob/main/Simplemakefile
-imaginal.c
+cred_main.c
 rules.c
 codegen/codeformat.c
 codegen/codegen.c
@@ -8,9 +8,6 @@ codegen/identity_transform.c
 codegen/c/ccode.c
 codegen/c/ctransformer.c
 codegen/graph/graphcode.c
-interpreter/debug_print.c
-interpreter/imaginal.c
-interpreter/repl.c
 ir/general.c
 ir/ir_create.c
 ir/irgen.c

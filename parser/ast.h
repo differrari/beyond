@@ -7,9 +7,13 @@
 typedef struct {
     Token t;
     int rule;
+    
     int option;
     int depth;
     int sequence;
+    
+    bool terminate;
+    
     sem_action action;
     int sem_value;
 } ast_node;
@@ -32,7 +36,7 @@ size_t tree_count(chunk_array_t *stack);
 
 void tree_reset(chunk_array_t *tree, size_t to);
 
-void print_stack(chunk_array_t *stack);
+void print_stack(chunk_array_t *stack, bool ignore_syntax_only);
 
 static inline stack_navigator make_stack_navigator(chunk_array_t *stack){
     return (stack_navigator){

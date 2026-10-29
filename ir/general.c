@@ -3,12 +3,16 @@
 #include "alloc/allocate.h"
 #include "syscalls/syscalls.h"
 #include "common.h"
+#define MOG_MODULE "CODEGEN"
+#define MOG_LEVEL MOG_ERROR
+#include "utils/mog.h"
 
 void *codegen_page;
 
 #define CODEGEN_DEC(name,t,subscope,printer) \
 extern bool name##_emit_code(codegen instance);\
 extern codegen name##_transform(codegen instance);\
+extern bool name##_analyze_semantics(codegen instance, symbol_table *table);\
 codegen name##_init(){\
     if (!codegen_page) codegen_page = page_alloc(PAGE_SIZE);\
     return (codegen){\
@@ -17,11 +21,15 @@ codegen name##_init(){\
         .register_subrule = name##_register_subrule,\
         .emit_code = name##_emit_code,\
         .transform = name##_transform,\
+        .analyze_semantics = name##_analyze_semantics,\
         .debug_print = printer,\
         .get_subscope = subscope,\
         .type = t,\
     };\
 }
+
+#define handle_default_rule default: mog(ERROR,"Unknown subrule %s for rule %s",sem_rule_strings[type],sem_rule_strings[instance.type]);
+#define handle_default_tok default: mog(ERROR,"Unknown token %s for rule %s. Value %v",token_name(elem.kind),sem_rule_strings[instance.type],token_to_slice(elem));
 
 void blk_code_register_elem(codegen instance, int type, Token elem){
     
@@ -29,7 +37,7 @@ void blk_code_register_elem(codegen instance, int type, Token elem){
 
 void blk_code_register_subrule(codegen instance, int type, codegen child){
     blk_code *code = (blk_code*)instance.ptr;
-    if (type == sem_rule_scope){
+    if (code->stat.ptr){//TODO: We could make this smarter and similar to s_exp so we can auto-chain
         code->chain = child;
     } else
         code->stat = child;
@@ -41,7 +49,10 @@ void dec_code_register_elem(codegen instance, int type, Token elem){
     dec_code *code = (dec_code*)instance.ptr;
     switch (type) {
         case sem_elem_type: code->type = token_to_slice(elem); break; 
+        case sem_elem_subtype: code->subtype = token_to_slice(elem); break;
         case sem_elem_name: code->name = token_to_slice(elem); break;
+        case sem_elem_ref: code->is_ref = true; break;
+        handle_default_tok
     }
 }
 
@@ -58,10 +69,11 @@ void ass_code_register_elem(codegen instance, int type, Token elem){
 
 void ass_code_register_subrule(codegen instance, int type, codegen child){
     ass_code *code = (ass_code*)instance.ptr;
-    if (type == sem_rule_var)
-        code->var = child;
-    if (type == sem_rule_exp)
-        code->expression = child;
+    switch (type){
+        case sem_rule_var: code->var = child; break;
+        case sem_rule_exp: code->expression = child; break;
+        handle_default_rule
+    }
 }
 
 CODEGEN_DEC(ass_code, sem_rule_assign, 0, 0)
@@ -72,6 +84,7 @@ void call_code_register_elem(codegen instance, int type, Token elem){
         case sem_rule_deref: code->transform = var_deref; break;
         case sem_rule_addr: code->transform = var_addr; break;
         case sem_rule_func: code->name = token_to_slice(elem); break;
+        handle_default_tok
     }
 }
 
@@ -89,9 +102,10 @@ void cond_code_register_elem(codegen instance, int type, Token elem){
 void cond_code_register_subrule(codegen instance, int type, codegen child){
     cond_code *code = (cond_code*)instance.ptr;
     switch (type){
-        case sem_rule_cond: code->cond = child; break;
+        case sem_rule_exp: code->cond = child; break;
         case sem_rule_scope: code->scope = child; break;
         case sem_rule_else: code->chain = child; break;
+        handle_default_rule
     }
 }
 
@@ -139,8 +153,13 @@ void exp_code_register_subrule(codegen instance, int type, codegen child){
     exp_code *code = (exp_code*)instance.ptr;
     switch (type){
         case sem_rule_var: code->var = child; break;
-        case sem_rule_exp: code->exp = child; break;
+        case sem_rule_call:
+        case sem_rule_exp: 
+        case sem_rule_scope: 
+        case sem_rule_assign: 
+            code->exp = child; break;
         case sem_rule_func: code->lambda = child; break;
+        handle_default_rule
     }
 }
 
@@ -152,10 +171,11 @@ void arg_code_register_elem(codegen instance, int type, Token elem){
 
 void arg_code_register_subrule(codegen instance, int type, codegen child){
     arg_code *code = (arg_code*)instance.ptr;
-    if (type == sem_rule_args)
-        code->chain = child;
-    if (type == sem_rule_exp)
-        code->exp = child;
+    switch (type){
+        case sem_rule_args: code->chain = child; break;
+        case sem_rule_exp: code->exp = child; break;
+        handle_default_rule
+    }
 }
 
 CODEGEN_DEC(arg_code, sem_rule_args, 0, 0)
@@ -165,6 +185,7 @@ void param_code_register_elem(codegen instance, int type, Token elem){
     switch (type) {
         case sem_elem_type: code->type = token_to_slice(elem); break; 
         case sem_elem_name: code->name = token_to_slice(elem); break;
+        handle_default_tok
     }
 }
 
@@ -181,14 +202,18 @@ void func_code_register_elem(codegen instance, int type, Token elem){
     switch (type) {
         case sem_elem_type: code->type = token_to_slice(elem); break; 
         case sem_elem_name: code->name = token_to_slice(elem); break;
+        handle_default_tok
     }
 }
 
 void func_code_register_subrule(codegen instance, int type, codegen child){
     func_code *code = (func_code*)instance.ptr;
-    if (type == sem_rule_func) code->signature = child;
-    if (type == sem_rule_param) code->args = child;
-    if (type == sem_rule_scope) code->body = child;
+    switch (type){
+        case sem_rule_func: code->signature = child; break;
+        case sem_rule_param: code->args = child; break;
+        case sem_rule_scope: code->body = child; break;
+        handle_default_rule
+    }
 }
 
 codegen func_code_get_subscope(codegen instance){
@@ -208,8 +233,9 @@ void for_code_register_subrule(codegen instance, int type, codegen child){
     switch (type) {
         case sem_rule_assign: code->increment = child; break;
         case sem_rule_dec: code->initial = child; break;
-        case sem_rule_cond: code->condition = child; break;
+        case sem_rule_exp: code->condition = child; break;
         case sem_rule_scope: code->body = child; break;
+        handle_default_rule
     }
 }
 
@@ -228,8 +254,9 @@ void while_code_register_elem(codegen instance, int type, Token elem){
 void while_code_register_subrule(codegen instance, int type, codegen child){
     while_code *code = (while_code*)instance.ptr;
     switch (type) {
-        case sem_rule_cond: code->condition = child; break;
+        case sem_rule_exp: code->condition = child; break;
         case sem_rule_scope: code->body = child; break;
+        handle_default_rule
     }
 }
 
@@ -247,8 +274,9 @@ void dowhile_code_register_elem(codegen instance, int type, Token elem){
 void dowhile_code_register_subrule(codegen instance, int type, codegen child){
     dowhile_code *code = (dowhile_code*)instance.ptr;
     switch (type) {
-        case sem_rule_cond: code->condition = child; break;
+        case sem_rule_exp: code->condition = child; break;
         case sem_rule_scope: code->body = child; break;
+        handle_default_rule
     }
 }
 
@@ -266,34 +294,39 @@ void var_code_register_elem(codegen instance, int type, Token elem){
         case sem_rule_op: code->operation = token_to_slice(elem); break;
         case sem_rule_deref: code->transform = var_deref; break;
         case sem_rule_addr: code->transform = var_addr; break;
+        handle_default_tok
     }
 }
 
 void var_code_register_subrule(codegen instance, int type, codegen child){
     var_code *code = (var_code*)instance.ptr;
-    if (type == sem_rule_exp)
-        code->expression = child;
-    else if (type == sem_rule_var)
-        code->var = child;
+    switch (type){
+        case sem_rule_call:
+        case sem_rule_exp: code->expression = child; break;
+        case sem_rule_var: code->var.ptr ? (code->expression = child) : (code->var = child); break;
+        handle_default_rule
+    }
 }
 
 CODEGEN_DEC(var_code, sem_rule_var, 0, 0)
 
 void inc_code_register_elem(codegen instance, int type, Token elem){
     inc_code *code = (inc_code*)instance.ptr;
-    if (type == sem_rule_inc && *elem.start == '"') code->value = elem;
+    if (elem.kind == TOK_STRING || (elem.kind == TOK_CONST && elem.start && *elem.start == '"')) code->value = token_to_slice(elem);
 }
 
 void inc_code_register_subrule(codegen instance, int type, codegen child){
-    
 }
 
 CODEGEN_DEC(inc_code, sem_rule_inc, 0, 0)
 
 void struct_code_register_elem(codegen instance, int type, Token elem){
     struct_code *code = (struct_code*)instance.ptr;
-    if (type == sem_elem_parent) code->parent = elem;
-    if (type == sem_elem_name) code->name = token_to_slice(elem);
+    switch (type){
+        case sem_elem_parent: code->parent = token_to_slice(elem); break;
+        case sem_elem_name: code->name = token_to_slice(elem); break;
+        handle_default_tok
+    }
 }
 
 void struct_code_register_subrule(codegen instance, int type, codegen child){
@@ -339,28 +372,36 @@ CODEGEN_DEC(int_code, sem_rule_interf, 0, 0)
 
 void enum_code_register_elem(codegen instance, int type, Token elem){
     enum_code * code = (enum_code*)instance.ptr;
-    if (type == sem_elem_name)
-        code->name = elem;
+    switch (type){
+        case sem_elem_name: code->name = token_to_slice(elem); break;
+        handle_default_tok
+    }
 }
 
 void enum_code_register_subrule(codegen instance, int type, codegen child){
     enum_code * code = (enum_code*)instance.ptr;
-    if (type == sem_rule_enum_case)
-        code->contents = child;
+    switch (type){
+        case sem_rule_enum_case: code->contents = child; break;
+        handle_default_rule
+    } 
 }
 
 CODEGEN_DEC(enum_code, sem_rule_enum, 0, 0)
 
 void enum_case_code_register_elem(codegen instance, int type, Token elem){
     enum_case_code * code = (enum_case_code*)instance.ptr;
-    if (type == sem_elem_name)
-        code->name = elem;
+    switch (type){
+        case sem_elem_name: code->name = token_to_slice(elem); break;
+        handle_default_tok
+    }
 }
 
 void enum_case_code_register_subrule(codegen instance, int type, codegen child){
     enum_case_code * code = (enum_case_code*)instance.ptr;
-    if (type == sem_rule_enum_case)
-        code->chain = child;
+    switch (type){
+        case sem_rule_enum_case: code->chain = child; break;
+        handle_default_rule
+    }
 }
 
 CODEGEN_DEC(enum_case_code, sem_rule_enum_case, 0, 0)
@@ -389,7 +430,10 @@ void switch_code_register_subrule(codegen instance, int type, codegen child){
     switch_code *code = (switch_code*)instance.ptr;
     switch (type){
         case sem_rule_exp: code->condition = child; break;
-        case sem_rule_scope: code->cases = child; break;    
+        case sem_rule_scope:
+        case sem_rule_cases:
+            code->cases = child; break;
+        handle_default_rule
     }
 }
 CODEGEN_DEC(switch_code, sem_rule_switch, 0, 0)
@@ -404,8 +448,9 @@ void case_code_register_subrule(codegen instance, int type, codegen child){
     case_code *code = (case_code*)instance.ptr;
     switch (type){
         case sem_rule_exp: code->match = child; break;
-        case sem_rule_scope: code->body = child; break;   
-        case sem_rule_cases: code->chain = child; break;    
+        case sem_rule_scope: code->body = child; break;
+        case sem_rule_cases: code->chain = child; break;
+        handle_default_rule
     }
 }
 
